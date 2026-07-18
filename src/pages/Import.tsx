@@ -250,6 +250,13 @@ function SessionEditCard({
 }) {
   const [expanded, setExpanded] = useState(session.flags.length > 0)
 
+  const resistedText =
+    session.compulsions_resisted === true
+      ? 'Fully resisted'
+      : session.compulsions_resisted === false
+        ? 'Partial resistance'
+        : null
+
   return (
     <Card className={session.flags.length ? 'border-amber-300 dark:border-amber-900' : ''}>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -283,6 +290,17 @@ function SessionEditCard({
           </button>
         </div>
       </div>
+
+      {!expanded && (session.peak_suds !== null || session.end_suds !== null || resistedText) && (
+        <p className="mt-1.5 text-xs text-slate-400">
+          {(session.peak_suds !== null || session.end_suds !== null) && (
+            <span>
+              Peak {session.peak_suds ?? '—'} → End {session.end_suds ?? '—'}
+            </span>
+          )}
+          {resistedText && <span>{session.peak_suds !== null || session.end_suds !== null ? ' · ' : ''}{resistedText}</span>}
+        </p>
+      )}
 
       {session.flags.length > 0 && (
         <ul className="mt-3 list-inside list-disc space-y-0.5 text-xs text-amber-700 dark:text-amber-400">
