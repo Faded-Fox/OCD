@@ -40,7 +40,9 @@ data lives only in this browser's IndexedDB until you export or delete it.
   detected automatically and offered as a restore instead of parsed as a new
   import. This is what makes data survive deleting and reinstalling the app (e.g.
   on iPhone, or if iOS clears storage from disuse): export before you lose the
-  app, restore after.
+  app, restore after. A dashboard banner nudges you to export if it's been
+  about a week since your last one (dismissible for a few days at a time) — all
+  tracked locally, no notifications or background sync involved.
 - **Settings**: export all data as JSON, or permanently delete everything on this
   device.
 

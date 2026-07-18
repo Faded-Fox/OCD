@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   CartesianGrid,
@@ -17,11 +18,31 @@ import {
   sessionFrequency,
 } from '../lib/insights'
 import { colorForHierarchy } from '../lib/colors'
+import { downloadBackup } from '../lib/export'
+import { isExportOverdue, snoozeExportReminder } from '../lib/exportReminder'
 import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 
 export default function Dashboard() {
   const { sessions, loading } = useSessions()
+  const [showReminder, setShowReminder] = useState(false)
+  const [reminderExporting, setReminderExporting] = useState(false)
+
+  useEffect(() => {
+    if (!loading) setShowReminder(isExportOverdue(sessions.length > 0))
+  }, [loading, sessions.length])
+
+  const dismissReminder = () => {
+    snoozeExportReminder()
+    setShowReminder(false)
+  }
+
+  const exportNow = async () => {
+    setReminderExporting(true)
+    await downloadBackup()
+    setReminderExporting(false)
+    setShowReminder(false)
+  }
 
   if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
 
@@ -59,6 +80,26 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-6 py-4">
+      {showReminder && (
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-violet-300 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/40">
+          <p className="text-sm text-violet-800 dark:text-violet-300">
+            It's been about a week since your last backup. Export your data in case this app ever gets
+            deleted or reinstalled.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <SecondaryButton
+              onClick={dismissReminder}
+              className="border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-900"
+            >
+              Remind me later
+            </SecondaryButton>
+            <PrimaryButton onClick={exportNow} disabled={reminderExporting}>
+              {reminderExporting ? 'Exporting…' : 'Export now'}
+            </PrimaryButton>
+          </div>
+        </Card>
+      )}
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Dashboard</h1>

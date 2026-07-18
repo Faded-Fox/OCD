@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { deleteAllData, exportAllAsJson } from '../lib/db'
+import { deleteAllData } from '../lib/db'
+import { downloadBackup } from '../lib/export'
 import { useSessions } from '../lib/useSessions'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
@@ -14,14 +15,7 @@ export default function Settings() {
 
   const handleExport = async () => {
     setExporting(true)
-    const json = await exportAllAsJson()
-    const blob = new Blob([json], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `erp-sessions-export-${new Date().toISOString().slice(0, 10)}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    await downloadBackup()
     setExporting(false)
   }
 
