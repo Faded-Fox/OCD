@@ -1,11 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { addJournalEntry, deleteJournalEntry } from '../lib/db'
 import { newId } from '../lib/session'
-import { JOURNAL_TEMPLATES, type JournalEntry, type JournalType } from '../lib/journal'
+import {
+  JOURNAL_TEMPLATES,
+  QUICK_PROMPTS,
+  pickRandomQuickPrompt,
+  type JournalType,
+  type QuickPrompt,
+  type QuickPromptEntry,
+  type StructuredJournalEntry,
+} from '../lib/journal'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 
-type Phase = 'landing' | 'form' | 'saved' | 'history'
+type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick'
 
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
@@ -20,6 +28,7 @@ function formatElapsed(ms: number): string {
 export default function Journal() {
   const [phase, setPhase] = useState<Phase>('landing')
   const [activeType, setActiveType] = useState<JournalType | null>(null)
+  const [activePrompt, setActivePrompt] = useState<QuickPrompt | null>(null)
 
   if (phase === 'history') {
     return <HistoryView onBack={() => setPhase('landing')} />
@@ -35,6 +44,23 @@ export default function Journal() {
         }}
         onCancel={() => {
           setActiveType(null)
+          setPhase('landing')
+        }}
+      />
+    )
+  }
+
+  if (phase === 'quick' && activePrompt) {
+    return (
+      <QuickPromptView
+        prompt={activePrompt}
+        onReroll={() => setActivePrompt(pickRandomQuickPrompt(activePrompt.id))}
+        onDone={() => {
+          setActivePrompt(null)
+          setPhase('saved')
+        }}
+        onCancel={() => {
+          setActivePrompt(null)
           setPhase('landing')
         }}
       />
@@ -88,6 +114,31 @@ export default function Journal() {
           }}
         />
       </div>
+
+      <Card className="flex flex-col gap-3">
+        <div className="inline-flex h-10 w-10 items-center justify-center self-start rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 text-white">
+          <ShuffleIcon />
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Quick prompt</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            One short, random prompt — free write for as long or short as you want, then save it.
+          </p>
+        </div>
+        <PrimaryButton
+          onClick={() => {
+            setActivePrompt(pickRandomQuickPrompt())
+            setPhase('quick')
+          }}
+          disabled={QUICK_PROMPTS.length === 0}
+          className="self-start"
+        >
+          Give me a prompt
+        </PrimaryButton>
+        {QUICK_PROMPTS.length === 0 && (
+          <p className="text-xs text-slate-400">No prompts added yet.</p>
+        )}
+      </Card>
 
       <button
         type="button"
@@ -144,6 +195,18 @@ function MoonIcon() {
   )
 }
 
+function ShuffleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"
+      />
+    </svg>
+  )
+}
+
 function JournalForm({
   type,
   onDone,
@@ -172,7 +235,7 @@ function JournalForm({
 
   const save = async () => {
     setSaving(true)
-    const entry: JournalEntry = {
+    const entry: StructuredJournalEntry = {
       id: newId(),
       type,
       date: new Date().toISOString().slice(0, 10),
@@ -290,6 +353,90 @@ function JournalForm({
   )
 }
 
+function QuickPromptView({
+  prompt,
+  onReroll,
+  onDone,
+  onCancel,
+}: {
+  prompt: QuickPrompt
+  onReroll: () => void
+  onDone: () => void
+  onCancel: () => void
+}) {
+  const [response, setResponse] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const save = async () => {
+    setSaving(true)
+    const entry: QuickPromptEntry = {
+      id: newId(),
+      type: 'quick',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString(),
+      promptId: prompt.id,
+      promptCategory: prompt.category,
+      promptText: prompt.text,
+      response,
+    }
+    await addJournalEntry(entry)
+    setSaving(false)
+    onDone()
+  }
+
+  return (
+    <div className="flex flex-col gap-6 py-4">
+      <div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+        >
+          ← Journal
+        </button>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Quick prompt</h1>
+      </div>
+
+      <Card className="flex flex-col gap-3">
+        <Badge className="self-start bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+          {prompt.category}
+        </Badge>
+        <p className="text-lg text-slate-800 dark:text-slate-100">{prompt.text}</p>
+        <button
+          type="button"
+          onClick={() => {
+            setResponse('')
+            onReroll()
+          }}
+          className="self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+        >
+          Give me a different one
+        </button>
+      </Card>
+
+      <Card>
+        <textarea
+          value={response}
+          onChange={(e) => setResponse(e.target.value)}
+          placeholder="Write whatever comes up…"
+          rows={8}
+          className={inputClass}
+          autoFocus
+        />
+      </Card>
+
+      <div className="flex gap-3">
+        <SecondaryButton onClick={onCancel} disabled={saving}>
+          Discard
+        </SecondaryButton>
+        <PrimaryButton onClick={save} disabled={saving || !response.trim()}>
+          {saving ? 'Saving…' : 'Save entry'}
+        </PrimaryButton>
+      </div>
+    </div>
+  )
+}
+
 function HistoryView({ onBack }: { onBack: () => void }) {
   const { entries, loading, refresh } = useJournalEntries()
   const [expandedId, setExpandedId] = useState<string | null>(null)
@@ -321,71 +468,157 @@ function HistoryView({ onBack }: { onBack: () => void }) {
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
-          {entries.map((entry) => {
-            const template = JOURNAL_TEMPLATES[entry.type]
-            const expanded = expandedId === entry.id
-            return (
-              <Card key={entry.id}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      className={
-                        entry.type === 'morning'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                          : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300'
-                      }
-                    >
-                      {template.title}
-                    </Badge>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">{entry.date}</span>
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(expanded ? null : entry.id)}
-                      className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
-                    >
-                      {expanded ? 'Collapse' : 'View'}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => remove(entry.id)}
-                      className="text-sm font-medium text-rose-600 hover:underline dark:text-rose-400"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                {expanded && (
-                  <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-                    {template.sections.map((section) => {
-                      const values = section.fields
-                        .map((f) => entry.fields[f.key])
-                        .filter((v) => v && v.trim())
-                      if (values.length === 0) return null
-                      return (
-                        <div key={section.title}>
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                            {section.title}
-                          </p>
-                          {section.fields.map((f) =>
-                            entry.fields[f.key]?.trim() ? (
-                              <p key={f.key} className="mt-1 text-sm text-slate-700 dark:text-slate-300">
-                                {section.fields.length > 1 ? `${f.label}: ` : ''}
-                                {entry.fields[f.key]}
-                              </p>
-                            ) : null,
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </Card>
-            )
-          })}
+          {entries.map((entry) =>
+            entry.type === 'quick' ? (
+              <QuickEntryCard
+                key={entry.id}
+                entry={entry}
+                expanded={expandedId === entry.id}
+                onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                onDelete={() => remove(entry.id)}
+              />
+            ) : (
+              <StructuredEntryCard
+                key={entry.id}
+                entry={entry}
+                expanded={expandedId === entry.id}
+                onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                onDelete={() => remove(entry.id)}
+              />
+            ),
+          )}
         </div>
       )}
     </div>
+  )
+}
+
+function EntryCardShell({
+  badge,
+  badgeClass,
+  date,
+  expanded,
+  onToggle,
+  onDelete,
+  children,
+}: {
+  badge: string
+  badgeClass: string
+  date: string
+  expanded: boolean
+  onToggle: () => void
+  onDelete: () => void
+  children: ReactNode
+}) {
+  return (
+    <Card>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Badge className={badgeClass}>{badge}</Badge>
+          <span className="text-sm text-slate-500 dark:text-slate-400">{date}</span>
+        </div>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+          >
+            {expanded ? 'Collapse' : 'View'}
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            className="text-sm font-medium text-rose-600 hover:underline dark:text-rose-400"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+          {children}
+        </div>
+      )}
+    </Card>
+  )
+}
+
+function StructuredEntryCard({
+  entry,
+  expanded,
+  onToggle,
+  onDelete,
+}: {
+  entry: StructuredJournalEntry
+  expanded: boolean
+  onToggle: () => void
+  onDelete: () => void
+}) {
+  const template = JOURNAL_TEMPLATES[entry.type]
+  return (
+    <EntryCardShell
+      badge={template.title}
+      badgeClass={
+        entry.type === 'morning'
+          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+          : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300'
+      }
+      date={entry.date}
+      expanded={expanded}
+      onToggle={onToggle}
+      onDelete={onDelete}
+    >
+      {template.sections.map((section) => {
+        const values = section.fields.map((f) => entry.fields[f.key]).filter((v) => v && v.trim())
+        if (values.length === 0) return null
+        return (
+          <div key={section.title}>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              {section.title}
+            </p>
+            {section.fields.map((f) =>
+              entry.fields[f.key]?.trim() ? (
+                <p key={f.key} className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                  {section.fields.length > 1 ? `${f.label}: ` : ''}
+                  {entry.fields[f.key]}
+                </p>
+              ) : null,
+            )}
+          </div>
+        )
+      })}
+    </EntryCardShell>
+  )
+}
+
+function QuickEntryCard({
+  entry,
+  expanded,
+  onToggle,
+  onDelete,
+}: {
+  entry: QuickPromptEntry
+  expanded: boolean
+  onToggle: () => void
+  onDelete: () => void
+}) {
+  return (
+    <EntryCardShell
+      badge={`Quick prompt · ${entry.promptCategory}`}
+      badgeClass="bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+      date={entry.date}
+      expanded={expanded}
+      onToggle={onToggle}
+      onDelete={onDelete}
+    >
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Prompt</p>
+        <p className="mt-1 text-sm italic text-slate-600 dark:text-slate-300">{entry.promptText}</p>
+      </div>
+      <div>
+        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Response</p>
+        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{entry.response}</p>
+      </div>
+    </EntryCardShell>
   )
 }

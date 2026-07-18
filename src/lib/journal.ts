@@ -32,13 +32,34 @@ export interface JournalTemplate {
   compulsionWarning: JournalCompulsionWarning
 }
 
-export interface JournalEntry {
+export interface StructuredJournalEntry {
   id: string
   type: JournalType
   date: string
   createdAt: string
   fields: Record<string, string>
 }
+
+/** A single random short prompt (as opposed to the timed, multi-section
+ *  structured templates below) paired with one free-write response. */
+export interface QuickPrompt {
+  id: string
+  category: string
+  text: string
+}
+
+export interface QuickPromptEntry {
+  id: string
+  type: 'quick'
+  date: string
+  createdAt: string
+  promptId: string
+  promptCategory: string
+  promptText: string
+  response: string
+}
+
+export type JournalEntry = StructuredJournalEntry | QuickPromptEntry
 
 export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
   morning: {
@@ -169,4 +190,14 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
         'If any of the above apply, bring this journal to your next session with your OCD therapist. This template is an adjunct to, not a replacement for, ERP/CBT/ACT treatment. IOCDF therapist directory: iocdf.org/find-help',
     },
   },
+}
+
+// Populated separately — one entry per short prompt, grouped by `category`.
+export const QUICK_PROMPTS: QuickPrompt[] = []
+
+export function pickRandomQuickPrompt(excludeId?: string): QuickPrompt | null {
+  if (QUICK_PROMPTS.length === 0) return null
+  const pool = excludeId ? QUICK_PROMPTS.filter((p) => p.id !== excludeId) : QUICK_PROMPTS
+  const candidates = pool.length > 0 ? pool : QUICK_PROMPTS
+  return candidates[Math.floor(Math.random() * candidates.length)]
 }
