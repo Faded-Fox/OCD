@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useTheme } from '../lib/useTheme'
+import pawLogo from '../assets/paw-logo.png'
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
@@ -33,11 +34,7 @@ export default function Layout() {
     <div className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 pb-16 sm:px-6">
       <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-5">
         <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-violet-500 text-white shadow-sm">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 15h4l2-7 3 10 2-7 2 4h5" />
-            </svg>
-          </span>
+          <img src={pawLogo} alt="" className="h-8 w-8 rounded-xl shadow-sm" />
           <span>
             PocketFox<span className="hidden sm:inline"> Companion</span>
           </span>
