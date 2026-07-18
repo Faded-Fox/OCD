@@ -17,7 +17,7 @@ import {
   sessionFrequency,
 } from '../lib/insights'
 import { colorForHierarchy } from '../lib/colors'
-import { Card, EmptyState, PrimaryButton, StatTile } from '../components/ui'
+import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 
 export default function Dashboard() {
@@ -29,11 +29,16 @@ export default function Dashboard() {
     return (
       <EmptyState
         title="No sessions yet"
-        body="Import a conversation export or pasted session text to start seeing trends and patterns here."
+        body="Run a live session, or import a conversation export or pasted session text to start seeing trends and patterns here."
         action={
-          <Link to="/import">
-            <PrimaryButton>Import sessions</PrimaryButton>
-          </Link>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Link to="/live">
+              <PrimaryButton>Start live session</PrimaryButton>
+            </Link>
+            <Link to="/import">
+              <SecondaryButton>Import sessions</SecondaryButton>
+            </Link>
+          </div>
         }
       />
     )
@@ -61,9 +66,14 @@ export default function Dashboard() {
             A descriptive summary of logged sessions — not a diagnosis or a treatment recommendation.
           </p>
         </div>
-        <Link to="/import">
-          <PrimaryButton>Import more</PrimaryButton>
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/live">
+            <PrimaryButton>Start live session</PrimaryButton>
+          </Link>
+          <Link to="/import">
+            <SecondaryButton>Import more</SecondaryButton>
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

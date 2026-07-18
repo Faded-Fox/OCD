@@ -157,21 +157,21 @@ export default function SessionFields({
                 value={r.label}
                 onChange={(e) => updateReading(i, { label: e.target.value })}
                 placeholder="label (pre, 5min, end…)"
-                className={`${inputClass} flex-1`}
+                className={`${inputBaseClass} flex-1`}
               />
               <input
                 type="text"
                 value={r.time_or_minute}
                 onChange={(e) => updateReading(i, { time_or_minute: e.target.value })}
                 placeholder="time / minute"
-                className={`${inputClass} w-28`}
+                className={`${inputBaseClass} w-28`}
               />
               <input
                 type="number"
                 value={r.suds}
                 onChange={(e) => updateReading(i, { suds: Number(e.target.value) })}
                 placeholder="SUDs"
-                className={`${inputClass} w-20`}
+                className={`${inputBaseClass} w-20`}
               />
               <button
                 type="button"
@@ -241,8 +241,13 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: stri
   )
 }
 
-export const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
+// No width baked in, so callers that need a non-full width (e.g. the fixed-width
+// columns in the readings row below) can set one without fighting `w-full` for
+// specificity — two width utilities on the same element is a Tailwind footgun.
+export const inputBaseClass =
+  'rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
+
+export const inputClass = `w-full ${inputBaseClass}`
 
 export function Field({ label, children, full }: { label: string; children: ReactNode; full?: boolean }) {
   return (

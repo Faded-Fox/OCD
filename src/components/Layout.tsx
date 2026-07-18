@@ -3,6 +3,7 @@ import { useTheme } from '../lib/useTheme'
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
+  { to: '/live', label: 'Live' },
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]
