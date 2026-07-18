@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { Session, SudsReading } from '../lib/types'
 
 export default function SessionFields({
@@ -120,23 +120,12 @@ export default function SessionFields({
         </select>
       </Field>
       <Field label="Techniques used (comma separated)">
-        <input
-          type="text"
-          value={session.techniques_used.join(', ')}
-          onChange={(e) =>
-            onChange({ techniques_used: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })
-          }
-          className={inputClass}
-        />
+        <TagsInput value={session.techniques_used} onChange={(techniques_used) => onChange({ techniques_used })} />
       </Field>
       <Field label="Compulsions targeted (comma separated)">
-        <input
-          type="text"
-          value={session.compulsions_targeted.join(', ')}
-          onChange={(e) =>
-            onChange({ compulsions_targeted: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })
-          }
-          className={inputClass}
+        <TagsInput
+          value={session.compulsions_targeted}
+          onChange={(compulsions_targeted) => onChange({ compulsions_targeted })}
         />
       </Field>
       <Field label="Scenario / what the exposure was">
@@ -208,6 +197,47 @@ export default function SessionFields({
       </div>
 
     </div>
+  )
+}
+
+/**
+ * A comma-separated tag list backed by its own local text state, rather than an
+ * input whose value is re-derived from `array.join(', ')` on every keystroke —
+ * that pattern trims each keystroke's array item immediately, so a trailing
+ * space (or any text before the next comma) gets stripped right back out and
+ * typing a space appears to do nothing.
+ */
+function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
+  const [text, setText] = useState(value.join(', '))
+
+  // Resync from the array only when it changed for a reason other than our own
+  // onChange below (e.g. a different session's data loaded into this field).
+  useEffect(() => {
+    const derived = text
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (JSON.stringify(derived) !== JSON.stringify(value)) {
+      setText(value.join(', '))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  return (
+    <input
+      type="text"
+      value={text}
+      onChange={(e) => {
+        setText(e.target.value)
+        onChange(
+          e.target.value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+        )
+      }}
+      className={inputClass}
+    />
   )
 }
 
