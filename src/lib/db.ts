@@ -63,6 +63,16 @@ export async function deleteAllData(): Promise<void> {
   await Promise.all([deleteAllSessions(), deleteAllJournalEntries()])
 }
 
+/** Restores sessions/journal entries from a parsed backup. Uses put (upsert) rather
+ *  than add, so re-restoring the same backup — or restoring onto a device that
+ *  already has some overlapping records — replaces matching ids instead of erroring. */
+export async function restoreBackup(data: { sessions: Session[]; journalEntries: JournalEntry[] }): Promise<void> {
+  await Promise.all([
+    data.sessions.length ? db.sessions.bulkPut(data.sessions) : undefined,
+    data.journalEntries.length ? db.journalEntries.bulkPut(data.journalEntries) : undefined,
+  ])
+}
+
 function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()

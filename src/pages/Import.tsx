@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { addSessions } from '../lib/db'
+import { addSessions, restoreBackup } from '../lib/db'
 import { parseImportText } from '../lib/parser'
+import { looksLikeBackup, countBackupEntries, parseBackup } from '../lib/backup'
 import type { Session } from '../lib/types'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
@@ -20,6 +21,7 @@ export default function Import() {
   const [saving, setSaving] = useState(false)
   const [autoScrollPending, setAutoScrollPending] = useState(false)
   const [flagCursor, setFlagCursor] = useState(0)
+  const [restoring, setRestoring] = useState(false)
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const handleFile = async (file: File) => {
@@ -33,6 +35,22 @@ export default function Import() {
     setWarnings(result.warnings)
     setFlagCursor(0)
     setAutoScrollPending(true)
+  }
+
+  const isBackup = useMemo(() => looksLikeBackup(raw), [raw])
+  const backupCounts = useMemo(() => (isBackup ? countBackupEntries(raw) : null), [isBackup, raw])
+
+  const runRestore = async () => {
+    if (!backupCounts || backupCounts.sessions + backupCounts.journalEntries === 0) return
+    const confirmed = confirm(
+      `Restore ${backupCounts.sessions} session${backupCounts.sessions === 1 ? '' : 's'} and ${backupCounts.journalEntries} journal entr${backupCounts.journalEntries === 1 ? 'y' : 'ies'} to this device? Anything already here with a matching ID will be overwritten.`,
+    )
+    if (!confirmed) return
+    setRestoring(true)
+    const data = await parseBackup(raw)
+    await restoreBackup(data)
+    setRestoring(false)
+    navigate('/')
   }
 
   const flaggedIds = useMemo(
@@ -181,15 +199,28 @@ export default function Import() {
         <Card className="flex flex-col gap-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Paste a Claude.ai conversation export (JSON) or plain conversation text containing ERP session
-            logs, and this device will pick out the structured session data automatically.
+            logs, and this device will pick out the structured session data automatically. You can also paste
+            in a backup file from this app's own Settings → Export to restore it.
           </p>
           <textarea
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
-            placeholder="Paste conversation export JSON or session text here…"
+            placeholder="Paste conversation export JSON, session text, or a previously exported backup here…"
             rows={14}
             className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-violet-900"
           />
+
+          {isBackup && backupCounts && (
+            <Card className="border-teal-300 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/40">
+              <p className="text-sm text-teal-800 dark:text-teal-300">
+                This looks like an ERP Insights backup — {backupCounts.sessions} session
+                {backupCounts.sessions === 1 ? '' : 's'} and {backupCounts.journalEntries} journal entr
+                {backupCounts.journalEntries === 1 ? 'y' : 'ies'} found. Restoring adds them to this device;
+                anything already here with a matching ID gets overwritten.
+              </p>
+            </Card>
+          )}
+
           <div className="flex flex-wrap items-center gap-3">
             <SecondaryButton onClick={() => fileInputRef.current?.click()}>Upload file…</SecondaryButton>
             <input
@@ -203,9 +234,15 @@ export default function Import() {
                 e.target.value = ''
               }}
             />
-            <PrimaryButton onClick={runParse} disabled={!raw.trim()}>
-              Parse
-            </PrimaryButton>
+            {isBackup ? (
+              <PrimaryButton onClick={runRestore} disabled={!raw.trim() || restoring}>
+                {restoring ? 'Restoring…' : 'Restore backup'}
+              </PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={runParse} disabled={!raw.trim()}>
+                Parse
+              </PrimaryButton>
+            )}
           </div>
         </Card>
       ) : (

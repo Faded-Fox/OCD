@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { deleteAllData, exportAllAsJson } from '../lib/db'
 import { useSessions } from '../lib/useSessions'
 import { useJournalEntries } from '../lib/useJournalEntries'
@@ -48,19 +48,26 @@ export default function Settings() {
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           This app runs entirely on your device. Session and journal data is stored locally in your browser's
           IndexedDB. There is no backend, no account, no analytics, and nothing is ever transmitted off this
-          device. Uninstalling the app or clearing site data will remove everything.
+          device. Uninstalling the app, clearing site data, or (on iPhone) not opening it for a while can all
+          remove everything — export a backup below so a reinstall isn't a data loss.
         </p>
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Export data</h2>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Backup &amp; restore</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Download every logged session and journal entry as a single JSON file — useful as a backup, or to
-          bring structured data to a specialist appointment.
+          Download every logged session and journal entry as a single JSON file. Keep it somewhere that
+          survives an app deletion — Files app, iCloud Drive, email to yourself — so that if this app ever
+          gets deleted and reinstalled (or iOS clears its storage from disuse), you can bring everything back.
         </p>
         <PrimaryButton onClick={handleExport} disabled={exporting || !hasData} className="mt-3">
           {exporting ? 'Preparing…' : 'Export all data as JSON'}
         </PrimaryButton>
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
+          To restore, go to <Link to="/import" className="font-medium text-violet-600 hover:underline dark:text-violet-400">Import</Link> and
+          paste in or upload that same backup file — it's detected automatically and offered back as a
+          restore rather than parsed as a new import.
+        </p>
       </Card>
 
       <Card className="border-rose-200 dark:border-rose-900">

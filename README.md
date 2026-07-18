@@ -35,6 +35,12 @@ data lives only in this browser's IndexedDB until you export or delete it.
   and habituation-speed trends.
 - **Per-session view**: the full SUDs curve, compulsions targeted/resisted, techniques
   used, and notes.
+- **Backup & restore**: export all data as JSON from Settings, then bring it back
+  any time by pasting or uploading that same file on the Import screen — it's
+  detected automatically and offered as a restore instead of parsed as a new
+  import. This is what makes data survive deleting and reinstalling the app (e.g.
+  on iPhone, or if iOS clears storage from disuse): export before you lose the
+  app, restore after.
 - **Settings**: export all data as JSON, or permanently delete everything on this
   device.
 
