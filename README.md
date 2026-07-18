@@ -15,10 +15,13 @@ data lives only in this browser's IndexedDB until you export or delete it.
   saved locally as you go, so an accidental reload mid-session doesn't lose it.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
-  citations, and compulsion-warning signs from their source templates built in. The
-  saved-entries view is intentionally low-key (mainly for export or bringing to a
-  therapist) since both templates flag re-reading past entries for reassurance as a
-  compulsion warning sign.
+  citations, and compulsion-warning signs from their source templates built in. A
+  third "Quick prompt" mode picks one short prompt at random from a pool spanning
+  general intrusive thoughts, harm OCD, sexual intrusive thoughts, ROCD, postpartum,
+  and CBT/ACT reframing, with a free-write box underneath. The saved-entries view is
+  intentionally low-key (mainly for export or bringing to a therapist) since these
+  prompts flag re-reading past entries — or rerolling to find "the right" one — for
+  reassurance as a compulsion warning sign.
 - **Import** a Claude.ai conversation export (JSON) or pasted conversation text
   containing ERP session logs. Parsing happens entirely client-side.
 - **Review** every parsed session before it's saved — fields the parser couldn't

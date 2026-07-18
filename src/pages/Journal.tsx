@@ -425,6 +425,14 @@ function QuickPromptView({
         />
       </Card>
 
+      <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+        <p className="text-sm text-amber-800 dark:text-amber-300">
+          One pass is the exercise. If you notice yourself rerolling to find "the right" prompt, or rewriting
+          until the answer feels complete, that's worth naming as the same loop this is meant to interrupt —
+          not something to fix by writing more.
+        </p>
+      </Card>
+
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>
           Discard
