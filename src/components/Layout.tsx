@@ -4,6 +4,7 @@ import { useTheme } from '../lib/useTheme'
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/live', label: 'Live' },
+  { to: '/journal', label: 'Journal' },
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]

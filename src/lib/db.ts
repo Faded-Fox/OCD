@@ -1,14 +1,20 @@
 import Dexie, { type Table } from 'dexie'
 import type { Session } from './types'
+import type { JournalEntry } from './journal'
 
 class ErpInsightsDb extends Dexie {
   sessions!: Table<Session, string>
+  journalEntries!: Table<JournalEntry, string>
 
   constructor() {
     super('erp-insights')
     this.version(1).stores({
       // indexed by internal id; secondary indexes for common queries
       sessions: 'id, date, hierarchy, rung',
+    })
+    this.version(2).stores({
+      sessions: 'id, date, hierarchy, rung',
+      journalEntries: 'id, date, type',
     })
   }
 }
@@ -36,6 +42,27 @@ export async function deleteAllSessions(): Promise<void> {
   await db.sessions.clear()
 }
 
+export async function getAllJournalEntries(): Promise<JournalEntry[]> {
+  const entries = await db.journalEntries.toArray()
+  return entries.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+}
+
+export async function addJournalEntry(entry: JournalEntry): Promise<void> {
+  await db.journalEntries.add(entry)
+}
+
+export async function deleteJournalEntry(id: string): Promise<void> {
+  await db.journalEntries.delete(id)
+}
+
+export async function deleteAllJournalEntries(): Promise<void> {
+  await db.journalEntries.clear()
+}
+
+export async function deleteAllData(): Promise<void> {
+  await Promise.all([deleteAllSessions(), deleteAllJournalEntries()])
+}
+
 function blobToDataUrl(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -46,12 +73,12 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 export async function exportAllAsJson(): Promise<string> {
-  const sessions = await getAllSessions()
-  const exportable = await Promise.all(
+  const [sessions, journalEntries] = await Promise.all([getAllSessions(), getAllJournalEntries()])
+  const exportableSessions = await Promise.all(
     sessions.map(async (s) => ({
       ...s,
       photo: s.photo ? await blobToDataUrl(s.photo) : null,
     })),
   )
-  return JSON.stringify(exportable, null, 2)
+  return JSON.stringify({ sessions: exportableSessions, journalEntries }, null, 2)
 }
