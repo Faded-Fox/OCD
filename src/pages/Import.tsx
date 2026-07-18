@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { parseImportText } from '../lib/parser'
@@ -13,6 +13,9 @@ export default function Import() {
   const [parsed, setParsed] = useState<Session[] | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
+  const [autoScrollPending, setAutoScrollPending] = useState(false)
+  const [flagCursor, setFlagCursor] = useState(0)
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const handleFile = async (file: File) => {
     const text = await file.text()
@@ -23,6 +26,35 @@ export default function Import() {
     const result = parseImportText(raw)
     setParsed(result.sessions)
     setWarnings(result.warnings)
+    setFlagCursor(0)
+    setAutoScrollPending(true)
+  }
+
+  const flaggedIds = useMemo(
+    () => (parsed ? parsed.filter((s) => s.flags.length > 0).map((s) => s.id) : []),
+    [parsed],
+  )
+
+  const scrollToCard = (id: string) => {
+    cardRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
+
+  // Jump straight to the first flagged session as soon as parsing finishes —
+  // runs once per parse via the pending flag rather than on every edit.
+  useEffect(() => {
+    if (!autoScrollPending || !parsed) return
+    if (flaggedIds.length > 0) {
+      scrollToCard(flaggedIds[0])
+      setFlagCursor(1 % flaggedIds.length)
+    }
+    setAutoScrollPending(false)
+  }, [autoScrollPending, parsed, flaggedIds])
+
+  const jumpToNextFlag = () => {
+    if (flaggedIds.length === 0) return
+    const id = flaggedIds[flagCursor % flaggedIds.length]
+    scrollToCard(id)
+    setFlagCursor((c) => (c + 1) % flaggedIds.length)
   }
 
   const updateSession = (id: string, patch: Partial<Session>) => {
@@ -74,14 +106,36 @@ export default function Import() {
           </Card>
         )}
 
+        {flaggedIds.length > 0 && (
+          <div className="sticky top-2 z-10 flex items-center justify-between gap-3 rounded-full bg-amber-500 px-4 py-2 text-sm font-medium text-white shadow-lg">
+            <span>
+              {flaggedIds.length} session{flaggedIds.length === 1 ? '' : 's'} need review
+            </span>
+            <button
+              type="button"
+              onClick={jumpToNextFlag}
+              className="rounded-full bg-white/20 px-3 py-1 font-semibold hover:bg-white/30"
+            >
+              Jump to next ↓
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4">
           {parsed.map((session) => (
-            <SessionEditCard
+            <div
               key={session.id}
-              session={session}
-              onChange={(patch) => updateSession(session.id, patch)}
-              onDiscard={() => discardSession(session.id)}
-            />
+              ref={(el) => {
+                cardRefs.current[session.id] = el
+              }}
+              className="scroll-mt-16"
+            >
+              <SessionEditCard
+                session={session}
+                onChange={(patch) => updateSession(session.id, patch)}
+                onDiscard={() => discardSession(session.id)}
+              />
+            </div>
           ))}
         </div>
 
