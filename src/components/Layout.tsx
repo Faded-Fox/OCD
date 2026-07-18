@@ -31,16 +31,18 @@ export default function Layout() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 pb-16 sm:px-6">
-      <header className="flex items-center justify-between gap-4 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-5">
         <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
           <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-violet-500 text-white shadow-sm">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 15h4l2-7 3 10 2-7 2 4h5" />
             </svg>
           </span>
-          <span>ERP Insights</span>
+          <span>
+            PocketFox<span className="hidden sm:inline"> Companion</span>
+          </span>
         </NavLink>
-        <nav className="flex items-center gap-1 rounded-full bg-white/70 p-1 shadow-sm ring-1 ring-slate-200 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-800">
+        <nav className="flex flex-wrap items-center gap-1 rounded-full bg-white/70 p-1 shadow-sm ring-1 ring-slate-200 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-800">
           {navItems.map((item) => (
             <NavLink
               key={item.to}

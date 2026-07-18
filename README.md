@@ -1,4 +1,4 @@
-# ERP Session Insights
+# PocketFox Companion
 
 A private, installable PWA that turns exported ERP (Exposure and Response Prevention)
 session logs into trend charts and patterns — for the person doing the exposures and

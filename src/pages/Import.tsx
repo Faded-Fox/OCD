@@ -213,7 +213,7 @@ export default function Import() {
           {isBackup && backupCounts && (
             <Card className="border-teal-300 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/40">
               <p className="text-sm text-teal-800 dark:text-teal-300">
-                This looks like an ERP Insights backup — {backupCounts.sessions} session
+                This looks like a PocketFox Companion backup — {backupCounts.sessions} session
                 {backupCounts.sessions === 1 ? '' : 's'} and {backupCounts.journalEntries} journal entr
                 {backupCounts.journalEntries === 1 ? 'y' : 'ies'} found. Restoring adds them to this device;
                 anything already here with a matching ID gets overwritten.

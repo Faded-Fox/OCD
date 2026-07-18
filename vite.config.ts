@@ -17,8 +17,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png'],
       manifest: {
-        name: 'ERP Session Insights',
-        short_name: 'ERP Insights',
+        name: 'PocketFox Companion',
+        short_name: 'PocketFox',
         description:
           'Private, local-only tracker for ERP exposure session patterns and trends, for you and your specialist.',
         theme_color: '#0f172a',
