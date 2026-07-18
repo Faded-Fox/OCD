@@ -33,4 +33,6 @@ export interface Session {
   flags: string[]
   /** raw source text this session was parsed from, kept for reference/re-parsing */
   source_excerpt: string
+  /** original photo (e.g. a handwritten log page), kept for reference — never leaves this device */
+  photo: Blob | null
 }

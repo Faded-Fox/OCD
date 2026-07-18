@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   CartesianGrid,
@@ -23,16 +23,34 @@ export default function SessionDetail() {
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
   const [notes, setNotes] = useState('')
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null)
+
+  const session = sessions.find((s) => s.id === id)
+
+  useEffect(() => {
+    if (!session?.photo) {
+      setPhotoUrl(null)
+      return
+    }
+    const url = URL.createObjectURL(session.photo)
+    setPhotoUrl(url)
+    return () => URL.revokeObjectURL(url)
+  }, [session?.photo])
 
   if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
 
-  const session = sessions.find((s) => s.id === id)
   if (!session) {
     return <EmptyState title="Session not found" body="It may have been deleted." />
   }
 
   const color = colorForHierarchy(session.hierarchy)
   const { points: curve, isTimeBased } = displayCurve(session)
+
+  const removePhoto = async () => {
+    if (!confirm('Remove the attached photo? The session itself will be kept.')) return
+    await updateSession({ ...session, photo: null })
+    refresh()
+  }
 
   const handleDelete = async () => {
     if (!confirm('Delete this session? This cannot be undone.')) return
@@ -149,6 +167,30 @@ export default function SessionDetail() {
               real timeline.
             </p>
           )}
+        </Card>
+      )}
+
+      {photoUrl && (
+        <Card>
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Original photo</h2>
+            <button
+              type="button"
+              onClick={removePhoto}
+              className="text-sm font-medium text-rose-600 hover:underline dark:text-rose-400"
+            >
+              Remove photo
+            </button>
+          </div>
+          <button type="button" onClick={() => window.open(photoUrl, '_blank')} className="block">
+            <img
+              src={photoUrl}
+              alt="Original handwritten log"
+              style={{ imageOrientation: 'from-image' }}
+              className="max-h-[70vh] w-full rounded-xl object-contain"
+            />
+          </button>
+          <p className="mt-2 text-xs text-slate-400">Tap the photo to view full size</p>
         </Card>
       )}
 

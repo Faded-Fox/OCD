@@ -36,7 +36,22 @@ export async function deleteAllSessions(): Promise<void> {
   await db.sessions.clear()
 }
 
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(blob)
+  })
+}
+
 export async function exportAllAsJson(): Promise<string> {
   const sessions = await getAllSessions()
-  return JSON.stringify(sessions, null, 2)
+  const exportable = await Promise.all(
+    sessions.map(async (s) => ({
+      ...s,
+      photo: s.photo ? await blobToDataUrl(s.photo) : null,
+    })),
+  )
+  return JSON.stringify(exportable, null, 2)
 }

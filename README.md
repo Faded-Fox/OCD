@@ -13,6 +13,12 @@ data lives only in this browser's IndexedDB until you export or delete it.
   containing ERP session logs. Parsing happens entirely client-side.
 - **Review** every parsed session before it's saved — fields the parser couldn't
   confidently extract are flagged for manual correction rather than guessed.
+- **Add from a photo**: for handwritten paper logs, take or upload a photo and it's
+  shown right next to a blank session form so you can quickly transcribe it yourself.
+  There's no automatic handwriting recognition (on-device OCR was tested and isn't
+  reliable enough to trust with real data) — the original photo is kept with the
+  session instead, so anything a form field can't capture (like a hand-drawn SUDs
+  curve) isn't lost.
 - **Dashboard**: peak-SUDs trend across hierarchies, full-resistance rate, readiness
   signals, recent sessions.
 - **Per-hierarchy view**: rung ladder, attempt counts, resistance streaks, peak-SUDs

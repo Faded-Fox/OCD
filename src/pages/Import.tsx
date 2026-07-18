@@ -1,14 +1,19 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { parseImportText } from '../lib/parser'
 import type { Session } from '../lib/types'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
+import PhotoEntry from '../components/PhotoEntry'
+import SessionFields from '../components/SessionFields'
+
+type Mode = 'text' | 'photo'
 
 export default function Import() {
   const navigate = useNavigate()
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [mode, setMode] = useState<Mode>('text')
   const [raw, setRaw] = useState('')
   const [parsed, setParsed] = useState<Session[] | null>(null)
   const [warnings, setWarnings] = useState<string[]>([])
@@ -76,6 +81,11 @@ export default function Import() {
   const startOver = () => {
     setParsed(null)
     setWarnings([])
+  }
+
+  const savePhotoSession = async (session: Session) => {
+    await addSessions([session])
+    navigate('/')
   }
 
   if (parsed) {
@@ -152,40 +162,80 @@ export default function Import() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Import a session export</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Import a session</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Paste a Claude.ai conversation export (JSON) or plain conversation text containing ERP session
-          logs. Parsing happens entirely on this device — nothing is uploaded anywhere.
+          Everything below happens entirely on this device — nothing is ever uploaded anywhere.
         </p>
       </div>
 
-      <Card className="flex flex-col gap-4">
-        <textarea
-          value={raw}
-          onChange={(e) => setRaw(e.target.value)}
-          placeholder="Paste conversation export JSON or session text here…"
-          rows={14}
-          className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-violet-900"
-        />
-        <div className="flex flex-wrap items-center gap-3">
-          <SecondaryButton onClick={() => fileInputRef.current?.click()}>Upload file…</SecondaryButton>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,.txt"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0]
-              if (file) handleFile(file)
-              e.target.value = ''
-            }}
+      <div className="inline-flex w-fit rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+        <ModeButton active={mode === 'text'} onClick={() => setMode('text')}>
+          Paste conversation text
+        </ModeButton>
+        <ModeButton active={mode === 'photo'} onClick={() => setMode('photo')}>
+          Add from a photo
+        </ModeButton>
+      </div>
+
+      {mode === 'text' ? (
+        <Card className="flex flex-col gap-4">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Paste a Claude.ai conversation export (JSON) or plain conversation text containing ERP session
+            logs, and this device will pick out the structured session data automatically.
+          </p>
+          <textarea
+            value={raw}
+            onChange={(e) => setRaw(e.target.value)}
+            placeholder="Paste conversation export JSON or session text here…"
+            rows={14}
+            className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-violet-900"
           />
-          <PrimaryButton onClick={runParse} disabled={!raw.trim()}>
-            Parse
-          </PrimaryButton>
-        </div>
-      </Card>
+          <div className="flex flex-wrap items-center gap-3">
+            <SecondaryButton onClick={() => fileInputRef.current?.click()}>Upload file…</SecondaryButton>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,.txt"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleFile(file)
+                e.target.value = ''
+              }}
+            />
+            <PrimaryButton onClick={runParse} disabled={!raw.trim()}>
+              Parse
+            </PrimaryButton>
+          </div>
+        </Card>
+      ) : (
+        <PhotoEntry onSave={savePhotoSession} />
+      )}
     </div>
+  )
+}
+
+function ModeButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean
+  onClick: () => void
+  children: string
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+      }`}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -243,152 +293,10 @@ function SessionEditCard({
       )}
 
       {expanded && (
-        <div className="mt-4 grid grid-cols-1 gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2 dark:border-slate-800">
-          <Field label="Date">
-            <input
-              type="date"
-              value={session.date}
-              onChange={(e) => onChange({ date: e.target.value })}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Hierarchy">
-            <input
-              type="text"
-              value={session.hierarchy}
-              onChange={(e) => onChange({ hierarchy: e.target.value })}
-              placeholder="e.g. Harm/Contamination"
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Rung">
-            <input
-              type="number"
-              value={session.rung ?? ''}
-              onChange={(e) => onChange({ rung: e.target.value === '' ? null : Number(e.target.value) })}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Variation">
-            <input
-              type="text"
-              value={session.variation ?? ''}
-              onChange={(e) => onChange({ variation: e.target.value || null })}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Target SUDs range">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={session.target_suds_range?.[0] ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    target_suds_range: [
-                      e.target.value === '' ? 0 : Number(e.target.value),
-                      session.target_suds_range?.[1] ?? 0,
-                    ],
-                  })
-                }
-                className={inputClass}
-              />
-              <span className="text-slate-400">–</span>
-              <input
-                type="number"
-                value={session.target_suds_range?.[1] ?? ''}
-                onChange={(e) =>
-                  onChange({
-                    target_suds_range: [
-                      session.target_suds_range?.[0] ?? 0,
-                      e.target.value === '' ? 0 : Number(e.target.value),
-                    ],
-                  })
-                }
-                className={inputClass}
-              />
-            </div>
-          </Field>
-          <Field label="Peak / End SUDs">
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                value={session.peak_suds ?? ''}
-                onChange={(e) => onChange({ peak_suds: e.target.value === '' ? null : Number(e.target.value) })}
-                className={inputClass}
-              />
-              <span className="text-slate-400">/</span>
-              <input
-                type="number"
-                value={session.end_suds ?? ''}
-                onChange={(e) => onChange({ end_suds: e.target.value === '' ? null : Number(e.target.value) })}
-                className={inputClass}
-              />
-            </div>
-          </Field>
-          <Field label="Compulsions resisted">
-            <select
-              value={session.compulsions_resisted === null ? 'unknown' : session.compulsions_resisted ? 'yes' : 'partial'}
-              onChange={(e) =>
-                onChange({
-                  compulsions_resisted: e.target.value === 'unknown' ? null : e.target.value === 'yes',
-                })
-              }
-              className={inputClass}
-            >
-              <option value="yes">Fully resisted</option>
-              <option value="partial">Partial / completed</option>
-              <option value="unknown">Unknown</option>
-            </select>
-          </Field>
-          <Field label="Techniques used (comma separated)">
-            <input
-              type="text"
-              value={session.techniques_used.join(', ')}
-              onChange={(e) =>
-                onChange({ techniques_used: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })
-              }
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Notes" full>
-            <textarea
-              value={session.notes}
-              onChange={(e) => onChange({ notes: e.target.value })}
-              rows={2}
-              className={inputClass}
-            />
-          </Field>
-
-          {session.readings.length > 0 && (
-            <div className="sm:col-span-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Readings detected
-              </span>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {session.readings.map((r, i) => (
-                  <Badge key={i} className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    {r.label}: {r.suds}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+          <SessionFields session={session} onChange={onChange} />
         </div>
       )}
     </Card>
-  )
-}
-
-const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
-
-function Field({ label, children, full }: { label: string; children: ReactNode; full?: boolean }) {
-  return (
-    <label className={`flex flex-col gap-1 ${full ? 'sm:col-span-2' : ''}`}>
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {label}
-      </span>
-      {children}
-    </label>
   )
 }

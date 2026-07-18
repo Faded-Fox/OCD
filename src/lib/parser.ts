@@ -1,4 +1,5 @@
 import type { Session, SudsReading } from './types'
+import { newId } from './session'
 
 export interface ParseResult {
   sessions: Session[]
@@ -26,11 +27,6 @@ const KNOWN_TECHNIQUES = [
   'cognitive defusion',
   'thanking the mind',
 ]
-
-function newId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
-  return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
 
 function looksLikeJson(s: string): boolean {
   return (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))
@@ -381,6 +377,7 @@ function buildSession(block: string, index: number, usedFallback: boolean): Sess
     notes,
     flags: [...flags, ...compulsionFlags],
     source_excerpt: block.trim().slice(0, 4000),
+    photo: null,
   }
 }
 
