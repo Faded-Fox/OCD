@@ -39,7 +39,7 @@ export default function Layout() {
             PocketFox<span className="hidden sm:inline"> Companion</span>
           </span>
         </NavLink>
-        <nav className="flex flex-wrap items-center gap-1 rounded-full bg-white/70 p-1 shadow-sm ring-1 ring-slate-200 backdrop-blur dark:bg-slate-900/70 dark:ring-slate-800">
+        <nav className="flex flex-wrap items-center gap-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -48,7 +48,7 @@ export default function Layout() {
               className={({ isActive }) =>
                 `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                    ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`
               }
@@ -60,7 +60,7 @@ export default function Layout() {
             type="button"
             onClick={toggle}
             aria-label="Toggle dark mode"
-            className="ml-1 rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
           </button>
