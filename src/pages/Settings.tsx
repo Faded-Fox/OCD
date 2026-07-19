@@ -86,6 +86,17 @@ export default function Settings() {
         </p>
       </Card>
 
+      <Card>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Therapist summary</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          A separate, printable report — resistance rates by hierarchy, recent sessions, focus plan debriefs — for
+          bringing to a session, rather than handing over the raw backup file above.
+        </p>
+        <Link to="/summary">
+          <PrimaryButton className="mt-3">Open therapist summary</PrimaryButton>
+        </Link>
+      </Card>
+
       <Card className="border-rose-200 dark:border-rose-900">
         <h2 className="text-sm font-semibold text-rose-700 dark:text-rose-400">Delete all data</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">

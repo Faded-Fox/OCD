@@ -66,6 +66,14 @@ const SECTIONS: HelpSection[] = [
     ],
   },
   {
+    title: 'Summary',
+    body: [
+      'A printable report to bring to a therapy session — resistance rates by hierarchy, sessions in the selected period, Focus Plan debriefs, and planned fear ladders — separate from the raw JSON backup in Settings, which is for restoring the app rather than reading.',
+      'From/To narrows it to a date range (e.g. since the last appointment); leave both blank for all-time. "Print / Save as PDF" opens the browser\'s print dialog with the rest of the app hidden, and "Share" sends a plain-text version through the native share sheet (or copies it to the clipboard if that\'s not available), the same pattern as the Flare Guide\'s Share button.',
+      "Journal entries only ever show up here as a count, never their content, for the same reassurance-seeking reason the Journal tab's own saved-entries view stays low-key.",
+    ],
+  },
+  {
     title: 'Import',
     body: [
       '"Paste conversation text" extracts session data from a Claude.ai conversation export (JSON) or plain pasted text — everything happens on this device, nothing is uploaded. Every parsed session is shown for review before saving; anything the parser couldn\'t confidently extract is flagged rather than guessed.',

@@ -10,6 +10,7 @@ const navItems = [
   { to: '/focus-plan', label: 'Focus Plan' },
   { to: '/ladders', label: 'Ladders' },
   { to: '/flare-guide', label: 'Flare Guide' },
+  { to: '/summary', label: 'Summary' },
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]
@@ -46,7 +47,7 @@ export default function Layout() {
 
   return (
     <div className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-5">
+      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-5 print:hidden">
         <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
           <img src={pawLogo} alt="" className="h-8 w-8 rounded-xl shadow-sm" />
           <span>
@@ -96,7 +97,7 @@ export default function Layout() {
       <main className="flex-1">
         <Outlet />
       </main>
-      <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600">
+      <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600 print:hidden">
         All data stays on this device. No accounts, no cloud sync, no analytics.
       </footer>
     </div>

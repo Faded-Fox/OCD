@@ -70,6 +70,15 @@ data lives only in this browser's IndexedDB until you export or delete it.
   app, restore after. A dashboard banner nudges you to export if it's been
   about a week since your last one (dismissible for a few days at a time) — all
   tracked locally, no notifications or background sync involved.
+- **Therapist summary**: a printable, human-readable report — resistance rates by
+  hierarchy, sessions in a chosen date range, Focus Plan debriefs, planned fear
+  ladders — separate from the raw JSON backup, which is for restoring the app
+  rather than reading. "Print / Save as PDF" opens the browser's print dialog
+  with the rest of the app hidden; "Share" sends a plain-text version through
+  the native share sheet (or copies it to the clipboard), the same pattern as
+  the Flare Guide. Journal entries only ever appear as a count, never their
+  content, for the same reassurance-seeking reason the Journal tab itself stays
+  low-key about past entries.
 - **Flare Guide**: a guide for the people you trust — what a hard stretch looks
   like, what actually helps and what doesn't, what to do if things feel really
   bad, and a support contact if you want one. Meant to be handed over (give

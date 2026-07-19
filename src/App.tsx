@@ -12,6 +12,7 @@ import SessionDetail from './pages/SessionDetail'
 import Settings from './pages/Settings'
 import Help from './pages/Help'
 import FlareGuidePage from './pages/FlareGuide'
+import TherapistSummary from './pages/TherapistSummary'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/help" element={<Help />} />
           <Route path="/flare-guide" element={<FlareGuidePage />} />
+          <Route path="/summary" element={<TherapistSummary />} />
         </Route>
       </Routes>
     </BrowserRouter>
