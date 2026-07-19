@@ -14,15 +14,18 @@ import { useSessions } from '../lib/useSessions'
 import { deleteSession, updateSession } from '../lib/db'
 import { displayCurve } from '../lib/insights'
 import { colorForHierarchy } from '../lib/colors'
+import type { Session } from '../lib/types'
 import { Card, EmptyState, Badge, SecondaryButton, PrimaryButton } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
+import SessionFields from '../components/SessionFields'
 
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>()
   const { sessions, loading, refresh } = useSessions()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
-  const [notes, setNotes] = useState('')
+  const [draft, setDraft] = useState<Session | null>(null)
+  const [saving, setSaving] = useState(false)
   const [photoUrl, setPhotoUrl] = useState<string | null>(null)
 
   const session = sessions.find((s) => s.id === id)
@@ -59,14 +62,51 @@ export default function SessionDetail() {
   }
 
   const startEdit = () => {
-    setNotes(session.notes)
+    setDraft(session)
     setEditing(true)
   }
 
-  const saveNotes = async () => {
-    await updateSession({ ...session, notes })
+  const cancelEdit = () => {
+    setDraft(null)
     setEditing(false)
+  }
+
+  const saveEdit = async () => {
+    if (!draft) return
+    setSaving(true)
+    await updateSession(draft)
+    setSaving(false)
+    setEditing(false)
+    setDraft(null)
     refresh()
+  }
+
+  if (editing && draft) {
+    return (
+      <div className="flex flex-col gap-6 py-4">
+        <div>
+          <button
+            type="button"
+            onClick={cancelEdit}
+            className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+          >
+            ← Cancel
+          </button>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Edit session</h1>
+        </div>
+        <Card>
+          <SessionFields session={draft} onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))} />
+        </Card>
+        <div className="flex gap-3">
+          <SecondaryButton onClick={cancelEdit} disabled={saving}>
+            Cancel
+          </SecondaryButton>
+          <PrimaryButton onClick={saveEdit} disabled={saving}>
+            {saving ? 'Saving…' : 'Save changes'}
+          </PrimaryButton>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -86,9 +126,12 @@ export default function SessionDetail() {
               {session.variation ? ` · ${session.variation}` : ''}
             </h1>
           </div>
-          <SecondaryButton onClick={handleDelete} className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950">
-            Delete session
-          </SecondaryButton>
+          <div className="flex gap-2">
+            <SecondaryButton onClick={startEdit}>Edit session</SecondaryButton>
+            <SecondaryButton onClick={handleDelete} className="border-rose-200 text-rose-600 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-400 dark:hover:bg-rose-950">
+              Delete session
+            </SecondaryButton>
+          </div>
         </div>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{session.date || 'no date'}</p>
       </div>
@@ -233,30 +276,8 @@ export default function SessionDetail() {
       </div>
 
       <Card>
-        <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</h2>
-          {!editing && (
-            <button type="button" onClick={startEdit} className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">
-              Edit
-            </button>
-          )}
-        </div>
-        {editing ? (
-          <div className="flex flex-col gap-2">
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={3}
-              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900"
-            />
-            <div className="flex gap-2">
-              <PrimaryButton onClick={saveNotes}>Save</PrimaryButton>
-              <SecondaryButton onClick={() => setEditing(false)}>Cancel</SecondaryButton>
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-slate-600 dark:text-slate-300">{session.notes || 'No notes.'}</p>
-        )}
+        <h2 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</h2>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{session.notes || 'No notes.'}</p>
       </Card>
 
       {session.rung_description && (
