@@ -49,35 +49,10 @@ export default function SessionFields({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
         <SectionLabel full>SUDs</SectionLabel>
         <Field label="Target range">
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              value={session.target_suds_range?.[0] ?? ''}
-              onChange={(e) =>
-                onChange({
-                  target_suds_range: [
-                    e.target.value === '' ? 0 : Number(e.target.value),
-                    session.target_suds_range?.[1] ?? 0,
-                  ],
-                })
-              }
-              className={inputClass}
-            />
-            <span className="text-slate-400">–</span>
-            <input
-              type="number"
-              value={session.target_suds_range?.[1] ?? ''}
-              onChange={(e) =>
-                onChange({
-                  target_suds_range: [
-                    session.target_suds_range?.[0] ?? 0,
-                    e.target.value === '' ? 0 : Number(e.target.value),
-                  ],
-                })
-              }
-              className={inputClass}
-            />
-          </div>
+          <TargetRangeInput
+            value={session.target_suds_range}
+            onChange={(target_suds_range) => onChange({ target_suds_range })}
+          />
         </Field>
         <Field label="Peak / End">
           <div className="flex items-center gap-2">
@@ -302,6 +277,72 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: stri
       }}
       className={inputClass}
     />
+  )
+}
+
+/**
+ * The two SUDs range bounds are stored as a single [number, number] tuple, so
+ * a naive input bound directly to that tuple has to pick a placeholder (0) for
+ * the side you haven't typed yet — and since `0 ?? ''` is still `0`, that box
+ * can never render empty again once it's been set, making the "0" impossible
+ * to actually delete. Local text state per box (same fix as TagsInput above)
+ * keeps each box's display independent of the other, only defaulting to 0 in
+ * the value handed up to the parent, never in what's shown while typing.
+ */
+export function TargetRangeInput({
+  value,
+  onChange,
+}: {
+  value: [number, number] | null
+  onChange: (range: [number, number] | null) => void
+}) {
+  const [lowText, setLowText] = useState(value ? String(value[0]) : '')
+  const [highText, setHighText] = useState(value ? String(value[1]) : '')
+
+  // Resync from the tuple only when it changed for a reason other than our
+  // own commit() below (e.g. a different session's data loaded into this field).
+  useEffect(() => {
+    const derivedLow = lowText === '' ? null : Number(lowText)
+    const derivedHigh = highText === '' ? null : Number(highText)
+    const derived: [number, number] | null =
+      derivedLow === null && derivedHigh === null ? null : [derivedLow ?? 0, derivedHigh ?? 0]
+    if (JSON.stringify(derived) !== JSON.stringify(value)) {
+      setLowText(value ? String(value[0]) : '')
+      setHighText(value ? String(value[1]) : '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  const commit = (low: string, high: string) => {
+    if (low === '' && high === '') {
+      onChange(null)
+    } else {
+      onChange([low === '' ? 0 : Number(low), high === '' ? 0 : Number(high)])
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <input
+        type="number"
+        value={lowText}
+        onChange={(e) => {
+          setLowText(e.target.value)
+          commit(e.target.value, highText)
+        }}
+        className={inputClass}
+      />
+      <span className="text-slate-400">–</span>
+      <input
+        type="number"
+        value={highText}
+        onChange={(e) => {
+          setHighText(e.target.value)
+          commit(lowText, e.target.value)
+        }}
+        className={inputClass}
+      />
+    </div>
   )
 }
 

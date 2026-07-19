@@ -15,7 +15,7 @@ import { createEmptySession } from '../lib/session'
 import type { Session } from '../lib/types'
 import { colorForHierarchy } from '../lib/colors'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
-import SessionFields, { inputClass, Field } from '../components/SessionFields'
+import SessionFields, { inputClass, Field, TargetRangeInput } from '../components/SessionFields'
 
 type Phase = 'setup' | 'running' | 'wrapup'
 
@@ -202,37 +202,10 @@ export default function LiveSession() {
               />
             </Field>
             <Field label="Target SUDs range">
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={session.target_suds_range?.[0] ?? ''}
-                  onChange={(e) =>
-                    setSession((s) => ({
-                      ...s,
-                      target_suds_range: [
-                        e.target.value === '' ? 0 : Number(e.target.value),
-                        s.target_suds_range?.[1] ?? 0,
-                      ],
-                    }))
-                  }
-                  className={inputClass}
-                />
-                <span className="text-slate-400">–</span>
-                <input
-                  type="number"
-                  value={session.target_suds_range?.[1] ?? ''}
-                  onChange={(e) =>
-                    setSession((s) => ({
-                      ...s,
-                      target_suds_range: [
-                        s.target_suds_range?.[0] ?? 0,
-                        e.target.value === '' ? 0 : Number(e.target.value),
-                      ],
-                    }))
-                  }
-                  className={inputClass}
-                />
-              </div>
+              <TargetRangeInput
+                value={session.target_suds_range}
+                onChange={(target_suds_range) => setSession((s) => ({ ...s, target_suds_range }))}
+              />
             </Field>
             <Field label="Scenario / what the exposure is" full>
               <input
