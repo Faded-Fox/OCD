@@ -106,10 +106,18 @@ This is a descriptive tracking tool, not a diagnostic or treatment-decision tool
 
 ```bash
 npm install
-npm run dev      # start the dev server
-npm run build    # type-check and build for production
-npm run lint      # oxlint
+npm run dev        # start the dev server
+npm run build      # type-check and build for production
+npm run lint       # oxlint
+npm test           # run the unit test suite once
+npm run test:watch # re-run tests on file changes
 ```
 
 Stack: React + Vite + TypeScript, Tailwind CSS v4, Recharts, Dexie (IndexedDB),
-vite-plugin-pwa for the installable/offline app shell.
+vite-plugin-pwa for the installable/offline app shell. Unit tests (Vitest) cover
+`src/lib/parser.ts` (conversation/text import parsing) and `src/lib/insights.ts`
+(resistance rates, habituation timing, readiness signals, and the other derived
+stats) — the two places most likely to silently break as the app grows, since
+they're pure logic with a lot of edge cases and no UI to visually catch a
+regression in. The GitHub Pages deploy workflow runs lint and tests before
+building, so a broken change won't reach the deployed app.
