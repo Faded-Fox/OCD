@@ -120,14 +120,14 @@ export default function Sessions() {
           className={inputClass}
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
-          <label className="flex flex-col gap-1">
+          <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Hierarchy
             </span>
             <select
               value={filters.hierarchy}
               onChange={(e) => patch({ hierarchy: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} min-w-0`}
             >
               <option value="all">All</option>
               {hierarchies.map((h) => (
@@ -137,14 +137,14 @@ export default function Sessions() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1">
+          <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Resistance
             </span>
             <select
               value={filters.resistance}
               onChange={(e) => patch({ resistance: e.target.value as ResistanceFilter })}
-              className={inputClass}
+              className={`${inputClass} min-w-0`}
             >
               <option value="any">Any</option>
               <option value="full">Fully resisted</option>
@@ -152,7 +152,7 @@ export default function Sessions() {
               <option value="unknown">Unknown</option>
             </select>
           </label>
-          <label className="flex flex-col gap-1">
+          <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               From
             </span>
@@ -160,10 +160,10 @@ export default function Sessions() {
               type="date"
               value={filters.dateFrom}
               onChange={(e) => patch({ dateFrom: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} min-w-0`}
             />
           </label>
-          <label className="flex flex-col gap-1">
+          <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               To
             </span>
@@ -171,7 +171,7 @@ export default function Sessions() {
               type="date"
               value={filters.dateTo}
               onChange={(e) => patch({ dateTo: e.target.value })}
-              className={inputClass}
+              className={`${inputClass} min-w-0`}
             />
           </label>
         </div>

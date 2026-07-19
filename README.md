@@ -85,7 +85,8 @@ data lives only in this browser's IndexedDB until you export or delete it.
 - **Help**: a "?" icon in the header links to a single reference page summarizing
   what every tab does and a few workflows that aren't obvious from the UI alone
   (e.g. Focus Plan debriefs being meant for later, or the Import screen doubling
-  as the restore-a-backup screen).
+  as the restore-a-backup screen). The bottom of the page shows the app version,
+  bumped with each shipped change, as a quick way to confirm a fix actually landed.
 
 This is a descriptive tracking tool, not a diagnostic or treatment-decision tool — see
 `ERPInsightsPWASpec.pdf` for the full spec this app was built from.

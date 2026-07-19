@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui'
+import { APP_VERSION } from '../lib/version'
 
 interface HelpSection {
   title: string
@@ -124,6 +125,8 @@ export default function Help() {
         This app is a descriptive tracking tool, not a diagnostic or treatment-decision tool. Bring what you log
         here to your OCD specialist rather than acting on it alone.
       </p>
+
+      <p className="text-center text-xs text-slate-300 dark:text-slate-600">{APP_VERSION}</p>
     </div>
   )
 }
