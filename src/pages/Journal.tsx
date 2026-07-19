@@ -12,6 +12,9 @@ import {
 } from '../lib/journal'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
+import foxMorning from '../assets/fox-morning.webp'
+import foxWindDown from '../assets/fox-wind-down.webp'
+import foxQuickPrompt from '../assets/fox-quick-prompt.webp'
 
 type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick'
 
@@ -99,7 +102,7 @@ export default function Journal() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <JournalCard
           type="morning"
-          accent="from-amber-400 to-orange-500"
+          icon={foxMorning}
           onStart={() => {
             setActiveType('morning')
             setPhase('form')
@@ -107,7 +110,7 @@ export default function Journal() {
         />
         <JournalCard
           type="evening"
-          accent="from-slate-600 to-slate-800"
+          icon={foxWindDown}
           onStart={() => {
             setActiveType('evening')
             setPhase('form')
@@ -116,9 +119,7 @@ export default function Journal() {
       </div>
 
       <Card className="flex flex-col gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center self-start rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
-          <ShuffleIcon />
-        </div>
+        <img src={foxQuickPrompt} alt="" className="h-16 w-16 self-start" />
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Quick prompt</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -153,19 +154,17 @@ export default function Journal() {
 
 function JournalCard({
   type,
-  accent,
+  icon,
   onStart,
 }: {
   type: JournalType
-  accent: string
+  icon: string
   onStart: () => void
 }) {
   const template = JOURNAL_TEMPLATES[type]
   return (
     <Card className="flex flex-col gap-3">
-      <div className={`inline-flex h-10 w-10 items-center justify-center self-start rounded-xl bg-gradient-to-br ${accent} text-white`}>
-        {type === 'morning' ? <SunIcon /> : <MoonIcon />}
-      </div>
+      <img src={icon} alt="" className="h-16 w-16 self-start" />
       <div>
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{template.title}</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400">{template.subtitle}</p>
@@ -175,35 +174,6 @@ function JournalCard({
         Start
       </PrimaryButton>
     </Card>
-  )
-}
-
-function SunIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
-      <circle cx="12" cy="12" r="4" />
-      <path strokeLinecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-    </svg>
-  )
-}
-
-function MoonIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z" />
-    </svg>
-  )
-}
-
-function ShuffleIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"
-      />
-    </svg>
   )
 }
 
