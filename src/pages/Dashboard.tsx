@@ -192,7 +192,12 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Recent sessions</h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent sessions</h2>
+          <Link to="/sessions" className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">
+            Search all sessions
+          </Link>
+        </div>
         <div className="flex flex-col gap-2">
           {recent.map((s) => (
             <Link key={s.id} to={`/session/${s.id}`}>

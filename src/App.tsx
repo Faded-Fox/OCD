@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
+import Sessions from './pages/Sessions'
 import Import from './pages/Import'
 import LiveSession from './pages/LiveSession'
 import Journal from './pages/Journal'
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/sessions" element={<Sessions />} />
           <Route path="/live" element={<LiveSession />} />
           <Route path="/journal" element={<Journal />} />
           <Route path="/focus-plan" element={<FocusPlan />} />

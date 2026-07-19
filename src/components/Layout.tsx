@@ -4,6 +4,7 @@ import pawLogo from '../assets/paw-logo.png'
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true },
+  { to: '/sessions', label: 'Sessions' },
   { to: '/live', label: 'Live' },
   { to: '/journal', label: 'Journal' },
   { to: '/focus-plan', label: 'Focus Plan' },

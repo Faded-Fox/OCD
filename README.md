@@ -51,7 +51,12 @@ data lives only in this browser's IndexedDB until you export or delete it.
   alongside ones you've already run sessions on, and the page itself works with zero
   sessions logged as long as a ladder is planned.
 - **Per-session view**: the full SUDs curve, compulsions targeted/resisted, techniques
-  used, and notes.
+  used, and notes. Every field is editable in place after saving — fixing a wrong
+  hierarchy, rung, or SUDs reading no longer means deleting and re-importing.
+- **Sessions**: search and filter every logged session at once, across all
+  hierarchies — free text (notes, scenario, compulsions, techniques), hierarchy,
+  resistance, and date range, with sort by date or peak SUDs. The Dashboard's
+  "Recent sessions" only shows the latest few; this is the full browsable list.
 - **Backup & restore**: export all data as JSON from Settings, then bring it back
   any time by pasting or uploading that same file on the Import screen — it's
   detected automatically and offered as a restore instead of parsed as a new
