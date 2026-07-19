@@ -115,9 +115,11 @@ npm run test:watch # re-run tests on file changes
 
 Stack: React + Vite + TypeScript, Tailwind CSS v4, Recharts, Dexie (IndexedDB),
 vite-plugin-pwa for the installable/offline app shell. Unit tests (Vitest) cover
-`src/lib/parser.ts` (conversation/text import parsing) and `src/lib/insights.ts`
+`src/lib/parser.ts` (conversation/text import parsing), `src/lib/insights.ts`
 (resistance rates, habituation timing, readiness signals, and the other derived
-stats) — the two places most likely to silently break as the app grows, since
-they're pure logic with a lot of edge cases and no UI to visually catch a
-regression in. The GitHub Pages deploy workflow runs lint and tests before
+stats), and `src/lib/backup.ts` (backup detection, entry counting, and restoring
+a session's photo from its exported data URL back into a Blob) — the parts most
+likely to silently break as the app grows, since they're pure logic with a lot
+of edge cases and no UI to visually catch a regression in. The GitHub Pages
+deploy workflow runs lint and tests before
 building, so a broken change won't reach the deployed app.
