@@ -160,7 +160,7 @@ export default function Sessions() {
               type="date"
               value={filters.dateFrom}
               onChange={(e) => patch({ dateFrom: e.target.value })}
-              className={`${inputClass} h-10 min-w-0 py-0`}
+              className={`${inputClass} h-10 min-w-0 appearance-none py-0`}
             />
           </label>
           <label className="flex min-w-0 flex-col gap-1">
@@ -171,7 +171,7 @@ export default function Sessions() {
               type="date"
               value={filters.dateTo}
               onChange={(e) => patch({ dateTo: e.target.value })}
-              className={`${inputClass} h-10 min-w-0 py-0`}
+              className={`${inputClass} h-10 min-w-0 appearance-none py-0`}
             />
           </label>
         </div>
