@@ -38,6 +38,9 @@ export interface StructuredJournalEntry {
   date: string
   createdAt: string
   fields: Record<string, string>
+  /** Seconds actually spent, timed live while writing. Absent on entries saved
+   *  before this was tracked — never backfilled or guessed. */
+  durationSeconds?: number
 }
 
 /** A single random short prompt (as opposed to the timed, multi-section

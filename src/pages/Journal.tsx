@@ -241,6 +241,7 @@ function JournalForm({
       date: new Date().toISOString().slice(0, 10),
       createdAt: new Date().toISOString(),
       fields,
+      durationSeconds: Math.round((Date.now() - startedAt) / 1000),
     }
     await addJournalEntry(entry)
     setSaving(false)
@@ -505,6 +506,7 @@ function EntryCardShell({
   badge,
   badgeClass,
   date,
+  extra,
   expanded,
   onToggle,
   onDelete,
@@ -513,6 +515,7 @@ function EntryCardShell({
   badge: string
   badgeClass: string
   date: string
+  extra?: ReactNode
   expanded: boolean
   onToggle: () => void
   onDelete: () => void
@@ -524,6 +527,7 @@ function EntryCardShell({
         <div className="flex items-center gap-2">
           <Badge className={badgeClass}>{badge}</Badge>
           <span className="text-sm text-slate-500 dark:text-slate-400">{date}</span>
+          {extra}
         </div>
         <div className="flex gap-3">
           <button
@@ -572,6 +576,11 @@ function StructuredEntryCard({
           : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
       }
       date={entry.date}
+      extra={
+        entry.durationSeconds !== undefined ? (
+          <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
+        ) : undefined
+      }
       expanded={expanded}
       onToggle={onToggle}
       onDelete={onDelete}
