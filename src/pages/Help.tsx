@@ -46,6 +46,14 @@ const SECTIONS: HelpSection[] = [
     ],
   },
   {
+    title: 'Flare Guide',
+    body: [
+      "A guide for the people you trust — what a hard stretch looks like for you, what actually helps, what doesn't, and what to do if things feel really bad. Meant to be handed over: give someone your phone open to this page.",
+      'Everything here, including a support contact\'s name and phone number if you add one, starts blank and is written and stored entirely by you on this device — none of it is built into the app itself.',
+      'Use "Edit" to fill it in or update it any time; the reading view only shows sections you\'ve actually written something in.',
+    ],
+  },
+  {
     title: 'Ladders',
     body: [
       'Plan a hierarchy\'s rungs — a number, a short description, and an optional target SUDs range each — before you\'ve ever logged a session in it. Normally a hierarchy only exists once a session references it; this is the way around that.',

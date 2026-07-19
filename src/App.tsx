@@ -11,6 +11,7 @@ import HierarchyView from './pages/HierarchyView'
 import SessionDetail from './pages/SessionDetail'
 import Settings from './pages/Settings'
 import Help from './pages/Help'
+import FlareGuidePage from './pages/FlareGuide'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/session/:id" element={<SessionDetail />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/flare-guide" element={<FlareGuidePage />} />
         </Route>
       </Routes>
     </BrowserRouter>

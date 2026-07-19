@@ -9,6 +9,7 @@ const navItems = [
   { to: '/journal', label: 'Journal' },
   { to: '/focus-plan', label: 'Focus Plan' },
   { to: '/ladders', label: 'Ladders' },
+  { to: '/flare-guide', label: 'Flare Guide' },
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]

@@ -2,12 +2,14 @@ import type { Session } from './types'
 import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
+import type { FlareGuide } from './flareGuide'
 
 export interface BackupData {
   sessions: Session[]
   journalEntries: JournalEntry[]
   focusPlans: FocusPlanEntry[]
   fearLadders: FearLadder[]
+  flareGuide: FlareGuide | null
 }
 
 interface RawBackupSession extends Omit<Session, 'photo'> {
@@ -19,6 +21,7 @@ interface RawBackup {
   journalEntries?: JournalEntry[]
   focusPlans?: FocusPlanEntry[]
   fearLadders?: FearLadder[]
+  flareGuide?: FlareGuide | null
 }
 
 /** True if the pasted/uploaded text is this app's own export shape, not a Claude
@@ -34,7 +37,8 @@ export function looksLikeBackup(raw: string): boolean {
       Array.isArray(obj.sessions) ||
       Array.isArray(obj.journalEntries) ||
       Array.isArray(obj.focusPlans) ||
-      Array.isArray(obj.fearLadders)
+      Array.isArray(obj.fearLadders) ||
+      Boolean(obj.flareGuide)
     )
   } catch {
     return false
@@ -46,6 +50,7 @@ export interface BackupCounts {
   journalEntries: number
   focusPlans: number
   fearLadders: number
+  flareGuide: number
 }
 
 export function countBackupEntries(raw: string): BackupCounts {
@@ -56,9 +61,10 @@ export function countBackupEntries(raw: string): BackupCounts {
       journalEntries: Array.isArray(data.journalEntries) ? data.journalEntries.length : 0,
       focusPlans: Array.isArray(data.focusPlans) ? data.focusPlans.length : 0,
       fearLadders: Array.isArray(data.fearLadders) ? data.fearLadders.length : 0,
+      flareGuide: data.flareGuide ? 1 : 0,
     }
   } catch {
-    return { sessions: 0, journalEntries: 0, focusPlans: 0, fearLadders: 0 }
+    return { sessions: 0, journalEntries: 0, focusPlans: 0, fearLadders: 0, flareGuide: 0 }
   }
 }
 
@@ -71,6 +77,7 @@ export function describeBackupCounts(counts: BackupCounts): string {
     parts.push(`${counts.journalEntries} journal entr${counts.journalEntries === 1 ? 'y' : 'ies'}`)
   if (counts.focusPlans > 0) parts.push(`${counts.focusPlans} focus plan${counts.focusPlans === 1 ? '' : 's'}`)
   if (counts.fearLadders > 0) parts.push(`${counts.fearLadders} fear ladder${counts.fearLadders === 1 ? '' : 's'}`)
+  if (counts.flareGuide > 0) parts.push('a flare guide')
   if (parts.length === 0) return 'nothing'
   if (parts.length === 1) return parts[0]
   if (parts.length === 2) return `${parts[0]} and ${parts[1]}`
@@ -97,5 +104,6 @@ export async function parseBackup(raw: string): Promise<BackupData> {
     journalEntries: data.journalEntries ?? [],
     focusPlans: data.focusPlans ?? [],
     fearLadders: data.fearLadders ?? [],
+    flareGuide: data.flareGuide ?? null,
   }
 }
