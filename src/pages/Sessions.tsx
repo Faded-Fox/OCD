@@ -119,7 +119,7 @@ export default function Sessions() {
           placeholder="Search notes, scenario, compulsions, techniques…"
           className={`${inputClass} h-10 py-0`}
         />
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Hierarchy
