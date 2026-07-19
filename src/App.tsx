@@ -10,6 +10,7 @@ import FearLadders from './pages/FearLadders'
 import HierarchyView from './pages/HierarchyView'
 import SessionDetail from './pages/SessionDetail'
 import Settings from './pages/Settings'
+import Help from './pages/Help'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/hierarchy/:name" element={<HierarchyView />} />
           <Route path="/session/:id" element={<SessionDetail />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/help" element={<Help />} />
         </Route>
       </Routes>
     </BrowserRouter>

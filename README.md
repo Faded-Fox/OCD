@@ -67,6 +67,10 @@ data lives only in this browser's IndexedDB until you export or delete it.
   tracked locally, no notifications or background sync involved.
 - **Settings**: export all data as JSON, or permanently delete everything on this
   device.
+- **Help**: a "?" icon in the header links to a single reference page summarizing
+  what every tab does and a few workflows that aren't obvious from the UI alone
+  (e.g. Focus Plan debriefs being meant for later, or the Import screen doubling
+  as the restore-a-backup screen).
 
 This is a descriptive tracking tool, not a diagnostic or treatment-decision tool — see
 `ERPInsightsPWASpec.pdf` for the full spec this app was built from.

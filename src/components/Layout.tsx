@@ -30,6 +30,16 @@ function MoonIcon() {
   )
 }
 
+function HelpIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.5 9a2.5 2.5 0 1 1 3.5 2.29c-.7.3-1.25.86-1.25 1.71v.25" />
+      <circle cx="12" cy="16.5" r="0.75" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
 export default function Layout() {
   const { theme, toggle } = useTheme()
 
@@ -59,6 +69,19 @@ export default function Layout() {
               {item.label}
             </NavLink>
           ))}
+          <NavLink
+            to="/help"
+            aria-label="Help"
+            className={({ isActive }) =>
+              `rounded-full p-2 transition-colors ${
+                isActive
+                  ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
+                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`
+            }
+          >
+            <HelpIcon />
+          </NavLink>
           <button
             type="button"
             onClick={toggle}

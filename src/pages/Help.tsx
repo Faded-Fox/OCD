@@ -1,0 +1,117 @@
+import { Link } from 'react-router-dom'
+import { Card } from '../components/ui'
+
+interface HelpSection {
+  title: string
+  body: string[]
+}
+
+const SECTIONS: HelpSection[] = [
+  {
+    title: 'Dashboard',
+    body: [
+      'A summary of everything logged so far: peak-SUDs trend across hierarchies, full-resistance rate, readiness signals, and the most recent sessions.',
+      'If it\'s been about a week since your last export, a banner appears here nudging you to back up — "Remind me later" snoozes it for a few days, "Export now" downloads a backup and clears it.',
+    ],
+  },
+  {
+    title: 'Sessions',
+    body: [
+      'Search and filter every logged session at once — free text across notes, scenario, compulsions, and techniques, plus hierarchy, resistance, and date-range filters. Sort by date or peak SUDs.',
+      'The Dashboard only shows the latest few sessions; this is the full browsable history.',
+    ],
+  },
+  {
+    title: 'Live',
+    body: [
+      'Run an ERP exposure in real time. Set up the hierarchy, rung, and a pre-exposure SUDs rating, start the timer, and tap to log a SUDs reading anytime — the curve updates live.',
+      'Progress saves locally as you go, so an accidental reload mid-session won\'t lose it — reopening the app picks the running session back up.',
+      'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save.',
+    ],
+  },
+  {
+    title: 'Journal',
+    body: [
+      'Three ways to journal. "Morning Anchor" (5–10 min) and "OCD Wind Down" (10 min) are structured, timed prompts with built-in evidence citations and compulsion-warning signs.',
+      '"Quick prompt" picks one short prompt at random from a pool spanning general intrusive thoughts, harm OCD, sexual intrusive thoughts, ROCD, postpartum, and CBT/ACT reframing — reroll for a different one, then free-write underneath.',
+      'The saved-entries view is intentionally low-key: both structured templates flag re-reading past entries — or rerolling a quick prompt to find "the right" one — as a reassurance-seeking compulsion warning sign.',
+    ],
+  },
+  {
+    title: 'Focus Plan',
+    body: [
+      'A 5-step worksheet for tasks OCD makes hard to start or finish: describe the task, break it into smaller parts with time estimates, schedule each part with OCD-safe rewards, then plan an ERP response to the intrusions and urges likely to show up.',
+      'Step 5 (the debrief — peak/end SUDs, what worked, what to flag for your therapist) is meant to be filled in after you\'ve actually attempted the task, which might be hours or days later. Plans save with "Debrief pending" and reopen for editing at any time — you don\'t have to finish it in one sitting.',
+      'A collapsible "ERP toolkit" card at the bottom (SUDs scale, defusion techniques) is meant to be handy to reopen during the task itself, not just while planning.',
+    ],
+  },
+  {
+    title: 'Ladders',
+    body: [
+      'Plan a hierarchy\'s rungs — a number, a short description, and an optional target SUDs range each — before you\'ve ever logged a session in it. Normally a hierarchy only exists once a session references it; this is the way around that.',
+      'Once you do start logging sessions, the per-hierarchy view (reached from the Dashboard or from a session\'s page) automatically merges the plan with actual progress: rungs you\'ve planned but not attempted yet sit alongside ones you\'ve already run, with attempt counts and readiness signals filled in as they happen.',
+    ],
+  },
+  {
+    title: 'Import',
+    body: [
+      '"Paste conversation text" extracts session data from a Claude.ai conversation export (JSON) or plain pasted text — everything happens on this device, nothing is uploaded. Every parsed session is shown for review before saving; anything the parser couldn\'t confidently extract is flagged rather than guessed.',
+      '"Add from a photo" is for handwritten paper logs: take or upload a photo and it\'s shown right next to a blank form so you can transcribe it yourself. There\'s no automatic handwriting recognition — on-device OCR was tested and wasn\'t reliable enough to trust — so the original photo is kept with the session, in case a form field can\'t capture something like a hand-drawn SUDs curve.',
+      'This same screen also handles restoring a backup: paste or upload a file exported from Settings, and it\'s detected automatically and offered back as a restore instead of being parsed as a new import.',
+    ],
+  },
+  {
+    title: 'Editing a saved session',
+    body: [
+      'Open any session\'s page and use "Edit session" to change anything — hierarchy, rung, SUDs, readings, compulsions, notes, all of it. Saved edits update the session in place.',
+    ],
+  },
+  {
+    title: 'Backup, restore, and iPhone storage',
+    body: [
+      'Everything lives only in this browser\'s local storage — there\'s no account and no cloud sync, so nothing is recoverable if the app is deleted or the browser clears its storage (which iOS can do on its own after a period of disuse).',
+      'The fix: Settings → "Export all data as JSON" downloads everything (sessions, journal entries, focus plans, fear ladders) into one file. Keep that file somewhere that survives an app deletion — the Files app, iCloud Drive, emailing it to yourself.',
+      'To bring it back, paste or upload that same file on the Import screen. It restores by matching IDs, so restoring the same backup twice (or onto a device with some overlapping data) won\'t create duplicates.',
+    ],
+  },
+  {
+    title: 'Settings',
+    body: [
+      'Shows how much is stored on this device, the export/backup card described above, and a "Delete all data" option that permanently erases everything after typing "delete" to confirm.',
+    ],
+  },
+]
+
+export default function Help() {
+  return (
+    <div className="flex flex-col gap-6 py-4">
+      <div>
+        <Link to="/" className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
+          ← Dashboard
+        </Link>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Help</h1>
+        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          What each tab does, and a few workflows that aren't obvious from the UI alone.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {SECTIONS.map((section) => (
+          <Card key={section.title} className="flex flex-col gap-2">
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{section.title}</h2>
+            {section.body.map((p, i) => (
+              <p key={i} className="text-sm text-slate-600 dark:text-slate-300">
+                {p}
+              </p>
+            ))}
+          </Card>
+        ))}
+      </div>
+
+      <p className="text-xs text-slate-400">
+        This app is a descriptive tracking tool, not a diagnostic or treatment-decision tool. Bring what you log
+        here to your OCD specialist rather than acting on it alone.
+      </p>
+    </div>
+  )
+}
