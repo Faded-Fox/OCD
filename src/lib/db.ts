@@ -2,11 +2,13 @@ import Dexie, { type Table } from 'dexie'
 import type { Session } from './types'
 import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
+import type { FearLadder } from './fearLadder'
 
 class ErpInsightsDb extends Dexie {
   sessions!: Table<Session, string>
   journalEntries!: Table<JournalEntry, string>
   focusPlans!: Table<FocusPlanEntry, string>
+  fearLadders!: Table<FearLadder, string>
 
   constructor() {
     super('erp-insights')
@@ -22,6 +24,12 @@ class ErpInsightsDb extends Dexie {
       sessions: 'id, date, hierarchy, rung',
       journalEntries: 'id, date, type',
       focusPlans: 'id, date',
+    })
+    this.version(4).stores({
+      sessions: 'id, date, hierarchy, rung',
+      journalEntries: 'id, date, type',
+      focusPlans: 'id, date',
+      fearLadders: 'id, hierarchy',
     })
   }
 }
@@ -83,23 +91,51 @@ export async function deleteAllFocusPlanEntries(): Promise<void> {
   await db.focusPlans.clear()
 }
 
-export async function deleteAllData(): Promise<void> {
-  await Promise.all([deleteAllSessions(), deleteAllJournalEntries(), deleteAllFocusPlanEntries()])
+export async function getAllFearLadders(): Promise<FearLadder[]> {
+  const ladders = await db.fearLadders.toArray()
+  return ladders.sort((a, b) => a.hierarchy.localeCompare(b.hierarchy))
 }
 
-/** Restores sessions/journal/focus-plan entries from a parsed backup. Uses put
- *  (upsert) rather than add, so re-restoring the same backup — or restoring onto a
- *  device that already has some overlapping records — replaces matching ids instead
- *  of erroring. */
+export async function getFearLadderForHierarchy(hierarchy: string): Promise<FearLadder | undefined> {
+  return db.fearLadders.where('hierarchy').equals(hierarchy).first()
+}
+
+export async function saveFearLadder(ladder: FearLadder): Promise<void> {
+  await db.fearLadders.put(ladder)
+}
+
+export async function deleteFearLadder(id: string): Promise<void> {
+  await db.fearLadders.delete(id)
+}
+
+export async function deleteAllFearLadders(): Promise<void> {
+  await db.fearLadders.clear()
+}
+
+export async function deleteAllData(): Promise<void> {
+  await Promise.all([
+    deleteAllSessions(),
+    deleteAllJournalEntries(),
+    deleteAllFocusPlanEntries(),
+    deleteAllFearLadders(),
+  ])
+}
+
+/** Restores sessions/journal/focus-plan/fear-ladder entries from a parsed backup.
+ *  Uses put (upsert) rather than add, so re-restoring the same backup — or restoring
+ *  onto a device that already has some overlapping records — replaces matching ids
+ *  instead of erroring. */
 export async function restoreBackup(data: {
   sessions: Session[]
   journalEntries: JournalEntry[]
   focusPlans: FocusPlanEntry[]
+  fearLadders: FearLadder[]
 }): Promise<void> {
   await Promise.all([
     data.sessions.length ? db.sessions.bulkPut(data.sessions) : undefined,
     data.journalEntries.length ? db.journalEntries.bulkPut(data.journalEntries) : undefined,
     data.focusPlans.length ? db.focusPlans.bulkPut(data.focusPlans) : undefined,
+    data.fearLadders.length ? db.fearLadders.bulkPut(data.fearLadders) : undefined,
   ])
 }
 
@@ -113,10 +149,11 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 export async function exportAllAsJson(): Promise<string> {
-  const [sessions, journalEntries, focusPlans] = await Promise.all([
+  const [sessions, journalEntries, focusPlans, fearLadders] = await Promise.all([
     getAllSessions(),
     getAllJournalEntries(),
     getAllFocusPlanEntries(),
+    getAllFearLadders(),
   ])
   const exportableSessions = await Promise.all(
     sessions.map(async (s) => ({
@@ -124,5 +161,5 @@ export async function exportAllAsJson(): Promise<string> {
       photo: s.photo ? await blobToDataUrl(s.photo) : null,
     })),
   )
-  return JSON.stringify({ sessions: exportableSessions, journalEntries, focusPlans }, null, 2)
+  return JSON.stringify({ sessions: exportableSessions, journalEntries, focusPlans, fearLadders }, null, 2)
 }

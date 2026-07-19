@@ -41,8 +41,15 @@ data lives only in this browser's IndexedDB until you export or delete it.
   curve) isn't lost.
 - **Dashboard**: peak-SUDs trend across hierarchies, full-resistance rate, readiness
   signals, recent sessions.
+- **Fear Ladders**: plan a hierarchy's rungs — a number, a short description, and an
+  optional target SUDs range for each — before you've ever run a session in it, since
+  otherwise a hierarchy only exists once a session references it. Reachable from its
+  own tab, not just from an existing hierarchy's page.
 - **Per-hierarchy view**: rung ladder, attempt counts, resistance streaks, peak-SUDs
-  and habituation-speed trends.
+  and habituation-speed trends. Merges a planned Fear Ladder (if one exists) with
+  actual logged progress — rungs you've planned but not attempted yet show up
+  alongside ones you've already run sessions on, and the page itself works with zero
+  sessions logged as long as a ladder is planned.
 - **Per-session view**: the full SUDs curve, compulsions targeted/resisted, techniques
   used, and notes.
 - **Backup & restore**: export all data as JSON from Settings, then bring it back

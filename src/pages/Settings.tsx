@@ -5,6 +5,7 @@ import { downloadBackup } from '../lib/export'
 import { useSessions } from '../lib/useSessions'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { useFocusPlanEntries } from '../lib/useFocusPlanEntries'
+import { useFearLadders } from '../lib/useFearLadders'
 import { describeBackupCounts } from '../lib/backup'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 
@@ -12,6 +13,7 @@ export default function Settings() {
   const { sessions } = useSessions()
   const { entries: journalEntries } = useJournalEntries()
   const { entries: focusPlans } = useFocusPlanEntries()
+  const { ladders: fearLadders } = useFearLadders()
   const navigate = useNavigate()
   const [confirmText, setConfirmText] = useState('')
   const [exporting, setExporting] = useState(false)
@@ -28,7 +30,8 @@ export default function Settings() {
     navigate('/')
   }
 
-  const hasData = sessions.length > 0 || journalEntries.length > 0 || focusPlans.length > 0
+  const hasData =
+    sessions.length > 0 || journalEntries.length > 0 || focusPlans.length > 0 || fearLadders.length > 0
 
   return (
     <div className="flex flex-col gap-6 py-4">
@@ -39,6 +42,7 @@ export default function Settings() {
             sessions: sessions.length,
             journalEntries: journalEntries.length,
             focusPlans: focusPlans.length,
+            fearLadders: fearLadders.length,
           })}{' '}
           stored on this device.
         </p>
@@ -47,19 +51,20 @@ export default function Settings() {
       <Card>
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Privacy</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          This app runs entirely on your device. Session, journal, and focus plan data is stored locally in your
-          browser's IndexedDB. There is no backend, no account, no analytics, and nothing is ever transmitted off
-          this device. Uninstalling the app, clearing site data, or (on iPhone) not opening it for a while can all
-          remove everything — export a backup below so a reinstall isn't a data loss.
+          This app runs entirely on your device. Session, journal, focus plan, and fear ladder data is stored
+          locally in your browser's IndexedDB. There is no backend, no account, no analytics, and nothing is ever
+          transmitted off this device. Uninstalling the app, clearing site data, or (on iPhone) not opening it for
+          a while can all remove everything — export a backup below so a reinstall isn't a data loss.
         </p>
       </Card>
 
       <Card>
         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Backup &amp; restore</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Download every logged session, journal entry, and focus plan as a single JSON file. Keep it somewhere
-          that survives an app deletion — Files app, iCloud Drive, email to yourself — so that if this app ever
-          gets deleted and reinstalled (or iOS clears its storage from disuse), you can bring everything back.
+          Download every logged session, journal entry, focus plan, and fear ladder as a single JSON file. Keep it
+          somewhere that survives an app deletion — Files app, iCloud Drive, email to yourself — so that if this
+          app ever gets deleted and reinstalled (or iOS clears its storage from disuse), you can bring everything
+          back.
         </p>
         <PrimaryButton onClick={handleExport} disabled={exporting || !hasData} className="mt-3">
           {exporting ? 'Preparing…' : 'Export all data as JSON'}
@@ -74,8 +79,8 @@ export default function Settings() {
       <Card className="border-rose-200 dark:border-rose-900">
         <h2 className="text-sm font-semibold text-rose-700 dark:text-rose-400">Delete all data</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-          Permanently erases every session, journal entry, and focus plan stored on this device. This cannot be
-          undone — export a backup first if you want to keep a copy.
+          Permanently erases every session, journal entry, focus plan, and fear ladder stored on this device. This
+          cannot be undone — export a backup first if you want to keep a copy.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <input
