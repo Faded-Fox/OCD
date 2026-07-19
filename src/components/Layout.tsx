@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useTheme } from '../lib/useTheme'
 import pawLogo from '../assets/paw-logo.png'
@@ -95,7 +96,9 @@ export default function Layout() {
         </nav>
       </header>
       <main className="flex-1">
-        <Outlet />
+        <Suspense fallback={<p className="py-10 text-center text-sm text-slate-400">Loading…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
       <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600 print:hidden">
         All data stays on this device. No accounts, no cloud sync, no analytics.

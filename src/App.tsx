@@ -1,18 +1,23 @@
+import { lazy } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
-import Sessions from './pages/Sessions'
-import Import from './pages/Import'
-import LiveSession from './pages/LiveSession'
-import Journal from './pages/Journal'
-import FocusPlan from './pages/FocusPlan'
-import FearLadders from './pages/FearLadders'
-import HierarchyView from './pages/HierarchyView'
-import SessionDetail from './pages/SessionDetail'
-import Settings from './pages/Settings'
-import Help from './pages/Help'
-import FlareGuidePage from './pages/FlareGuide'
-import TherapistSummary from './pages/TherapistSummary'
+
+// Dashboard is the landing page, so it stays eagerly loaded — everything else
+// only needs to load once someone actually navigates there, keeping the first
+// paint from having to wait on JS (Recharts, the parser, etc.) it doesn't need yet.
+const Sessions = lazy(() => import('./pages/Sessions'))
+const Import = lazy(() => import('./pages/Import'))
+const LiveSession = lazy(() => import('./pages/LiveSession'))
+const Journal = lazy(() => import('./pages/Journal'))
+const FocusPlan = lazy(() => import('./pages/FocusPlan'))
+const FearLadders = lazy(() => import('./pages/FearLadders'))
+const HierarchyView = lazy(() => import('./pages/HierarchyView'))
+const SessionDetail = lazy(() => import('./pages/SessionDetail'))
+const Settings = lazy(() => import('./pages/Settings'))
+const Help = lazy(() => import('./pages/Help'))
+const FlareGuidePage = lazy(() => import('./pages/FlareGuide'))
+const TherapistSummary = lazy(() => import('./pages/TherapistSummary'))
 
 export default function App() {
   return (

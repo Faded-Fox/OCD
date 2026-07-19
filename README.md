@@ -123,3 +123,13 @@ likely to silently break as the app grows, since they're pure logic with a lot
 of edge cases and no UI to visually catch a regression in. The GitHub Pages
 deploy workflow runs lint and tests before
 building, so a broken change won't reach the deployed app.
+
+Every page except Dashboard is code-split (`React.lazy` in `App.tsx`) so a
+first visit only pays for the JS the current route actually needs, and
+Recharts specifically is deferred out of Dashboard itself into
+`components/DashboardPeakChart.tsx` — a brand-new install has zero sessions,
+so the Dashboard's empty state never needs a charting library at all. This
+cut the JS a fresh install has to parse before first paint from ~868KB to
+~354KB. The service worker still precaches every chunk in the background
+regardless of whether it's been visited yet, so offline support isn't
+affected.

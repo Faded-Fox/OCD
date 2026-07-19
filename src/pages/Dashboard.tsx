@@ -1,15 +1,5 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  CartesianGrid,
-  Legend,
-  Scatter,
-  ScatterChart,
-  Tooltip,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-} from 'recharts'
 import { useSessions } from '../lib/useSessions'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { useFocusPlanEntries } from '../lib/useFocusPlanEntries'
@@ -22,11 +12,15 @@ import {
   rungProgression,
   sessionFrequency,
 } from '../lib/insights'
-import { colorForHierarchy } from '../lib/colors'
 import { downloadBackup } from '../lib/export'
 import { isExportOverdue, snoozeExportReminder } from '../lib/exportReminder'
 import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
+
+// Recharts is a heavy dependency, and a session-less Dashboard never renders this
+// chart at all — deferring it keeps the very first (empty-state) load from paying
+// for it, and every later load only pays for it once, from cache.
+const DashboardPeakChart = lazy(() => import('../components/DashboardPeakChart'))
 
 export default function Dashboard() {
   const { sessions, loading } = useSessions()
@@ -167,34 +161,9 @@ export default function Dashboard() {
       </div>
 
       {scatterData.length > 0 && (
-        <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDs over time</h2>
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-                <XAxis dataKey="date" type="category" tick={{ fontSize: 11 }} allowDuplicatedCategory={false} />
-                <YAxis dataKey="peak" domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 12, fontSize: 12 }}
-                  formatter={(value, _name, payload) => [
-                    `${value} SUDs`,
-                    (payload?.payload as { hierarchy?: string } | undefined)?.hierarchy ?? '',
-                  ]}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {hierarchies.map((h) => (
-                  <Scatter
-                    key={h}
-                    name={h}
-                    data={scatterData.filter((d) => d.hierarchy === h)}
-                    fill={colorForHierarchy(h).hex}
-                  />
-                ))}
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
+        <Suspense fallback={<Card className="h-[21.5rem]">{null}</Card>}>
+          <DashboardPeakChart scatterData={scatterData} hierarchies={hierarchies} />
+        </Suspense>
       )}
 
       <div>
