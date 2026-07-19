@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import foxChecklist from '../assets/fox-checklist.webp'
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
@@ -25,11 +26,7 @@ export function StatTile({ label, value, sub }: { label: string; value: ReactNod
 export function EmptyState({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
     <Card className="flex flex-col items-center gap-3 py-14 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4 15h4l2-7 3 10 2-7 2 4h5" />
-        </svg>
-      </div>
+      <img src={foxChecklist} alt="" className="h-36 w-36 sm:h-44 sm:w-44" />
       <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
       <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">{body}</p>
       {action}
