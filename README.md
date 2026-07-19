@@ -11,10 +11,12 @@ data lives only in this browser's IndexedDB until you export or delete it.
 
 - **Live session**: run an ERP exposure in real time — set up the hierarchy/rung and
   a pre-exposure SUDs rating, start the timer, tap to log a SUDs reading anytime
-  (with a live-updating curve), then stop and fill in the rest to save. Progress is
-  saved locally as you go, so an accidental reload mid-session doesn't lose it. If
-  the hierarchy matches a planned Fear Ladder, its rungs appear as a tappable list
-  that autofills the scenario and target SUDs range.
+  (with a live-updating curve, visible from the very first reading), then stop and
+  fill in the rest to save — the curve stays on that wrap-up screen too, updating
+  live if a reading gets corrected before saving. Progress is saved locally as you
+  go, so an accidental reload mid-session doesn't lose it. If the hierarchy matches
+  a planned Fear Ladder, its rungs appear as a tappable list that autofills the
+  scenario and target SUDs range.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
   citations, and compulsion-warning signs from their source templates built in. A

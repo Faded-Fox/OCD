@@ -1,22 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
 import { addSessions } from '../lib/db'
 import { createEmptySession } from '../lib/session'
 import type { Session } from '../lib/types'
 import { colorForHierarchy } from '../lib/colors'
+import { displayCurve } from '../lib/insights'
 import { useFearLadders } from '../lib/useFearLadders'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput } from '../components/SessionFields'
+import SudsChart from '../components/SudsChart'
 
 type Phase = 'setup' | 'running' | 'wrapup'
 
@@ -171,11 +163,7 @@ export default function LiveSession() {
     navigate('/')
   }
 
-  const chartData = session.readings.map((r) => ({
-    minutes: typeof r.time_or_minute === 'number' ? r.time_or_minute : 0,
-    suds: r.suds,
-    label: r.label,
-  }))
+  const { points: chartPoints, isTimeBased } = displayCurve(session)
 
   if (phase === 'setup') {
     return (
@@ -356,28 +344,15 @@ export default function LiveSession() {
           </div>
         </Card>
 
-        {chartData.length > 1 && (
+        {chartPoints.length > 0 && (
           <Card>
             <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs so far</h2>
-            <div className="h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-                  {session.target_suds_range && (
-                    <ReferenceArea
-                      y1={session.target_suds_range[0]}
-                      y2={session.target_suds_range[1]}
-                      fill={color.hex}
-                      fillOpacity={0.08}
-                    />
-                  )}
-                  <XAxis dataKey="minutes" tick={{ fontSize: 11 }} label={{ value: 'minutes', position: 'insideBottom', offset: -4, fontSize: 11 }} />
-                  <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                  <Tooltip contentStyle={{ borderRadius: 12, fontSize: 12 }} formatter={(value) => [`${value} SUDs`, '']} />
-                  <Line type="monotone" dataKey="suds" stroke={color.hex} strokeWidth={2.5} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <SudsChart
+              points={chartPoints}
+              isTimeBased={isTimeBased}
+              targetRange={session.target_suds_range}
+              colorHex={color.hex}
+            />
           </Card>
         )}
 
@@ -423,6 +398,20 @@ export default function LiveSession() {
           {session.planned_duration_minutes} minute exposure logged. Fill in the rest, then save.
         </p>
       </div>
+
+      {chartPoints.length > 0 && (
+        <Card>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs curve</h2>
+          <SudsChart
+            points={chartPoints}
+            isTimeBased={isTimeBased}
+            targetRange={session.target_suds_range}
+            colorHex={color.hex}
+          />
+          <p className="mt-2 text-xs text-slate-400">Updates live as you edit the readings below.</p>
+        </Card>
+      )}
+
       <Card className="flex flex-col gap-4">
         <SessionFields session={session} onChange={(patch) => setSession((s) => ({ ...s, ...patch }))} />
         <div className="flex gap-3">

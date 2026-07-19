@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ReferenceArea,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts'
 import { useSessions } from '../lib/useSessions'
 import { deleteSession, updateSession } from '../lib/db'
 import { displayCurve } from '../lib/insights'
@@ -18,6 +8,7 @@ import type { Session } from '../lib/types'
 import { Card, EmptyState, Badge, SecondaryButton, PrimaryButton } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 import SessionFields from '../components/SessionFields'
+import SudsChart from '../components/SudsChart'
 
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>()
@@ -175,35 +166,13 @@ export default function SessionDetail() {
       {curve.length > 1 && (
         <Card>
           <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs curve</h2>
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={curve} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
-                {session.target_suds_range && (
-                  <ReferenceArea
-                    y1={session.target_suds_range[0]}
-                    y2={session.target_suds_range[1]}
-                    fill={color.hex}
-                    fillOpacity={0.08}
-                  />
-                )}
-                <XAxis
-                  dataKey="x"
-                  tick={{ fontSize: 11 }}
-                  label={{ value: isTimeBased ? 'minutes' : 'reading order', position: 'insideBottom', offset: -4, fontSize: 11 }}
-                />
-                <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ borderRadius: 12, fontSize: 12 }}
-                  formatter={(value) => [`${value} SUDs`, '']}
-                  labelFormatter={(x, payload) =>
-                    isTimeBased ? `${payload?.[0]?.payload?.label ?? ''} · ${x} min` : `${payload?.[0]?.payload?.label ?? ''}`
-                  }
-                />
-                <Line type="monotone" dataKey="suds" stroke={color.hex} strokeWidth={2.5} dot={{ r: 4 }} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <SudsChart
+            points={curve}
+            isTimeBased={isTimeBased}
+            targetRange={session.target_suds_range}
+            colorHex={color.hex}
+            heightClassName="h-72"
+          />
           {!isTimeBased && (
             <p className="mt-2 text-xs text-slate-400">
               Readings couldn't be matched to exact times, so they're shown in logged order rather than on a

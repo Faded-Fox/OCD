@@ -29,7 +29,7 @@ const SECTIONS: HelpSection[] = [
       'Run an ERP exposure in real time. Set up the hierarchy, rung, and a pre-exposure SUDs rating, start the timer, and tap to log a SUDs reading anytime — the curve updates live.',
       'Progress saves locally as you go, so an accidental reload mid-session won\'t lose it — reopening the app picks the running session back up.',
       'If the hierarchy you type matches a planned Fear Ladder, its rungs show up as tappable rows — picking one fills in the rung number, scenario, and target SUDs range for you, though you can still edit any of it afterward.',
-      'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save.',
+      'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save — the SUDs curve stays visible on this wrap-up screen too, and updates live if you correct a reading before saving.',
     ],
   },
   {
