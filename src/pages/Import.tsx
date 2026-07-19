@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions, restoreBackup } from '../lib/db'
 import { parseImportText } from '../lib/parser'
-import { looksLikeBackup, countBackupEntries, parseBackup } from '../lib/backup'
+import { looksLikeBackup, countBackupEntries, describeBackupCounts, parseBackup } from '../lib/backup'
 import type { Session } from '../lib/types'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
@@ -41,9 +41,9 @@ export default function Import() {
   const backupCounts = useMemo(() => (isBackup ? countBackupEntries(raw) : null), [isBackup, raw])
 
   const runRestore = async () => {
-    if (!backupCounts || backupCounts.sessions + backupCounts.journalEntries === 0) return
+    if (!backupCounts || backupCounts.sessions + backupCounts.journalEntries + backupCounts.focusPlans === 0) return
     const confirmed = confirm(
-      `Restore ${backupCounts.sessions} session${backupCounts.sessions === 1 ? '' : 's'} and ${backupCounts.journalEntries} journal entr${backupCounts.journalEntries === 1 ? 'y' : 'ies'} to this device? Anything already here with a matching ID will be overwritten.`,
+      `Restore ${describeBackupCounts(backupCounts)} to this device? Anything already here with a matching ID will be overwritten.`,
     )
     if (!confirmed) return
     setRestoring(true)
@@ -213,10 +213,8 @@ export default function Import() {
           {isBackup && backupCounts && (
             <Card className="border-teal-300 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/40">
               <p className="text-sm text-teal-800 dark:text-teal-300">
-                This looks like a PocketFox Companion backup — {backupCounts.sessions} session
-                {backupCounts.sessions === 1 ? '' : 's'} and {backupCounts.journalEntries} journal entr
-                {backupCounts.journalEntries === 1 ? 'y' : 'ies'} found. Restoring adds them to this device;
-                anything already here with a matching ID gets overwritten.
+                This looks like a PocketFox Companion backup — {describeBackupCounts(backupCounts)} found. Restoring
+                adds them to this device; anything already here with a matching ID gets overwritten.
               </p>
             </Card>
           )}

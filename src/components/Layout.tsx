@@ -6,6 +6,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/live', label: 'Live' },
   { to: '/journal', label: 'Journal' },
+  { to: '/focus-plan', label: 'Focus Plan' },
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]

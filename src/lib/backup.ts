@@ -1,9 +1,11 @@
 import type { Session } from './types'
 import type { JournalEntry } from './journal'
+import type { FocusPlanEntry } from './focusPlan'
 
 export interface BackupData {
   sessions: Session[]
   journalEntries: JournalEntry[]
+  focusPlans: FocusPlanEntry[]
 }
 
 interface RawBackupSession extends Omit<Session, 'photo'> {
@@ -13,6 +15,7 @@ interface RawBackupSession extends Omit<Session, 'photo'> {
 interface RawBackup {
   sessions?: RawBackupSession[]
   journalEntries?: JournalEntry[]
+  focusPlans?: FocusPlanEntry[]
 }
 
 /** True if the pasted/uploaded text is this app's own export shape, not a Claude
@@ -24,22 +27,43 @@ export function looksLikeBackup(raw: string): boolean {
     const data = JSON.parse(trimmed) as unknown
     if (!data || typeof data !== 'object' || Array.isArray(data)) return false
     const obj = data as Record<string, unknown>
-    return Array.isArray(obj.sessions) || Array.isArray(obj.journalEntries)
+    return Array.isArray(obj.sessions) || Array.isArray(obj.journalEntries) || Array.isArray(obj.focusPlans)
   } catch {
     return false
   }
 }
 
-export function countBackupEntries(raw: string): { sessions: number; journalEntries: number } {
+export interface BackupCounts {
+  sessions: number
+  journalEntries: number
+  focusPlans: number
+}
+
+export function countBackupEntries(raw: string): BackupCounts {
   try {
     const data = JSON.parse(raw) as RawBackup
     return {
       sessions: Array.isArray(data.sessions) ? data.sessions.length : 0,
       journalEntries: Array.isArray(data.journalEntries) ? data.journalEntries.length : 0,
+      focusPlans: Array.isArray(data.focusPlans) ? data.focusPlans.length : 0,
     }
   } catch {
-    return { sessions: 0, journalEntries: 0 }
+    return { sessions: 0, journalEntries: 0, focusPlans: 0 }
   }
+}
+
+/** Human-readable "3 sessions, 2 journal entries, and 1 focus plan" — omits any
+ *  category that's zero, and scales cleanly as more categories get added. */
+export function describeBackupCounts(counts: BackupCounts): string {
+  const parts: string[] = []
+  if (counts.sessions > 0) parts.push(`${counts.sessions} session${counts.sessions === 1 ? '' : 's'}`)
+  if (counts.journalEntries > 0)
+    parts.push(`${counts.journalEntries} journal entr${counts.journalEntries === 1 ? 'y' : 'ies'}`)
+  if (counts.focusPlans > 0) parts.push(`${counts.focusPlans} focus plan${counts.focusPlans === 1 ? '' : 's'}`)
+  if (parts.length === 0) return 'nothing'
+  if (parts.length === 1) return parts[0]
+  if (parts.length === 2) return `${parts[0]} and ${parts[1]}`
+  return `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`
 }
 
 async function dataUrlToBlob(dataUrl: string): Promise<Blob> {
@@ -57,5 +81,5 @@ export async function parseBackup(raw: string): Promise<BackupData> {
       photo: s.photo ? await dataUrlToBlob(s.photo) : null,
     })),
   )
-  return { sessions, journalEntries: data.journalEntries ?? [] }
+  return { sessions, journalEntries: data.journalEntries ?? [], focusPlans: data.focusPlans ?? [] }
 }

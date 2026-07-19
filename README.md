@@ -22,6 +22,13 @@ data lives only in this browser's IndexedDB until you export or delete it.
   intentionally low-key (mainly for export or bringing to a therapist) since these
   prompts flag re-reading past entries — or rerolling to find "the right" one — for
   reassurance as a compulsion warning sign.
+- **Focus Plan**: a 5-step worksheet for tasks OCD makes hard to start or finish —
+  describe the task, break it into smaller parts with time estimates, schedule each
+  part with OCD-safe rewards, plan an ERP response to the intrusions/urges likely to
+  show up, then come back after attempting the task for a no-judgment debrief (peak
+  and end SUDs, what worked, what to flag for your therapist). Includes a collapsible
+  reference card with the SUDs scale and defusion techniques for use during the task
+  itself. Plans can be started, saved, and edited later once the debrief is ready.
 - **Import** a Claude.ai conversation export (JSON) or pasted conversation text
   containing ERP session logs. Parsing happens entirely client-side.
 - **Review** every parsed session before it's saved — fields the parser couldn't
