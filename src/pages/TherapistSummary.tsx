@@ -89,7 +89,7 @@ export default function TherapistSummary() {
       </div>
 
       <Card className="flex flex-wrap items-end gap-3 print:hidden">
-        <label className="flex min-w-0 flex-col gap-1">
+        <label className="flex w-40 min-w-0 shrink-0 flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">From</span>
           <input
             type="date"
@@ -98,7 +98,7 @@ export default function TherapistSummary() {
             className={`${inputClass} h-10 min-w-0 appearance-none py-0`}
           />
         </label>
-        <label className="flex min-w-0 flex-col gap-1">
+        <label className="flex w-40 min-w-0 shrink-0 flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">To</span>
           <input
             type="date"
