@@ -74,7 +74,7 @@ export default function SessionDetail() {
       <div>
         <Link
           to={`/hierarchy/${encodeURIComponent(session.hierarchy)}`}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
         >
           ← {session.hierarchy || 'Unlabeled'}
         </Link>
@@ -221,7 +221,7 @@ export default function SessionDetail() {
           {session.techniques_used.length ? (
             <div className="flex flex-wrap gap-1.5">
               {session.techniques_used.map((t, i) => (
-                <Badge key={i} className="bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                <Badge key={i} className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
                   {t}
                 </Badge>
               ))}
@@ -236,7 +236,7 @@ export default function SessionDetail() {
         <div className="mb-2 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</h2>
           {!editing && (
-            <button type="button" onClick={startEdit} className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400">
+            <button type="button" onClick={startEdit} className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">
               Edit
             </button>
           )}
@@ -247,7 +247,7 @@ export default function SessionDetail() {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900"
+              className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900"
             />
             <div className="flex gap-2">
               <PrimaryButton onClick={saveNotes}>Save</PrimaryButton>

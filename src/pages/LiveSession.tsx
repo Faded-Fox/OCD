@@ -255,8 +255,8 @@ export default function LiveSession() {
     return (
       <div className="flex flex-col gap-6 py-4">
         {restoredNotice && (
-          <Card className="border-violet-300 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/40">
-            <p className="text-sm text-violet-800 dark:text-violet-300">
+          <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+            <p className="text-sm text-amber-800 dark:text-amber-300">
               Picked back up an in-progress session that was still running.
             </p>
           </Card>

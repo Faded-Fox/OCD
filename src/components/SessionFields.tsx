@@ -171,7 +171,7 @@ function ReadingsEditor({
         <button
           type="button"
           onClick={() => (readings.length ? setEditing(true) : addReading())}
-          className="text-xs font-medium text-violet-600 hover:underline dark:text-violet-400"
+          className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400"
         >
           {readings.length ? 'Edit' : '+ Add'}
         </button>
@@ -188,7 +188,7 @@ function ReadingsEditor({
         <button
           type="button"
           onClick={() => setEditing(false)}
-          className="text-xs font-medium text-violet-600 hover:underline dark:text-violet-400"
+          className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400"
         >
           Done
         </button>
@@ -230,7 +230,7 @@ function ReadingsEditor({
         <button
           type="button"
           onClick={addReading}
-          className="mt-0.5 self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+          className="mt-0.5 self-start text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
         >
           + Add reading
         </button>
@@ -350,7 +350,7 @@ export function TargetRangeInput({
 // columns in the readings row below) can set one without fighting `w-full` for
 // specificity — two width utilities on the same element is a Tailwind footgun.
 export const inputBaseClass =
-  'rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
+  'rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
 
 export const inputClass = `w-full ${inputBaseClass}`
 

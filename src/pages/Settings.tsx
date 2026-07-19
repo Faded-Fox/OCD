@@ -70,7 +70,7 @@ export default function Settings() {
           {exporting ? 'Preparing…' : 'Export all data as JSON'}
         </PrimaryButton>
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-          To restore, go to <Link to="/import" className="font-medium text-violet-600 hover:underline dark:text-violet-400">Import</Link> and
+          To restore, go to <Link to="/import" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Import</Link> and
           paste in or upload that same backup file — it's detected automatically and offered back as a
           restore rather than parsed as a new import.
         </p>

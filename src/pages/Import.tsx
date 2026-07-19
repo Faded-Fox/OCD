@@ -207,12 +207,12 @@ export default function Import() {
             onChange={(e) => setRaw(e.target.value)}
             placeholder="Paste conversation export JSON, session text, or a previously exported backup here…"
             rows={14}
-            className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-violet-900"
+            className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-amber-900"
           />
 
           {isBackup && backupCounts && (
-            <Card className="border-teal-300 bg-teal-50 dark:border-teal-900 dark:bg-teal-950/40">
-              <p className="text-sm text-teal-800 dark:text-teal-300">
+            <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
+              <p className="text-sm text-emerald-800 dark:text-emerald-300">
                 This looks like a PocketFox Companion backup — {describeBackupCounts(backupCounts)} found. Restoring
                 adds them to this device; anything already here with a matching ID gets overwritten.
               </p>
@@ -312,7 +312,7 @@ function SessionEditCard({
           <button
             type="button"
             onClick={() => setExpanded((e) => !e)}
-            className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+            className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
           >
             {expanded ? 'Collapse' : 'Edit'}
           </button>

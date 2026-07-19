@@ -95,7 +95,7 @@ export default function FearLadders() {
                   {sessionCount > 0 && (
                     <Link
                       to={`/hierarchy/${encodeURIComponent(ladder.hierarchy)}`}
-                      className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+                      className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
                     >
                       View progress
                     </Link>
@@ -175,7 +175,7 @@ function FearLadderForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
         >
           ← Fear Ladders
         </button>
@@ -250,7 +250,7 @@ function FearLadderForm({
         <button
           type="button"
           onClick={addRung}
-          className="self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+          className="self-start text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
         >
           + Add rung
         </button>

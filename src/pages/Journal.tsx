@@ -16,7 +16,7 @@ import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick'
 
 const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-violet-900'
+  'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -71,7 +71,7 @@ export default function Journal() {
     return (
       <div className="flex flex-col gap-6 py-4">
         <Card className="flex flex-col items-center gap-3 py-14 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-violet-500 text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
@@ -107,7 +107,7 @@ export default function Journal() {
         />
         <JournalCard
           type="evening"
-          accent="from-indigo-500 to-violet-600"
+          accent="from-slate-600 to-slate-800"
           onStart={() => {
             setActiveType('evening')
             setPhase('form')
@@ -116,7 +116,7 @@ export default function Journal() {
       </div>
 
       <Card className="flex flex-col gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center self-start rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 text-white">
+        <div className="inline-flex h-10 w-10 items-center justify-center self-start rounded-xl bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
           <ShuffleIcon />
         </div>
         <div>
@@ -143,7 +143,7 @@ export default function Journal() {
       <button
         type="button"
         onClick={() => setPhase('history')}
-        className="self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+        className="self-start text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
       >
         View saved entries
       </button>
@@ -253,7 +253,7 @@ function JournalForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
         >
           ← Journal
         </button>
@@ -390,7 +390,7 @@ function QuickPromptView({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
         >
           ← Journal
         </button>
@@ -398,7 +398,7 @@ function QuickPromptView({
       </div>
 
       <Card className="flex flex-col gap-3">
-        <Badge className="self-start bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+        <Badge className="self-start bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
           {prompt.category}
         </Badge>
         <p className="text-lg text-slate-800 dark:text-slate-100">{prompt.text}</p>
@@ -408,7 +408,7 @@ function QuickPromptView({
             setResponse('')
             onReroll()
           }}
-          className="self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+          className="self-start text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
         >
           Give me a different one
         </button>
@@ -458,7 +458,7 @@ function HistoryView({ onBack }: { onBack: () => void }) {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <button type="button" onClick={onBack} className="text-sm text-violet-600 hover:underline dark:text-violet-400">
+        <button type="button" onClick={onBack} className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
           ← Journal
         </button>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Saved entries</h1>
@@ -529,7 +529,7 @@ function EntryCardShell({
           <button
             type="button"
             onClick={onToggle}
-            className="text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+            className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
           >
             {expanded ? 'Collapse' : 'View'}
           </button>
@@ -569,7 +569,7 @@ function StructuredEntryCard({
       badgeClass={
         entry.type === 'morning'
           ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-          : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300'
+          : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
       }
       date={entry.date}
       expanded={expanded}
@@ -613,7 +613,7 @@ function QuickEntryCard({
   return (
     <EntryCardShell
       badge={`Quick prompt · ${entry.promptCategory}`}
-      badgeClass="bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300"
+      badgeClass="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
       date={entry.date}
       expanded={expanded}
       onToggle={onToggle}

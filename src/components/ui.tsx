@@ -25,7 +25,7 @@ export function StatTile({ label, value, sub }: { label: string; value: ReactNod
 export function EmptyState({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
     <Card className="flex flex-col items-center gap-3 py-14 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-violet-500 text-white">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 15h4l2-7 3 10 2-7 2 4h5" />
         </svg>
@@ -63,7 +63,7 @@ export function PrimaryButton({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-teal-500 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-amber-500 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${className}`}
     >
       {children}
     </button>

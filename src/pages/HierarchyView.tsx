@@ -54,7 +54,7 @@ export default function HierarchyView() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <Link to="/" className="text-sm text-violet-600 hover:underline dark:text-violet-400">
+        <Link to="/" className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
           ← Dashboard
         </Link>
         <h1 className="mt-2 flex items-center gap-3 text-2xl font-semibold text-slate-900 dark:text-white">
@@ -66,7 +66,7 @@ export default function HierarchyView() {
           {ladder && (
             <>
               {' · '}
-              <Link to="/ladders" className="text-violet-600 hover:underline dark:text-violet-400">
+              <Link to="/ladders" className="text-emerald-700 hover:underline dark:text-emerald-400">
                 {ladder.rungs.length} rung{ladder.rungs.length === 1 ? '' : 's'} planned
               </Link>
             </>
@@ -74,7 +74,7 @@ export default function HierarchyView() {
           {!ladder && (
             <>
               {' · '}
-              <Link to="/ladders" className="text-violet-600 hover:underline dark:text-violet-400">
+              <Link to="/ladders" className="text-emerald-700 hover:underline dark:text-emerald-400">
                 Plan this ladder
               </Link>
             </>
@@ -158,7 +158,7 @@ export default function HierarchyView() {
                   contentStyle={{ borderRadius: 12, fontSize: 12 }}
                   labelFormatter={(_l, payload) => payload?.[0]?.payload?.label}
                 />
-                <Line type="monotone" dataKey="minutesToHabituate" name="Minutes" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="minutesToHabituate" name="Minutes" stroke="#059669" strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -196,7 +196,7 @@ export default function HierarchyView() {
         <Card>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             No sessions logged for this hierarchy yet — this is just the plan so far. Start a{' '}
-            <Link to="/live" className="text-violet-600 hover:underline dark:text-violet-400">
+            <Link to="/live" className="text-emerald-700 hover:underline dark:text-emerald-400">
               live session
             </Link>{' '}
             against one of these rungs whenever you're ready.

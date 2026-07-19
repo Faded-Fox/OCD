@@ -71,7 +71,7 @@ export default function PhotoEntry({ onSave }: { onSave: (session: Session) => P
   if (!photoUrl) {
     return (
       <Card className="flex flex-col items-center gap-4 py-14 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-400 to-violet-500 text-white">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-emerald-500 text-white">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6">
             <path
               strokeLinecap="round"

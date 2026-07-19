@@ -84,7 +84,7 @@ export default function FocusPlan() {
                     className={
                       entry.completed === null
                         ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                        : 'bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-300'
+                        : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                     }
                   >
                     {entry.completed === null ? 'Debrief pending' : 'Debriefed'}
@@ -139,7 +139,7 @@ function FocusPlanForm({
         <button
           type="button"
           onClick={onCancel}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
         >
           ← Focus Plan
         </button>
@@ -415,7 +415,7 @@ function RowsEditor<T extends Record<string, string>>({
       <button
         type="button"
         onClick={addRow}
-        className="self-start text-sm font-medium text-violet-600 hover:underline dark:text-violet-400"
+        className="self-start text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400"
       >
         {addLabel}
       </button>
@@ -433,7 +433,7 @@ function ErpToolkit() {
         className="flex w-full items-center justify-between text-left"
       >
         <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">ERP toolkit for this task</h2>
-        <span className="text-sm text-violet-600 dark:text-violet-400">{open ? 'Hide' : 'Show'}</span>
+        <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
       </button>
       {open && (
         <div className="mt-4 flex flex-col gap-5">

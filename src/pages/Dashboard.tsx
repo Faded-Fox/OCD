@@ -81,15 +81,15 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col gap-6 py-4">
       {showReminder && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-violet-300 bg-violet-50 dark:border-violet-900 dark:bg-violet-950/40">
-          <p className="text-sm text-violet-800 dark:text-violet-300">
+        <Card className="flex flex-wrap items-center justify-between gap-3 border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
             It's been about a week since your last backup. Export your data in case this app ever gets
             deleted or reinstalled.
           </p>
           <div className="flex shrink-0 gap-2">
             <SecondaryButton
               onClick={dismissReminder}
-              className="border-violet-300 text-violet-700 hover:bg-violet-100 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-900"
+              className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-800 dark:text-amber-300 dark:hover:bg-amber-900"
             >
               Remind me later
             </SecondaryButton>
