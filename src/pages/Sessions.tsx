@@ -117,7 +117,7 @@ export default function Sessions() {
           value={filters.query}
           onChange={(e) => patch({ query: e.target.value })}
           placeholder="Search notes, scenario, compulsions, techniques…"
-          className={inputClass}
+          className={`${inputClass} h-10 py-0`}
         />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <label className="flex min-w-0 flex-col gap-1">
@@ -127,7 +127,7 @@ export default function Sessions() {
             <select
               value={filters.hierarchy}
               onChange={(e) => patch({ hierarchy: e.target.value })}
-              className={`${inputClass} min-w-0`}
+              className={`${inputClass} h-10 min-w-0 py-0`}
             >
               <option value="all">All</option>
               {hierarchies.map((h) => (
@@ -144,7 +144,7 @@ export default function Sessions() {
             <select
               value={filters.resistance}
               onChange={(e) => patch({ resistance: e.target.value as ResistanceFilter })}
-              className={`${inputClass} min-w-0`}
+              className={`${inputClass} h-10 min-w-0 py-0`}
             >
               <option value="any">Any</option>
               <option value="full">Fully resisted</option>
@@ -160,7 +160,7 @@ export default function Sessions() {
               type="date"
               value={filters.dateFrom}
               onChange={(e) => patch({ dateFrom: e.target.value })}
-              className={`${inputClass} min-w-0`}
+              className={`${inputClass} h-10 min-w-0 py-0`}
             />
           </label>
           <label className="flex min-w-0 flex-col gap-1">
@@ -171,7 +171,7 @@ export default function Sessions() {
               type="date"
               value={filters.dateTo}
               onChange={(e) => patch({ dateTo: e.target.value })}
-              className={`${inputClass} min-w-0`}
+              className={`${inputClass} h-10 min-w-0 py-0`}
             />
           </label>
         </div>
@@ -183,7 +183,7 @@ export default function Sessions() {
             <select
               value={filters.sort}
               onChange={(e) => patch({ sort: e.target.value as SortOrder })}
-              className={`${inputClass} w-auto`}
+              className={`${inputClass} h-10 w-auto py-0`}
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
