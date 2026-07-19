@@ -1,5 +1,19 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Session, SudsReading } from '../lib/types'
+import { useSessions } from '../lib/useSessions'
+import { SUGGESTED_TECHNIQUES } from '../lib/techniques'
+
+function dedupeCaseInsensitive(items: string[]): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const item of items) {
+    const key = item.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(item)
+  }
+  return out
+}
 
 export default function SessionFields({
   session,
@@ -8,6 +22,18 @@ export default function SessionFields({
   session: Session
   onChange: (patch: Partial<Session>) => void
 }) {
+  // Suggestions come from a small curated starter list (techniques only — compulsions
+  // are too personal/varied for a baked-in list) plus whatever this person has already
+  // typed across their own past sessions, so the list adapts to their own vocabulary.
+  const { sessions } = useSessions()
+  const techniqueSuggestions = dedupeCaseInsensitive([
+    ...SUGGESTED_TECHNIQUES,
+    ...sessions.flatMap((s) => s.techniques_used),
+  ]).sort((a, b) => a.localeCompare(b))
+  const compulsionSuggestions = dedupeCaseInsensitive(sessions.flatMap((s) => s.compulsions_targeted)).sort((a, b) =>
+    a.localeCompare(b),
+  )
+
   return (
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -97,12 +123,17 @@ export default function SessionFields({
           </select>
         </Field>
         <Field label="Techniques used">
-          <TagsInput value={session.techniques_used} onChange={(techniques_used) => onChange({ techniques_used })} />
+          <TagsInput
+            value={session.techniques_used}
+            onChange={(techniques_used) => onChange({ techniques_used })}
+            suggestions={techniqueSuggestions}
+          />
         </Field>
         <Field label="Compulsions targeted">
           <TagsInput
             value={session.compulsions_targeted}
             onChange={(compulsions_targeted) => onChange({ compulsions_targeted })}
+            suggestions={compulsionSuggestions}
           />
         </Field>
         <Field label="Scenario">
@@ -245,9 +276,25 @@ function ReadingsEditor({
  * that pattern trims each keystroke's array item immediately, so a trailing
  * space (or any text before the next comma) gets stripped right back out and
  * typing a space appears to do nothing.
+ *
+ * Autocomplete is a custom dropdown rather than a native <datalist> — Safari
+ * (including iOS) doesn't reliably render datalist suggestions at all, and this
+ * app's only real-device reports have all been from iOS Safari.
  */
-function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
+function TagsInput({
+  value,
+  onChange,
+  suggestions = [],
+}: {
+  value: string[]
+  onChange: (tags: string[]) => void
+  suggestions?: string[]
+}) {
   const [text, setText] = useState(value.join(', '))
+  const [focused, setFocused] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+  const [highlighted, setHighlighted] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Resync from the array only when it changed for a reason other than our own
   // onChange below (e.g. a different session's data loaded into this field).
@@ -262,21 +309,99 @@ function TagsInput({ value, onChange }: { value: string[]; onChange: (tags: stri
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
+  // Only the tag currently being typed (after the last comma) gets suggestions —
+  // already-confirmed tags earlier in the text are left alone.
+  const lastCommaIndex = text.lastIndexOf(',')
+  const prefix = lastCommaIndex === -1 ? '' : `${text.slice(0, lastCommaIndex + 1)} `
+  const activeFragment = text.slice(lastCommaIndex + 1).trim()
+  const alreadyUsed = new Set(
+    text
+      .slice(0, lastCommaIndex + 1)
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  )
+  const matches =
+    focused && !dismissed && activeFragment.length > 0
+      ? suggestions
+          .filter((s) => {
+            const lower = s.toLowerCase()
+            return lower.includes(activeFragment.toLowerCase()) && lower !== activeFragment.toLowerCase() && !alreadyUsed.has(lower)
+          })
+          .slice(0, 6)
+      : []
+
+  const commit = (nextText: string) => {
+    setText(nextText)
+    onChange(
+      nextText
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean),
+    )
+  }
+
+  const selectSuggestion = (s: string) => {
+    commit(`${prefix}${s}, `)
+    setDismissed(false)
+    setHighlighted(0)
+    inputRef.current?.focus()
+  }
+
   return (
-    <input
-      type="text"
-      value={text}
-      onChange={(e) => {
-        setText(e.target.value)
-        onChange(
-          e.target.value
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean),
-        )
-      }}
-      className={inputClass}
-    />
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        value={text}
+        onChange={(e) => {
+          commit(e.target.value)
+          setDismissed(false)
+          setHighlighted(0)
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onKeyDown={(e) => {
+          if (matches.length === 0) return
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            setHighlighted((h) => (h + 1) % matches.length)
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            setHighlighted((h) => (h - 1 + matches.length) % matches.length)
+          } else if (e.key === 'Enter') {
+            e.preventDefault()
+            selectSuggestion(matches[highlighted])
+          } else if (e.key === 'Escape') {
+            setDismissed(true)
+          }
+        }}
+        autoComplete="off"
+        className={inputClass}
+      />
+      {matches.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-md dark:border-slate-700 dark:bg-slate-950">
+          {matches.map((s, i) => (
+            <li key={s}>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  selectSuggestion(s)
+                }}
+                className={`block w-full px-3 py-1.5 text-left text-sm ${
+                  i === highlighted
+                    ? 'bg-amber-100 text-slate-900 dark:bg-amber-950 dark:text-amber-100'
+                    : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                }`}
+              >
+                {s}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   )
 }
 

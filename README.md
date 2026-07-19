@@ -16,7 +16,11 @@ data lives only in this browser's IndexedDB until you export or delete it.
   live if a reading gets corrected before saving. Progress is saved locally as you
   go, so an accidental reload mid-session doesn't lose it. If the hierarchy matches
   a planned Fear Ladder, its rungs appear as a tappable list that autofills the
-  scenario and target SUDs range.
+  scenario and target SUDs range. "Techniques used" and "Compulsions targeted"
+  autocomplete as you type — techniques from a small built-in list plus your own
+  past entries, compulsions purely from your own history, since those are too
+  personal for a built-in list. A real dropdown, not the native `<datalist>`
+  element, since Safari doesn't reliably render that at all.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
   citations, and compulsion-warning signs from their source templates built in. A

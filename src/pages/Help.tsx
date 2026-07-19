@@ -30,6 +30,7 @@ const SECTIONS: HelpSection[] = [
       'Progress saves locally as you go, so an accidental reload mid-session won\'t lose it — reopening the app picks the running session back up.',
       'If the hierarchy you type matches a planned Fear Ladder, its rungs show up as tappable rows — picking one fills in the rung number, scenario, and target SUDs range for you, though you can still edit any of it afterward.',
       'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save — the SUDs curve stays visible on this wrap-up screen too, and updates live if you correct a reading before saving.',
+      'Typing in "Techniques used" or "Compulsions targeted" suggests matches as you go — techniques from a small built-in starter list plus anything you\'ve typed before, compulsions purely from your own past sessions (too personal for a built-in list). Tap a suggestion or arrow-key to it and hit Enter; nothing is ever picked automatically.',
     ],
   },
   {
