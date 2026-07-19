@@ -51,6 +51,7 @@ const SECTIONS: HelpSection[] = [
       "A guide for the people you trust — what a hard stretch looks like for you, what actually helps, what doesn't, and what to do if things feel really bad. Meant to be handed over: give someone your phone open to this page.",
       'Everything here, including a support contact\'s name and phone number if you add one, starts blank and is written and stored entirely by you on this device — none of it is built into the app itself.',
       'Use "Edit" to fill it in or update it any time; the reading view only shows sections you\'ve actually written something in.',
+      '"Share" sends the filled-in sections as plain text to your phone\'s native share sheet (Messages, Mail, AirDrop, whatever you pick) — this is your device handing text to another app you choose, not this app sending anything anywhere on its own. If sharing isn\'t available, it copies the text to your clipboard instead so you can paste it in manually.',
     ],
   },
   {

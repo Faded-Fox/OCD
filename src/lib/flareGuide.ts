@@ -45,6 +45,42 @@ export function createEmptyFlareGuide(): FlareGuide {
   }
 }
 
+/** Formats the guide's filled-in sections into one plain-text block, suitable for
+ *  the native share sheet or clipboard — skips any section that's still blank. */
+export function buildFlareGuideText(guide: FlareGuide): string {
+  const lines: string[] = ['My OCD Flare-Up Guide', '']
+
+  const section = (heading: string | null, body: string) => {
+    if (!body.trim()) return
+    if (heading) lines.push(heading)
+    lines.push(body.trim(), '')
+  }
+
+  section(null, guide.introNote)
+  section('WHAT IT LOOKS LIKE WHEN THINGS ARE HARD', guide.signs)
+  section('WHAT HELPS MOST', guide.whatHelps)
+  section('THE SINGLE MOST HELPFUL THING', guide.mostHelpfulThing)
+  section("WHAT DOESN'T HELP (EVEN IF IT SEEMS KIND)", guide.whatDoesntHelp)
+  section('IF REASSURANCE IS ASKED FOR', guide.reassuranceNote)
+  if (guide.agreedPhrase.trim()) {
+    lines.push('THE AGREED PHRASE', `"${guide.agreedPhrase.trim()}"`, '')
+  }
+
+  const contact = [guide.contactName.trim(), guide.contactPhone.trim()].filter(Boolean).join(' — ')
+  if (contact || guide.spaceOrStayNote.trim() || guide.whatNotToDo.trim()) {
+    lines.push('IF THINGS FEEL REALLY BAD')
+    if (contact) lines.push(`Support contact: ${contact}`)
+    if (guide.spaceOrStayNote.trim()) lines.push(guide.spaceOrStayNote.trim())
+    if (guide.whatNotToDo.trim()) lines.push(`What not to do: ${guide.whatNotToDo.trim()}`)
+    lines.push('')
+  }
+
+  section('SIGNS THINGS ARE GETTING BETTER', guide.recoverySigns)
+  section(null, guide.closingNote)
+
+  return lines.join('\n').trim()
+}
+
 export function isFlareGuideEmpty(guide: FlareGuide): boolean {
   return (
     !guide.introNote.trim() &&

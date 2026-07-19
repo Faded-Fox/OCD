@@ -68,11 +68,13 @@ data lives only in this browser's IndexedDB until you export or delete it.
 - **Flare Guide**: a guide for the people you trust — what a hard stretch looks
   like, what actually helps and what doesn't, what to do if things feel really
   bad, and a support contact if you want one. Meant to be handed over (give
-  someone your phone, open to this page). None of it is templated in the app's
-  own source — every field starts blank and is written and stored entirely on
-  this device, since unlike the SUDs scale or defusion techniques this content
-  is inherently personal (and a real contact's name and phone number should
-  never end up in a public repo).
+  someone your phone, open to this page, or tap "Share" to send the filled-in
+  sections as plain text through your phone's native share sheet — falls back
+  to copying to the clipboard if the Web Share API isn't available). None of
+  it is templated in the app's own source — every field starts blank and is
+  written and stored entirely on this device, since unlike the SUDs scale or
+  defusion techniques this content is inherently personal (and a real
+  contact's name and phone number should never end up in a public repo).
 - **Settings**: export all data as JSON, or permanently delete everything on this
   device.
 - **Help**: a "?" icon in the header links to a single reference page summarizing

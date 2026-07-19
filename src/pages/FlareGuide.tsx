@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { saveFlareGuide } from '../lib/db'
-import { createEmptyFlareGuide, isFlareGuideEmpty, type FlareGuide } from '../lib/flareGuide'
+import { buildFlareGuideText, createEmptyFlareGuide, isFlareGuideEmpty, type FlareGuide } from '../lib/flareGuide'
 import { useFlareGuide } from '../lib/useFlareGuide'
 import { Card, PrimaryButton, SecondaryButton, EmptyState } from '../components/ui'
 import { inputClass, Field } from '../components/SessionFields'
@@ -51,16 +51,48 @@ export default function FlareGuidePage() {
 }
 
 function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => void }) {
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle')
+
+  const handleShare = async () => {
+    const text = buildFlareGuideText(guide)
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: 'My OCD Flare-Up Guide', text })
+        return
+      } catch (err) {
+        // AbortError means the person just closed the share sheet — not a failure.
+        if (err instanceof Error && err.name === 'AbortError') return
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(text)
+      setShareStatus('copied')
+      setTimeout(() => setShareStatus('idle'), 2000)
+    } catch {
+      setShareStatus('error')
+      setTimeout(() => setShareStatus('idle'), 2000)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Flare-Up Guide</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            Written for the people you trust. Hand them your phone, open to this page.
+            Written for the people you trust. Hand them your phone, open to this page, or share it as text.
           </p>
         </div>
-        <SecondaryButton onClick={onEdit}>Edit</SecondaryButton>
+        <div className="flex items-center gap-2">
+          {shareStatus === 'copied' && (
+            <span className="text-sm text-emerald-700 dark:text-emerald-400">Copied to clipboard</span>
+          )}
+          {shareStatus === 'error' && <span className="text-sm text-rose-600 dark:text-rose-400">Couldn't copy</span>}
+          <SecondaryButton onClick={handleShare}>Share</SecondaryButton>
+          <SecondaryButton onClick={onEdit}>Edit</SecondaryButton>
+        </div>
       </div>
 
       {guide.introNote.trim() && (
