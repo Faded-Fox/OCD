@@ -14,6 +14,7 @@ import { addSessions } from '../lib/db'
 import { createEmptySession } from '../lib/session'
 import type { Session } from '../lib/types'
 import { colorForHierarchy } from '../lib/colors'
+import { useFearLadders } from '../lib/useFearLadders'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput } from '../components/SessionFields'
 
@@ -47,6 +48,7 @@ function formatElapsed(ms: number): string {
 
 export default function LiveSession() {
   const navigate = useNavigate()
+  const { ladders } = useFearLadders()
   const [phase, setPhase] = useState<Phase>('setup')
   const [session, setSession] = useState<Session>(createEmptySession)
   const [startedAt, setStartedAt] = useState<number | null>(null)
@@ -86,6 +88,19 @@ export default function LiveSession() {
   const color = colorForHierarchy(session.hierarchy)
 
   const canStart = session.hierarchy.trim() !== '' && session.rung !== null && preSuds !== ''
+
+  const matchedLadder = ladders.find(
+    (l) => l.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && l.hierarchy.trim() !== '',
+  )
+
+  const pickRung = (rung: { rung: number; description: string; targetSudsRange: [number, number] | null }) => {
+    setSession((s) => ({
+      ...s,
+      rung: rung.rung,
+      rung_description: rung.description || s.rung_description,
+      target_suds_range: rung.targetSudsRange ?? s.target_suds_range,
+    }))
+  }
 
   const startSession = () => {
     const now = Date.now()
@@ -216,6 +231,41 @@ export default function LiveSession() {
               />
             </Field>
           </div>
+
+          {matchedLadder && matchedLadder.rungs.length > 0 && (
+            <div>
+              <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                Planned rungs for {matchedLadder.hierarchy}
+              </span>
+              <div className="mt-2 flex flex-col gap-1.5">
+                {[...matchedLadder.rungs]
+                  .sort((a, b) => a.rung - b.rung)
+                  .map((r) => (
+                    <button
+                      key={r.rung}
+                      type="button"
+                      onClick={() => pickRung(r)}
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-left text-sm transition-colors ${
+                        session.rung === r.rung
+                          ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900'
+                          : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <span className="font-semibold">Rung {r.rung}</span>
+                      {r.description && <span className="truncate">{r.description}</span>}
+                      {r.targetSudsRange && (
+                        <span className="ml-auto shrink-0 text-xs opacity-75">
+                          target {r.targetSudsRange[0]}–{r.targetSudsRange[1]}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+              </div>
+              <p className="mt-1.5 text-xs text-slate-400">
+                Tap a rung to fill in its description and target range — you can still edit anything above.
+              </p>
+            </div>
+          )}
 
           <div>
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">

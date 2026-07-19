@@ -12,7 +12,9 @@ data lives only in this browser's IndexedDB until you export or delete it.
 - **Live session**: run an ERP exposure in real time — set up the hierarchy/rung and
   a pre-exposure SUDs rating, start the timer, tap to log a SUDs reading anytime
   (with a live-updating curve), then stop and fill in the rest to save. Progress is
-  saved locally as you go, so an accidental reload mid-session doesn't lose it.
+  saved locally as you go, so an accidental reload mid-session doesn't lose it. If
+  the hierarchy matches a planned Fear Ladder, its rungs appear as a tappable list
+  that autofills the scenario and target SUDs range.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
   citations, and compulsion-warning signs from their source templates built in. A
@@ -40,7 +42,10 @@ data lives only in this browser's IndexedDB until you export or delete it.
   session instead, so anything a form field can't capture (like a hand-drawn SUDs
   curve) isn't lost.
 - **Dashboard**: peak-SUDs trend across hierarchies, full-resistance rate, readiness
-  signals, recent sessions.
+  signals, recent sessions. An "Elsewhere in the app" row ties in everything else —
+  journal entries this week, focus plans awaiting a debrief, hierarchies with a
+  planned ladder, and whether a Flare Guide has been set up — since otherwise
+  those only show up once you go looking for them.
 - **Fear Ladders**: plan a hierarchy's rungs — a number, a short description, and an
   optional target SUDs range for each — before you've ever run a session in it, since
   otherwise a hierarchy only exists once a session references it. Reachable from its

@@ -11,6 +11,11 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { useSessions } from '../lib/useSessions'
+import { useJournalEntries } from '../lib/useJournalEntries'
+import { useFocusPlanEntries } from '../lib/useFocusPlanEntries'
+import { useFearLadders } from '../lib/useFearLadders'
+import { useFlareGuide } from '../lib/useFlareGuide'
+import { isFlareGuideEmpty } from '../lib/flareGuide'
 import {
   compulsionResistanceRate,
   compulsionResistanceRateByHierarchy,
@@ -25,6 +30,10 @@ import HierarchyBadge from '../components/HierarchyBadge'
 
 export default function Dashboard() {
   const { sessions, loading } = useSessions()
+  const { entries: journalEntries } = useJournalEntries()
+  const { entries: focusPlans } = useFocusPlanEntries()
+  const { ladders: fearLadders } = useFearLadders()
+  const { guide: flareGuide } = useFlareGuide()
   const [showReminder, setShowReminder] = useState(false)
   const [reminderExporting, setReminderExporting] = useState(false)
 
@@ -76,6 +85,11 @@ export default function Dashboard() {
     .filter((s) => s.peak_suds !== null)
     .map((s) => ({ date: s.date, peak: s.peak_suds, hierarchy: s.hierarchy || 'Unlabeled', session: s }))
 
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  const journalThisWeek = journalEntries.filter((e) => e.date >= sevenDaysAgo).length
+  const focusPlansPending = focusPlans.filter((e) => e.completed === null).length
+  const flareGuideReady = Boolean(flareGuide && !isFlareGuideEmpty(flareGuide))
+
   const readySignals = progression.filter((r) => r.readySignal)
 
   return (
@@ -126,6 +140,30 @@ export default function Dashboard() {
           sub={overallRate.knownTotal ? `${overallRate.fullyResistedCount}/${overallRate.knownTotal} sessions` : undefined}
         />
         <StatTile label="Readiness signals" value={readySignals.length} sub="rungs showing two-in-a-row full resistance" />
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Elsewhere in the app</h2>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <LinkStatTile to="/journal" label="Journal" value={journalThisWeek} sub="entries this week" />
+          <LinkStatTile
+            to="/focus-plan"
+            label="Focus Plan"
+            value={focusPlansPending}
+            sub={focusPlansPending === 1 ? 'plan awaiting debrief' : 'plans awaiting debrief'}
+          />
+          <LinkStatTile
+            to="/ladders"
+            label="Ladders"
+            value={fearLadders.length}
+            sub={fearLadders.length === 1 ? 'hierarchy planned' : 'hierarchies planned'}
+          />
+          <LinkStatTile
+            to="/flare-guide"
+            label="Flare Guide"
+            value={flareGuideReady ? 'Ready' : 'Not set up'}
+          />
+        </div>
       </div>
 
       {scatterData.length > 0 && (
@@ -219,5 +257,23 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+  )
+}
+
+function LinkStatTile({
+  to,
+  label,
+  value,
+  sub,
+}: {
+  to: string
+  label: string
+  value: string | number
+  sub?: string
+}) {
+  return (
+    <Link to={to}>
+      <StatTile label={label} value={value} sub={sub} />
+    </Link>
   )
 }

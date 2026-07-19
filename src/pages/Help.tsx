@@ -12,6 +12,7 @@ const SECTIONS: HelpSection[] = [
     body: [
       'A summary of everything logged so far: peak-SUDs trend across hierarchies, full-resistance rate, readiness signals, and the most recent sessions.',
       'If it\'s been about a week since your last export, a banner appears here nudging you to back up — "Remind me later" snoozes it for a few days, "Export now" downloads a backup and clears it.',
+      'An "Elsewhere in the app" row surfaces what\'s happening outside of Sessions — journal entries logged this week, focus plans still awaiting a debrief, how many hierarchies have a planned ladder, and whether a Flare Guide has been set up. Each tile links straight to that tab.',
     ],
   },
   {
@@ -26,6 +27,7 @@ const SECTIONS: HelpSection[] = [
     body: [
       'Run an ERP exposure in real time. Set up the hierarchy, rung, and a pre-exposure SUDs rating, start the timer, and tap to log a SUDs reading anytime — the curve updates live.',
       'Progress saves locally as you go, so an accidental reload mid-session won\'t lose it — reopening the app picks the running session back up.',
+      'If the hierarchy you type matches a planned Fear Ladder, its rungs show up as tappable rows — picking one fills in the rung number, scenario, and target SUDs range for you, though you can still edit any of it afterward.',
       'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save.',
     ],
   },
@@ -59,6 +61,7 @@ const SECTIONS: HelpSection[] = [
     body: [
       'Plan a hierarchy\'s rungs — a number, a short description, and an optional target SUDs range each — before you\'ve ever logged a session in it. Normally a hierarchy only exists once a session references it; this is the way around that.',
       'Once you do start logging sessions, the per-hierarchy view (reached from the Dashboard or from a session\'s page) automatically merges the plan with actual progress: rungs you\'ve planned but not attempted yet sit alongside ones you\'ve already run, with attempt counts and readiness signals filled in as they happen.',
+      'It also shows up on the Live tab: type a hierarchy that matches a planned ladder and its rungs appear as a pickable list, autofilling the scenario and target range.',
     ],
   },
   {
