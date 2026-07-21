@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { addJournalEntry, deleteJournalEntry } from '../lib/db'
 import { newId } from '../lib/session'
 import {
+  FEELINGS_CHART,
   JOURNAL_TEMPLATES,
   QUICK_PROMPTS,
   pickRandomQuickPrompt,
@@ -140,6 +141,8 @@ export default function Journal() {
           <p className="text-xs text-slate-400">No prompts added yet.</p>
         )}
       </Card>
+
+      <FeelingsChart />
 
       <button
         type="button"
@@ -312,6 +315,8 @@ function JournalForm({
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{template.compulsionWarning.footer}</p>
       </Card>
 
+      <FeelingsChart />
+
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>
           Discard
@@ -404,6 +409,8 @@ function QuickPromptView({
         </p>
       </Card>
 
+      <FeelingsChart />
+
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>
           Discard
@@ -413,6 +420,34 @@ function QuickPromptView({
         </PrimaryButton>
       </div>
     </div>
+  )
+}
+
+function FeelingsChart() {
+  const [open, setOpen] = useState(false)
+  return (
+    <Card>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">How do you feel?</h2>
+        <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
+      </button>
+      {open && (
+        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
+          {FEELINGS_CHART.map((f) => (
+            <div key={f.emotion}>
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{f.emotion}</p>
+              {f.related.length > 0 && (
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{f.related.join(', ')}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Card>
   )
 }
 

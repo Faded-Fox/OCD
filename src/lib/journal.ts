@@ -1,5 +1,70 @@
 export type JournalType = 'morning' | 'evening'
 
+export interface FeelingChartEntry {
+  emotion: string
+  related: string[]
+}
+
+/** From a hand-drawn "What Does the Fox Feel?" feelings wheel — a reference for
+ *  naming an emotion while journaling, not a data field stored anywhere. Some
+ *  emotions (Frustrated, Surprised) had no related words in the source chart,
+ *  and a couple of words (e.g. Frustrated, Lonely) intentionally appear both as
+ *  their own entry and as a related word under another, matching the original. */
+export const FEELINGS_CHART: FeelingChartEntry[] = [
+  {
+    emotion: 'Angry',
+    related: [
+      'Hostile',
+      'Hurt',
+      'Rage',
+      'Stressed',
+      'Critical',
+      'Annoyed',
+      'Selfish',
+      'Jealous',
+      'Irritated',
+      'Skeptical',
+      'Frustrated',
+    ],
+  },
+  {
+    emotion: 'Calm',
+    related: [
+      'Connected',
+      'Trusting',
+      'Loving',
+      'Thoughtful',
+      'Secure',
+      'Relaxed',
+      'Safe',
+      'Relief',
+      'Thankful',
+      'Belonging',
+      'Serene',
+      'Sensitive',
+    ],
+  },
+  { emotion: 'Frustrated', related: [] },
+  {
+    emotion: 'Happy',
+    related: ['Optimistic', 'Hopeful', 'Playful', 'Proud', 'Content', 'Joyful', 'Accepted', 'Valued', 'Interested', 'Curious'],
+  },
+  { emotion: 'Nervous', related: ['Threatened', 'Anxious', 'Worried'] },
+  {
+    emotion: 'Scared',
+    related: ['Weak', 'Worthless', 'Insecure', 'Inferior', 'Confused', 'Perplexed', 'Rejected', 'Excluded'],
+  },
+  { emotion: 'Shy', related: ['Ashamed', 'Embarrassed'] },
+  { emotion: 'Surprised', related: [] },
+  {
+    emotion: 'Sad',
+    related: ['Guilty', 'Remorseful', 'Fragile', 'Vulnerable', 'Hopeless', 'Lonely', 'Miserable', 'Depressed'],
+  },
+  { emotion: 'Bored', related: ['Indifferent'] },
+  { emotion: 'Lonely', related: ['Isolated'] },
+  { emotion: 'Excited', related: ['Energetic'] },
+]
+
 export interface JournalField {
   key: string
   label: string
