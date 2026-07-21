@@ -16,6 +16,33 @@ import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import foxMorning from '../assets/fox-morning.webp'
 import foxWindDown from '../assets/fox-wind-down.webp'
 import foxQuickPrompt from '../assets/fox-quick-prompt.webp'
+import foxMoodAngry from '../assets/mood/fox-mood-angry.webp'
+import foxMoodCalm from '../assets/mood/fox-mood-calm.webp'
+import foxMoodFrustrated from '../assets/mood/fox-mood-frustrated.webp'
+import foxMoodHappy from '../assets/mood/fox-mood-happy.webp'
+import foxMoodNervous from '../assets/mood/fox-mood-nervous.webp'
+import foxMoodScared from '../assets/mood/fox-mood-scared.webp'
+import foxMoodShy from '../assets/mood/fox-mood-shy.webp'
+import foxMoodSurprised from '../assets/mood/fox-mood-surprised.webp'
+import foxMoodSad from '../assets/mood/fox-mood-sad.webp'
+import foxMoodBored from '../assets/mood/fox-mood-bored.webp'
+import foxMoodLonely from '../assets/mood/fox-mood-lonely.webp'
+import foxMoodExcited from '../assets/mood/fox-mood-excited.webp'
+
+const MOOD_IMAGES: Record<string, string> = {
+  angry: foxMoodAngry,
+  calm: foxMoodCalm,
+  frustrated: foxMoodFrustrated,
+  happy: foxMoodHappy,
+  nervous: foxMoodNervous,
+  scared: foxMoodScared,
+  shy: foxMoodShy,
+  surprised: foxMoodSurprised,
+  sad: foxMoodSad,
+  bored: foxMoodBored,
+  lonely: foxMoodLonely,
+  excited: foxMoodExcited,
+}
 
 type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick'
 
@@ -142,8 +169,6 @@ export default function Journal() {
         )}
       </Card>
 
-      <FeelingsChart />
-
       <button
         type="button"
         onClick={() => setPhase('history')}
@@ -191,6 +216,7 @@ function JournalForm({
 }) {
   const template = JOURNAL_TEMPLATES[type]
   const [fields, setFields] = useState<Record<string, string>>({})
+  const [mood, setMood] = useState<string | null>(null)
   const [startedAt] = useState(() => Date.now())
   const [nowTick, setNowTick] = useState(Date.now())
   const [saving, setSaving] = useState(false)
@@ -215,6 +241,7 @@ function JournalForm({
       createdAt: new Date().toISOString(),
       fields,
       durationSeconds: Math.round((Date.now() - startedAt) / 1000),
+      mood: mood ?? undefined,
     }
     await addJournalEntry(entry)
     setSaving(false)
@@ -315,7 +342,7 @@ function JournalForm({
         <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{template.compulsionWarning.footer}</p>
       </Card>
 
-      <FeelingsChart />
+      <MoodPicker value={mood} onChange={setMood} />
 
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>
@@ -341,6 +368,7 @@ function QuickPromptView({
   onCancel: () => void
 }) {
   const [response, setResponse] = useState('')
+  const [mood, setMood] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   const save = async () => {
@@ -354,6 +382,7 @@ function QuickPromptView({
       promptCategory: prompt.category,
       promptText: prompt.text,
       response,
+      mood: mood ?? undefined,
     }
     await addJournalEntry(entry)
     setSaving(false)
@@ -409,7 +438,7 @@ function QuickPromptView({
         </p>
       </Card>
 
-      <FeelingsChart />
+      <MoodPicker value={mood} onChange={setMood} />
 
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>
@@ -423,31 +452,47 @@ function QuickPromptView({
   )
 }
 
-function FeelingsChart() {
-  const [open, setOpen] = useState(false)
+function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood: string | null) => void }) {
+  const selected = FEELINGS_CHART.find((f) => f.key === value)
   return (
     <Card>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between text-left"
-      >
-        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">How do you feel?</h2>
-        <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
-      </button>
-      {open && (
-        <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
-          {FEELINGS_CHART.map((f) => (
-            <div key={f.emotion}>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{f.emotion}</p>
-              {f.related.length > 0 && (
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{f.related.join(', ')}</p>
-              )}
-            </div>
-          ))}
-        </div>
+      <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">How do you feel?</h2>
+      <p className="mt-0.5 text-xs text-slate-400">Optional — tap a face to check in, tap it again to clear it.</p>
+      <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+        {FEELINGS_CHART.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => onChange(value === f.key ? null : f.key)}
+            className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors ${
+              value === f.key
+                ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40'
+                : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            <img src={MOOD_IMAGES[f.key]} alt="" className="h-11 w-11 rounded-lg" />
+            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">{f.emotion}</span>
+          </button>
+        ))}
+      </div>
+      {selected && selected.related.length > 0 && (
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-medium text-slate-700 dark:text-slate-300">{selected.emotion}</span> can also feel
+          like: {selected.related.join(', ')}
+        </p>
       )}
     </Card>
+  )
+}
+
+function MoodBadge({ moodKey }: { moodKey: string }) {
+  const entry = FEELINGS_CHART.find((f) => f.key === moodKey)
+  if (!entry) return null
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 py-0.5 pl-0.5 pr-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+      <img src={MOOD_IMAGES[moodKey]} alt="" className="h-5 w-5 rounded-full" />
+      {entry.emotion}
+    </span>
   )
 }
 
@@ -582,9 +627,12 @@ function StructuredEntryCard({
       }
       date={entry.date}
       extra={
-        entry.durationSeconds !== undefined ? (
-          <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
-        ) : undefined
+        <>
+          {entry.durationSeconds !== undefined && (
+            <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
+          )}
+          {entry.mood && <MoodBadge moodKey={entry.mood} />}
+        </>
       }
       expanded={expanded}
       onToggle={onToggle}
@@ -629,6 +677,7 @@ function QuickEntryCard({
       badge={`Quick prompt · ${entry.promptCategory}`}
       badgeClass="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
       date={entry.date}
+      extra={entry.mood ? <MoodBadge moodKey={entry.mood} /> : undefined}
       expanded={expanded}
       onToggle={onToggle}
       onDelete={onDelete}

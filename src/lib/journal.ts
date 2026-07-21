@@ -1,17 +1,23 @@
 export type JournalType = 'morning' | 'evening'
 
 export interface FeelingChartEntry {
+  /** Stable lowercase key — matches the mood fox illustration filename and is
+   *  what actually gets stored on an entry (the display label can be re-worded
+   *  later without orphaning already-saved moods). */
+  key: string
   emotion: string
   related: string[]
 }
 
-/** From a hand-drawn "What Does the Fox Feel?" feelings wheel — a reference for
- *  naming an emotion while journaling, not a data field stored anywhere. Some
- *  emotions (Frustrated, Surprised) had no related words in the source chart,
- *  and a couple of words (e.g. Frustrated, Lonely) intentionally appear both as
- *  their own entry and as a related word under another, matching the original. */
+/** From a hand-drawn "What Does the Fox Feel?" feelings wheel. Used both as a
+ *  pickable mood check-in (saved with an entry) and, for whichever one is
+ *  picked, a reference to its related feeling words. Some emotions (Frustrated,
+ *  Surprised) had no related words in the source chart, and a couple of words
+ *  (e.g. Frustrated, Lonely) intentionally appear both as their own entry and
+ *  as a related word under another, matching the original. */
 export const FEELINGS_CHART: FeelingChartEntry[] = [
   {
+    key: 'angry',
     emotion: 'Angry',
     related: [
       'Hostile',
@@ -28,6 +34,7 @@ export const FEELINGS_CHART: FeelingChartEntry[] = [
     ],
   },
   {
+    key: 'calm',
     emotion: 'Calm',
     related: [
       'Connected',
@@ -44,25 +51,28 @@ export const FEELINGS_CHART: FeelingChartEntry[] = [
       'Sensitive',
     ],
   },
-  { emotion: 'Frustrated', related: [] },
+  { key: 'frustrated', emotion: 'Frustrated', related: [] },
   {
+    key: 'happy',
     emotion: 'Happy',
     related: ['Optimistic', 'Hopeful', 'Playful', 'Proud', 'Content', 'Joyful', 'Accepted', 'Valued', 'Interested', 'Curious'],
   },
-  { emotion: 'Nervous', related: ['Threatened', 'Anxious', 'Worried'] },
+  { key: 'nervous', emotion: 'Nervous', related: ['Threatened', 'Anxious', 'Worried'] },
   {
+    key: 'scared',
     emotion: 'Scared',
     related: ['Weak', 'Worthless', 'Insecure', 'Inferior', 'Confused', 'Perplexed', 'Rejected', 'Excluded'],
   },
-  { emotion: 'Shy', related: ['Ashamed', 'Embarrassed'] },
-  { emotion: 'Surprised', related: [] },
+  { key: 'shy', emotion: 'Shy', related: ['Ashamed', 'Embarrassed'] },
+  { key: 'surprised', emotion: 'Surprised', related: [] },
   {
+    key: 'sad',
     emotion: 'Sad',
     related: ['Guilty', 'Remorseful', 'Fragile', 'Vulnerable', 'Hopeless', 'Lonely', 'Miserable', 'Depressed'],
   },
-  { emotion: 'Bored', related: ['Indifferent'] },
-  { emotion: 'Lonely', related: ['Isolated'] },
-  { emotion: 'Excited', related: ['Energetic'] },
+  { key: 'bored', emotion: 'Bored', related: ['Indifferent'] },
+  { key: 'lonely', emotion: 'Lonely', related: ['Isolated'] },
+  { key: 'excited', emotion: 'Excited', related: ['Energetic'] },
 ]
 
 export interface JournalField {
@@ -106,6 +116,8 @@ export interface StructuredJournalEntry {
   /** Seconds actually spent, timed live while writing. Absent on entries saved
    *  before this was tracked — never backfilled or guessed. */
   durationSeconds?: number
+  /** A FeelingChartEntry.key, if a mood check-in was picked. Optional — never required to save. */
+  mood?: string
 }
 
 /** A single random short prompt (as opposed to the timed, multi-section
@@ -125,6 +137,8 @@ export interface QuickPromptEntry {
   promptCategory: string
   promptText: string
   response: string
+  /** A FeelingChartEntry.key, if a mood check-in was picked. Optional — never required to save. */
+  mood?: string
 }
 
 export type JournalEntry = StructuredJournalEntry | QuickPromptEntry

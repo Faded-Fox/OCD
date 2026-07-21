@@ -10,6 +10,13 @@ const base = '/OCD/'
 // https://vite.dev/config/
 export default defineConfig({
   base,
+  // Small image assets (e.g. the mood icons) default to being base64-inlined into
+  // the JS bundle below ~4KB, which bloats that chunk and stops the file from
+  // being cached independently by the service worker. Keep every asset a real,
+  // separately-cacheable file instead.
+  build: {
+    assetsInlineLimit: 0,
+  },
   plugins: [
     react(),
     tailwindcss(),

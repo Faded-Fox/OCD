@@ -40,7 +40,7 @@ const SECTIONS: HelpSection[] = [
       '"Quick prompt" picks one short prompt at random from a pool spanning general intrusive thoughts, harm OCD, sexual intrusive thoughts, ROCD, postpartum, and CBT/ACT reframing — reroll for a different one, then free-write underneath.',
       'The saved-entries view is intentionally low-key: both structured templates flag re-reading past entries — or rerolling a quick prompt to find "the right" one — as a reassurance-seeking compulsion warning sign.',
       'Morning Anchor and OCD Wind Down entries show how long the entry actually took next to its date, timed live while writing. Quick prompts don\'t show a duration since that mode has no timer to begin with.',
-      'A collapsible "How do you feel?" card — on the Journal home screen and inside every entry mode — lists common emotions and related feeling words, for naming what you\'re feeling while writing. It\'s a reference only; nothing you tap there is saved anywhere.',
+      'A "How do you feel?" mood check-in — inside every entry mode — lets you tap one of 12 fox-illustrated emotions to save with the entry; tap it again to clear it. It\'s entirely optional, and picking one shows its related feeling words underneath (e.g. Happy also covers Optimistic, Proud, Content…). Whatever you pick shows up next to that entry in the saved-entries list.',
     ],
   },
   {

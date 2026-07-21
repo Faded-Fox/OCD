@@ -30,10 +30,11 @@ data lives only in this browser's IndexedDB until you export or delete it.
   intentionally low-key (mainly for export or bringing to a therapist) since these
   prompts flag re-reading past entries — or rerolling to find "the right" one — for
   reassurance as a compulsion warning sign. The two timed templates show how long
-  each entry actually took next to its date in the saved-entries list. A collapsible
-  "How do you feel?" reference card — adapted from a hand-drawn fox feelings wheel —
-  lists common emotions and related words for naming what you're feeling while
-  writing; it's reference only, nothing tapped there is saved.
+  each entry actually took next to its date in the saved-entries list. A "How do you
+  feel?" mood check-in — 12 fox-illustrated emotions cropped from a hand-drawn
+  feelings wheel — lets you optionally tap one to save with the entry (tap again to
+  clear it); picking one also shows its related feeling words. Saved moods show up
+  next to that entry in the saved-entries list.
 - **Focus Plan**: a 5-step worksheet for tasks OCD makes hard to start or finish —
   describe the task, break it into smaller parts with time estimates, schedule each
   part with OCD-safe rewards, plan an ERP response to the intrusions/urges likely to
