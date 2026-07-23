@@ -19,7 +19,7 @@ const SECTIONS: HelpSection[] = [
   {
     title: 'Sessions',
     body: [
-      'Search and filter every logged session at once — free text across notes, scenario, compulsions, and techniques, plus hierarchy, resistance, and date-range filters. Sort by date or peak SUDs.',
+      'Search and filter every logged session at once — free text across notes, scenario, compulsions, and techniques, plus hierarchy, resistance, exposure type, and date-range filters. Sort by date or peak SUDs.',
       'The Dashboard only shows the latest few sessions; this is the full browsable history.',
     ],
   },
@@ -31,6 +31,7 @@ const SECTIONS: HelpSection[] = [
       'If the hierarchy you type matches a planned Fear Ladder, its rungs show up as tappable rows — picking one fills in the rung number, scenario, and target SUDs range for you, though you can still edit any of it afterward.',
       'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save — the SUDs curve stays visible on this wrap-up screen too, and updates live if you correct a reading before saving.',
       'Typing in "Techniques used" or "Compulsions targeted" suggests matches as you go — techniques from a small built-in starter list plus anything you\'ve typed before, compulsions purely from your own past sessions (too personal for a built-in list). Tap a suggestion or arrow-key to it and hit Enter; nothing is ever picked automatically.',
+      'An optional "Exposure type" field tags the session as in-vivo, imaginal, or interoceptive — leave it as "Not specified" if that distinction doesn\'t matter for what you\'re tracking.',
     ],
   },
   {

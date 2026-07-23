@@ -1,4 +1,4 @@
-import type { Session, SudsReading } from './types'
+import type { ExposureType, Session, SudsReading } from './types'
 import { newId } from './session'
 
 export interface ParseResult {
@@ -144,6 +144,23 @@ function extractTargetRange(text: string): [number, number] | null {
 function extractVariation(text: string): string | null {
   const m = text.match(/variation\s*#?\s*:?\s*([A-Za-z0-9][A-Za-z0-9 ]{0,20})/i)
   return m ? m[1].trim() : null
+}
+
+function normalizeExposureType(text: string): ExposureType | null {
+  const lower = text.toLowerCase()
+  if (/in[\s-]?vivo/.test(lower)) return 'in-vivo'
+  if (lower.includes('imaginal')) return 'imaginal'
+  if (lower.includes('interoceptive')) return 'interoceptive'
+  return null
+}
+
+function extractExposureType(text: string): ExposureType | null {
+  const labeled = extractLabeled(text, ['exposure type', 'type of exposure'])
+  if (labeled) {
+    const normalized = normalizeExposureType(labeled)
+    if (normalized) return normalized
+  }
+  return normalizeExposureType(text)
 }
 
 function extractDuration(text: string): number | null {
@@ -336,6 +353,7 @@ function buildSession(block: string, index: number, usedFallback: boolean): Sess
   const rungDescription = extractLabeled(block, ['rung description', 'scenario']) ?? ''
   const targetRange = extractTargetRange(block)
   const variation = extractVariation(block)
+  const exposureType = extractExposureType(block)
   const plannedDuration = extractDuration(block)
   const readings = extractSudsReadings(block)
   if (readings.length === 0) flags.push('no SUDs readings found — please add manually')
@@ -366,6 +384,7 @@ function buildSession(block: string, index: number, usedFallback: boolean): Sess
     rung_description: rungDescription,
     target_suds_range: targetRange,
     variation,
+    exposure_type: exposureType,
     planned_duration_minutes: plannedDuration,
     readings,
     peak_suds: peak,

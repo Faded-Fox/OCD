@@ -4,7 +4,7 @@ import { useSessions } from '../lib/useSessions'
 import { deleteSession, updateSession } from '../lib/db'
 import { displayCurve } from '../lib/insights'
 import { colorForHierarchy } from '../lib/colors'
-import type { Session } from '../lib/types'
+import { EXPOSURE_TYPE_LABELS, type Session } from '../lib/types'
 import { Card, EmptyState, Badge, SecondaryButton, PrimaryButton } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 import SessionFields from '../components/SessionFields'
@@ -110,8 +110,13 @@ export default function SessionDetail() {
           ← {session.hierarchy || 'Unlabeled'}
         </Link>
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <HierarchyBadge hierarchy={session.hierarchy} />
+            {session.exposure_type && (
+              <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                {EXPOSURE_TYPE_LABELS[session.exposure_type]}
+              </Badge>
+            )}
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
               Rung {session.rung ?? '—'}
               {session.variation ? ` · ${session.variation}` : ''}

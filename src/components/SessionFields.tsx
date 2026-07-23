@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import type { Session, SudsReading } from '../lib/types'
+import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session, type SudsReading } from '../lib/types'
 import { useSessions } from '../lib/useSessions'
 import { SUGGESTED_TECHNIQUES } from '../lib/techniques'
 
@@ -69,6 +69,22 @@ export default function SessionFields({
             onChange={(e) => onChange({ variation: e.target.value || null })}
             className={inputClass}
           />
+        </Field>
+        <Field label="Exposure type">
+          <select
+            value={session.exposure_type ?? ''}
+            onChange={(e) =>
+              onChange({ exposure_type: e.target.value === '' ? null : (e.target.value as ExposureType) })
+            }
+            className={inputClass}
+          >
+            <option value="">Not specified</option>
+            {EXPOSURE_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {EXPOSURE_TYPE_LABELS[t]}
+              </option>
+            ))}
+          </select>
         </Field>
       </div>
 

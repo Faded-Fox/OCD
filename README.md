@@ -20,7 +20,8 @@ data lives only in this browser's IndexedDB until you export or delete it.
   autocomplete as you type — techniques from a small built-in list plus your own
   past entries, compulsions purely from your own history, since those are too
   personal for a built-in list. A real dropdown, not the native `<datalist>`
-  element, since Safari doesn't reliably render that at all.
+  element, since Safari doesn't reliably render that at all. An optional
+  "Exposure type" field tags a session as in-vivo, imaginal, or interoceptive.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
   citations, and compulsion-warning signs from their source templates built in. A
@@ -71,8 +72,9 @@ data lives only in this browser's IndexedDB until you export or delete it.
   hierarchy, rung, or SUDs reading no longer means deleting and re-importing.
 - **Sessions**: search and filter every logged session at once, across all
   hierarchies — free text (notes, scenario, compulsions, techniques), hierarchy,
-  resistance, and date range, with sort by date or peak SUDs. The Dashboard's
-  "Recent sessions" only shows the latest few; this is the full browsable list.
+  resistance, exposure type, and date range, with sort by date or peak SUDs. The
+  Dashboard's "Recent sessions" only shows the latest few; this is the full
+  browsable list.
 - **Backup & restore**: export all data as JSON from Settings, then bring it back
   any time by pasting or uploading that same file on the Import screen — it's
   detected automatically and offered as a restore instead of parsed as a new

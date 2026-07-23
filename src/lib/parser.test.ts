@@ -25,6 +25,7 @@ Rung: 4
 Rung description: Touch the restroom door handle without washing hands afterward
 Target SUDs range: 2-5
 Variation: rush hour
+Exposure type: In-vivo
 Planned duration: 20 min
 
 Pre-exposure SUDs: 6
@@ -54,6 +55,7 @@ Notes: Noticed the urge faded faster than last time.
     expect(s.rung).toBe(4)
     expect(s.target_suds_range).toEqual([2, 5])
     expect(s.variation).toBe('rush hour')
+    expect(s.exposure_type).toBe('in-vivo')
     expect(s.planned_duration_minutes).toBe(20)
   })
 
@@ -201,6 +203,32 @@ Pre-exposure SUDs: 6
     // while still being invalid JSON in between.
     const result = parseImportText('{not actually valid json}')
     expect(result.warnings.some((w) => w.includes('failed to parse'))).toBe(true)
+  })
+})
+
+describe('parseImportText — exposure type detection', () => {
+  it('detects imaginal from an unlabeled mention', () => {
+    const text = `Session Log\nDate: 2026-02-01\nHierarchy: Harm\nRung: 2\nThis was an imaginal exposure — I imagined the intrusive scenario in detail.\nPre-exposure SUDs: 5\nEnd SUDs: 3`
+    const s = parseImportText(text).sessions[0]
+    expect(s.exposure_type).toBe('imaginal')
+  })
+
+  it('detects interoceptive from an unlabeled mention', () => {
+    const text = `Session Log\nDate: 2026-02-01\nHierarchy: Panic\nRung: 1\nRan an interoceptive exposure — spinning in a chair to bring on dizziness.\nPre-exposure SUDs: 5\nEnd SUDs: 3`
+    const s = parseImportText(text).sessions[0]
+    expect(s.exposure_type).toBe('interoceptive')
+  })
+
+  it('normalizes "in vivo" (no hyphen) the same as "in-vivo"', () => {
+    const text = `Session Log\nDate: 2026-02-01\nHierarchy: Contamination\nRung: 2\nExposure type: in vivo\nPre-exposure SUDs: 5\nEnd SUDs: 3`
+    const s = parseImportText(text).sessions[0]
+    expect(s.exposure_type).toBe('in-vivo')
+  })
+
+  it('leaves exposure_type null when nothing indicates a type', () => {
+    const text = `Session Log\nDate: 2026-02-01\nHierarchy: Contamination\nRung: 2\nPre-exposure SUDs: 5\nEnd SUDs: 3`
+    const s = parseImportText(text).sessions[0]
+    expect(s.exposure_type).toBeNull()
   })
 })
 

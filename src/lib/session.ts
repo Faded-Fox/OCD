@@ -17,6 +17,7 @@ export function createEmptySession(): Session {
     rung_description: '',
     target_suds_range: null,
     variation: null,
+    exposure_type: null,
     planned_duration_minutes: null,
     readings: [],
     peak_suds: null,

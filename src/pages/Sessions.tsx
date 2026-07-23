@@ -4,15 +4,17 @@ import { useSessions } from '../lib/useSessions'
 import { Card, EmptyState, PrimaryButton, SecondaryButton } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 import { inputClass } from '../components/SessionFields'
-import type { Session } from '../lib/types'
+import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type Session } from '../lib/types'
 
 type SortOrder = 'newest' | 'oldest' | 'peak-desc' | 'peak-asc'
 type ResistanceFilter = 'any' | 'full' | 'partial' | 'unknown'
+type ExposureTypeFilter = 'all' | 'unspecified' | (typeof EXPOSURE_TYPES)[number]
 
 const emptyFilters = {
   query: '',
   hierarchy: 'all',
   resistance: 'any' as ResistanceFilter,
+  exposureType: 'all' as ExposureTypeFilter,
   dateFrom: '',
   dateTo: '',
   sort: 'newest' as SortOrder,
@@ -52,6 +54,13 @@ export default function Sessions() {
       if (filters.resistance === 'full' && s.compulsions_resisted !== true) return false
       if (filters.resistance === 'partial' && s.compulsions_resisted !== false) return false
       if (filters.resistance === 'unknown' && s.compulsions_resisted !== null) return false
+      if (filters.exposureType === 'unspecified' && s.exposure_type !== null) return false
+      if (
+        filters.exposureType !== 'all' &&
+        filters.exposureType !== 'unspecified' &&
+        s.exposure_type !== filters.exposureType
+      )
+        return false
       if (filters.dateFrom && s.date < filters.dateFrom) return false
       if (filters.dateTo && s.date > filters.dateTo) return false
       return true
@@ -78,6 +87,7 @@ export default function Sessions() {
     filters.query !== '' ||
     filters.hierarchy !== 'all' ||
     filters.resistance !== 'any' ||
+    filters.exposureType !== 'all' ||
     filters.dateFrom !== '' ||
     filters.dateTo !== ''
 
@@ -119,7 +129,7 @@ export default function Sessions() {
           placeholder="Search notes, scenario, compulsions, techniques…"
           className={`${inputClass} h-10 py-0`}
         />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Hierarchy
@@ -150,6 +160,24 @@ export default function Sessions() {
               <option value="full">Fully resisted</option>
               <option value="partial">Partial</option>
               <option value="unknown">Unknown</option>
+            </select>
+          </label>
+          <label className="flex min-w-0 flex-col gap-1">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Exposure type
+            </span>
+            <select
+              value={filters.exposureType}
+              onChange={(e) => patch({ exposureType: e.target.value as ExposureTypeFilter })}
+              className={`${inputClass} h-10 min-w-0 py-0`}
+            >
+              <option value="all">All</option>
+              {EXPOSURE_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {EXPOSURE_TYPE_LABELS[t]}
+                </option>
+              ))}
+              <option value="unspecified">Not specified</option>
             </select>
           </label>
           <label className="flex min-w-0 flex-col gap-1">
@@ -222,6 +250,11 @@ export default function Sessions() {
                     {s.rung !== null ? `Rung ${s.rung}` : 'Rung —'}
                     {s.variation ? ` · ${s.variation}` : ''}
                   </span>
+                  {s.exposure_type && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {EXPOSURE_TYPE_LABELS[s.exposure_type]}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                   <span>{s.date || 'no date'}</span>

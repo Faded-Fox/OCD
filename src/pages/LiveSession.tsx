@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { createEmptySession } from '../lib/session'
-import type { Session } from '../lib/types'
+import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session } from '../lib/types'
 import { colorForHierarchy } from '../lib/colors'
 import { displayCurve } from '../lib/insights'
 import { useFearLadders } from '../lib/useFearLadders'
@@ -204,6 +204,25 @@ export default function LiveSession() {
                 className={inputClass}
               />
             </Field>
+            <Field label="Exposure type">
+              <select
+                value={session.exposure_type ?? ''}
+                onChange={(e) =>
+                  setSession((s) => ({
+                    ...s,
+                    exposure_type: e.target.value === '' ? null : (e.target.value as ExposureType),
+                  }))
+                }
+                className={inputClass}
+              >
+                <option value="">Not specified</option>
+                {EXPOSURE_TYPES.map((t) => (
+                  <option key={t} value={t}>
+                    {EXPOSURE_TYPE_LABELS[t]}
+                  </option>
+                ))}
+              </select>
+            </Field>
             <Field label="Target SUDs range">
               <TargetRangeInput
                 value={session.target_suds_range}
@@ -303,6 +322,7 @@ export default function LiveSession() {
           <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
             {session.hierarchy} · Rung {session.rung}
             {session.variation ? ` · ${session.variation}` : ''}
+            {session.exposure_type ? ` · ${EXPOSURE_TYPE_LABELS[session.exposure_type]}` : ''}
           </span>
           <span className="text-5xl font-semibold tabular-nums text-slate-900 dark:text-white">
             {formatElapsed(elapsedMs)}

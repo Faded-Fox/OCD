@@ -1,5 +1,15 @@
 export type ReadingLabel = 'pre' | 'reread' | 'end' | string
 
+export type ExposureType = 'in-vivo' | 'imaginal' | 'interoceptive'
+
+export const EXPOSURE_TYPES: ExposureType[] = ['in-vivo', 'imaginal', 'interoceptive']
+
+export const EXPOSURE_TYPE_LABELS: Record<ExposureType, string> = {
+  'in-vivo': 'In-vivo',
+  imaginal: 'Imaginal',
+  interoceptive: 'Interoceptive',
+}
+
 export interface SudsReading {
   label: ReadingLabel
   /** Free-form: a clock time ("10:42am"), a minute offset (5), or a descriptive label ("reread") */
@@ -19,6 +29,8 @@ export interface Session {
   rung_description: string
   target_suds_range: [number, number] | null
   variation: string | null
+  /** null = not specified — most existing/imported logs won't have this tagged */
+  exposure_type: ExposureType | null
   planned_duration_minutes: number | null
   readings: SudsReading[]
   peak_suds: number | null
