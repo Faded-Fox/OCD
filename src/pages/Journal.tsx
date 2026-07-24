@@ -304,27 +304,28 @@ function JournalForm({
               ))}
             </div>
           ) : (
-            section.fields.map((f) =>
-              f.multiline ? (
-                <textarea
-                  key={f.key}
-                  value={fields[f.key] ?? ''}
-                  onChange={(e) => setField(f.key, e.target.value)}
-                  placeholder={f.placeholder}
-                  rows={3}
-                  className={inputClass}
-                />
-              ) : (
-                <input
-                  key={f.key}
-                  type="text"
-                  value={fields[f.key] ?? ''}
-                  onChange={(e) => setField(f.key, e.target.value)}
-                  placeholder={f.placeholder}
-                  className={inputClass}
-                />
-              ),
-            )
+            section.fields.map((f) => (
+              <div key={f.key} className="flex flex-col gap-1.5">
+                {f.placeholder && (
+                  <p className="text-sm italic text-slate-500 dark:text-slate-400">{f.placeholder}</p>
+                )}
+                {f.multiline ? (
+                  <textarea
+                    value={fields[f.key] ?? ''}
+                    onChange={(e) => setField(f.key, e.target.value)}
+                    rows={3}
+                    className={inputClass}
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={fields[f.key] ?? ''}
+                    onChange={(e) => setField(f.key, e.target.value)}
+                    className={inputClass}
+                  />
+                )}
+              </div>
+            ))
           )}
         </Card>
       ))}
