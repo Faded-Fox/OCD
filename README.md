@@ -119,8 +119,11 @@ data lives only in this browser's IndexedDB until you export or delete it.
   written and stored entirely on this device, since unlike the SUDs scale or
   defusion techniques this content is inherently personal (and a real
   contact's name and phone number should never end up in a public repo).
-- **Settings**: export all data as JSON, or permanently delete everything on this
-  device.
+- **Settings**: export all data as JSON, request persistent storage (asks the
+  browser to exempt this app's data from automatic eviction under storage
+  pressure — a best-effort signal, not a guarantee, so it's a complement to
+  backups rather than a replacement for them), or permanently delete everything
+  on this device.
 - **Help**: a "?" icon in the header links to a single reference page summarizing
   what every tab does and a few workflows that aren't obvious from the UI alone
   (e.g. Focus Plan debriefs being meant for later, or the Import screen doubling

@@ -105,14 +105,15 @@ const SECTIONS: HelpSection[] = [
     title: 'Backup, restore, and iPhone storage',
     body: [
       'Everything lives only in this browser\'s local storage — there\'s no account and no cloud sync, so nothing is recoverable if the app is deleted or the browser clears its storage (which iOS can do on its own after a period of disuse).',
-      'The fix: Settings → "Export all data as JSON" downloads everything (sessions, journal entries, focus plans, fear ladders, flare guide, values) into one file. Keep that file somewhere that survives an app deletion — the Files app, iCloud Drive, emailing it to yourself.',
+      'Settings → "Storage persistence" asks the browser to mark this data as persistent, which can lower the odds of it being cleared automatically — but support and behavior vary by browser, and it\'s a best-effort signal, not a guarantee.',
+      'The reliable fix either way: Settings → "Export all data as JSON" downloads everything (sessions, journal entries, focus plans, fear ladders, flare guide, values) into one file. Keep that file somewhere that survives an app deletion — the Files app, iCloud Drive, emailing it to yourself.',
       'To bring it back, paste or upload that same file on the Import screen. It restores by matching IDs, so restoring the same backup twice (or onto a device with some overlapping data) won\'t create duplicates.',
     ],
   },
   {
     title: 'Settings',
     body: [
-      'Shows how much is stored on this device, the export/backup card described above, and a "Delete all data" option that permanently erases everything after typing "delete" to confirm.',
+      'Shows how much is stored on this device, a storage-persistence status with a button to request it, the export/backup card described above, and a "Delete all data" option that permanently erases everything after typing "delete" to confirm.',
     ],
   },
 ]

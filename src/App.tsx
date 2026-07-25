@@ -1,7 +1,8 @@
-import { lazy } from 'react'
+import { lazy, useEffect } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
+import { requestPersistentStorage } from './lib/persistence'
 
 // Dashboard is the landing page, so it stays eagerly loaded — everything else
 // only needs to load once someone actually navigates there, keeping the first
@@ -21,6 +22,12 @@ const ValuesPage = lazy(() => import('./pages/Values'))
 const TherapistSummary = lazy(() => import('./pages/TherapistSummary'))
 
 export default function App() {
+  // Fire-and-forget: asks the browser once per load to treat this origin's
+  // storage as persistent. Silent no-op where unsupported; see lib/persistence.ts.
+  useEffect(() => {
+    requestPersistentStorage()
+  }, [])
+
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Routes>

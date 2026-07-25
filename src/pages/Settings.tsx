@@ -11,6 +11,7 @@ import { isFlareGuideEmpty } from '../lib/flareGuide'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { isValuesGuideEmpty } from '../lib/values'
 import { describeBackupCounts } from '../lib/backup'
+import { useStoragePersistence } from '../lib/useStoragePersistence'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 
 export default function Settings() {
@@ -20,6 +21,8 @@ export default function Settings() {
   const { ladders: fearLadders } = useFearLadders()
   const { guide: flareGuide } = useFlareGuide()
   const { guide: valuesGuide } = useValuesGuide()
+  const { status: persistenceStatus, request: requestPersistence, requesting: requestingPersistence } =
+    useStoragePersistence()
   const navigate = useNavigate()
   const [confirmText, setConfirmText] = useState('')
   const [exporting, setExporting] = useState(false)
@@ -71,6 +74,27 @@ export default function Settings() {
           data is stored locally in your browser's IndexedDB. There is no backend, no account, no analytics, and
           nothing is ever transmitted off this device. Uninstalling the app, clearing site data, or (on iPhone) not
           opening it for a while can all remove everything — export a backup below so a reinstall isn't a data loss.
+        </p>
+      </Card>
+
+      <Card>
+        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Storage persistence</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          {persistenceStatus === 'unsupported' &&
+            "This browser doesn't support requesting persistent storage — regular backups (below) are the reliable way to protect your data here."}
+          {persistenceStatus === 'checking' && 'Checking…'}
+          {persistenceStatus === 'granted' &&
+            "Granted — this browser has marked PocketFox's storage as persistent, making it less likely to be cleared automatically if the device is low on space or the app goes unused for a while."}
+          {persistenceStatus === 'not-granted' &&
+            "Not currently granted. Requesting it won't change anything you do day to day, but it may lower the odds of the browser silently clearing this app's data."}
+        </p>
+        {persistenceStatus === 'not-granted' && (
+          <SecondaryButton onClick={requestPersistence} disabled={requestingPersistence} className="mt-3">
+            {requestingPersistence ? 'Requesting…' : 'Request persistent storage'}
+          </SecondaryButton>
+        )}
+        <p className="mt-3 text-xs text-slate-400">
+          This is a best-effort browser signal, not a guarantee — it doesn't replace exporting a backup.
         </p>
       </Card>
 
