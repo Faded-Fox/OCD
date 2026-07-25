@@ -19,6 +19,7 @@ import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import foxMorning from '../assets/fox-morning.webp'
 import foxWindDown from '../assets/fox-wind-down.webp'
 import foxQuickPrompt from '../assets/fox-quick-prompt.webp'
+import foxIntrusiveThought from '../assets/fox-intrusive-thought.webp'
 import foxMoodAngry from '../assets/mood/fox-mood-angry.webp'
 import foxMoodCalm from '../assets/mood/fox-mood-calm.webp'
 import foxMoodFrustrated from '../assets/mood/fox-mood-frustrated.webp'
@@ -182,15 +183,7 @@ export default function Journal() {
       </Card>
 
       <Card className="flex flex-col gap-3">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-8 w-8">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 3c-4.5 0-7.5 2.9-7.5 6.5 0 2 1 3.6 2.5 4.7-.2 1-.7 1.8-1.5 2.4 1.3.3 2.6 0 3.6-.7.9.3 1.9.4 2.9.4 4.5 0 7.5-2.9 7.5-6.5S16.5 3 12 3z"
-            />
-          </svg>
-        </div>
+        <img src={foxIntrusiveThought} alt="" className="h-16 w-16 self-start" />
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Intrusive thought</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
