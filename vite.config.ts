@@ -4,8 +4,10 @@ import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // Served from https://<owner>.github.io/OCD/ as a GitHub Pages project site,
-// so all asset/manifest URLs need to be rooted at /OCD/ rather than /.
-const base = '/OCD/'
+// so all asset/manifest URLs need to be rooted at /OCD/ rather than / — except
+// for the Capacitor native-app build, which serves files from its own local
+// root and has no /OCD/ path segment at all.
+const base = process.env.CAPACITOR_BUILD ? '/' : '/OCD/'
 
 // https://vite.dev/config/
 export default defineConfig({

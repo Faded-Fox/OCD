@@ -164,3 +164,34 @@ cut the JS a fresh install has to parse before first paint from ~868KB to
 ~354KB. The service worker still precaches every chunk in the background
 regardless of whether it's been visited yet, so offline support isn't
 affected.
+
+### Native Android build (Capacitor)
+
+`android/` is a [Capacitor](https://capacitorjs.com/) wrapper around this same
+web app, for anyone who wants an installable APK rather than (or in addition
+to) the PWA's "Add to Home Screen". It's a normal Android Studio/Gradle
+project — nothing about it is Anthropic- or Claude-specific, it just needs a
+machine with normal internet access to fetch the Android Gradle Plugin and
+SDK from Google's servers (`google()`/`dl.google.com`), which the sandbox this
+was scaffolded in has no access to.
+
+To build it:
+
+```bash
+npm run build:capacitor  # builds the web app with base path "/" instead of "/OCD/"
+npx cap sync android      # copies the build output into android/app/src/main/assets/public
+```
+
+Then open `android/` in Android Studio and hit Run (it downloads its own SDK
+components automatically on first open), or from a terminal:
+
+```bash
+cd android
+./gradlew assembleDebug   # unsigned debug APK, sideloadable as-is
+# APK lands at android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+`build:capacitor` exists because the regular `npm run build` is rooted at
+`/OCD/` for GitHub Pages — the native app instead loads its assets from its
+own local root, so it needs the `CAPACITOR_BUILD=1` env var (see
+`vite.config.ts`) to build with base path `/`.
