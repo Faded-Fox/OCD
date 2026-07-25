@@ -27,9 +27,13 @@ data lives only in this browser's IndexedDB until you export or delete it.
   citations, and compulsion-warning signs from their source templates built in. A
   third "Quick prompt" mode picks one short prompt at random from a pool spanning
   general intrusive thoughts, harm OCD, sexual intrusive thoughts, ROCD, postpartum,
-  and CBT/ACT reframing, with a free-write box underneath. The saved-entries view is
-  intentionally low-key (mainly for export or bringing to a therapist) since these
-  prompts flag re-reading past entries — or rerolling to find "the right" one — for
+  and CBT/ACT reframing, with a free-write box underneath. A fourth "Intrusive
+  thought" mode is a one-tap capture with no text field at all — tag the thought's
+  theme (contamination, harm, relationship, moral, checking, health, existential,
+  other) and save, since writing the thought out is itself a way of engaging with
+  it rather than just observing it. The saved-entries view is intentionally
+  low-key (mainly for export or bringing to a therapist) since these modes flag
+  re-reading past entries — or rerolling to find "the right" one — for
   reassurance as a compulsion warning sign. The two timed templates show how long
   each entry actually took next to its date in the saved-entries list. A "How do you
   feel?" mood check-in — 12 fox-illustrated emotions cropped from a hand-drawn

@@ -5,11 +5,14 @@ import {
   FEELINGS_CHART,
   JOURNAL_TEMPLATES,
   QUICK_PROMPTS,
+  THOUGHT_THEMES,
   pickRandomQuickPrompt,
   type JournalType,
   type QuickPrompt,
   type QuickPromptEntry,
   type StructuredJournalEntry,
+  type ThoughtEntry,
+  type ThoughtTheme,
 } from '../lib/journal'
 import { useJournalEntries } from '../lib/useJournalEntries'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
@@ -44,7 +47,7 @@ const MOOD_IMAGES: Record<string, string> = {
   excited: foxMoodExcited,
 }
 
-type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick'
+type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick' | 'thought'
 
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
@@ -77,6 +80,15 @@ export default function Journal() {
           setActiveType(null)
           setPhase('landing')
         }}
+      />
+    )
+  }
+
+  if (phase === 'thought') {
+    return (
+      <ThoughtCaptureView
+        onDone={() => setPhase('saved')}
+        onCancel={() => setPhase('landing')}
       />
     )
   }
@@ -122,8 +134,8 @@ export default function Journal() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Journal</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Two short, structured prompts — not free-form journaling. Both are designed to stay brief and avoid
-          becoming reassurance-seeking; each one tells you what to watch for.
+          Four short ways to journal — not free-form writing. Each is designed to stay brief and avoid
+          becoming reassurance-seeking, and tells you what to watch for.
         </p>
       </div>
 
@@ -167,6 +179,27 @@ export default function Journal() {
         {QUICK_PROMPTS.length === 0 && (
           <p className="text-xs text-slate-400">No prompts added yet.</p>
         )}
+      </Card>
+
+      <Card className="flex flex-col gap-3">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-8 w-8">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 3c-4.5 0-7.5 2.9-7.5 6.5 0 2 1 3.6 2.5 4.7-.2 1-.7 1.8-1.5 2.4 1.3.3 2.6 0 3.6-.7.9.3 1.9.4 2.9.4 4.5 0 7.5-2.9 7.5-6.5S16.5 3 12 3z"
+            />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Intrusive thought</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Tag the theme and save — no writing, no explaining. Noticing it without acting on it is the exercise.
+          </p>
+        </div>
+        <PrimaryButton onClick={() => setPhase('thought')} className="self-start">
+          Log it
+        </PrimaryButton>
       </Card>
 
       <button
@@ -453,6 +486,83 @@ function QuickPromptView({
   )
 }
 
+function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
+  const [theme, setTheme] = useState<ThoughtTheme | null>(null)
+  const [mood, setMood] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  const save = async () => {
+    if (!theme) return
+    setSaving(true)
+    const entry: ThoughtEntry = {
+      id: newId(),
+      type: 'thought',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString(),
+      theme,
+      mood: mood ?? undefined,
+    }
+    await addJournalEntry(entry)
+    setSaving(false)
+    onDone()
+  }
+
+  return (
+    <div className="flex flex-col gap-6 py-4">
+      <div>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-sm text-emerald-700 hover:underline dark:text-emerald-400"
+        >
+          ← Journal
+        </button>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Intrusive thought</h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          What theme is this? Tap one, then save — that's the whole exercise.
+        </p>
+      </div>
+
+      <Card>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {THOUGHT_THEMES.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setTheme(theme === t.key ? null : t.key)}
+              className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                theme === t.key
+                  ? 'border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-300'
+                  : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+        <p className="text-sm text-amber-800 dark:text-amber-300">
+          No need to write it out, explain it, or figure out whether it's true. Naming the theme and moving on
+          is the point — writing out the thought itself just re-engages with it.
+        </p>
+      </Card>
+
+      <MoodPicker value={mood} onChange={setMood} />
+
+      <div className="flex gap-3">
+        <SecondaryButton onClick={onCancel} disabled={saving}>
+          Discard
+        </SecondaryButton>
+        <PrimaryButton onClick={save} disabled={saving || !theme}>
+          {saving ? 'Saving…' : 'Save'}
+        </PrimaryButton>
+      </div>
+    </div>
+  )
+}
+
 function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood: string | null) => void }) {
   const selected = FEELINGS_CHART.find((f) => f.key === value)
   return (
@@ -515,8 +625,8 @@ function HistoryView({ onBack }: { onBack: () => void }) {
         </button>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Saved entries</h1>
         <p className="mt-1 max-w-xl text-sm text-slate-500 dark:text-slate-400">
-          Mainly here for export or to bring to your therapist. Both prompts flag re-reading past entries for
-          reassurance as a compulsion warning sign — worth keeping in mind while browsing.
+          Mainly here for export or to bring to your therapist. Re-reading past entries for reassurance is a
+          compulsion warning sign flagged throughout Journal — worth keeping in mind while browsing.
         </p>
       </div>
 
@@ -531,6 +641,14 @@ function HistoryView({ onBack }: { onBack: () => void }) {
           {entries.map((entry) =>
             entry.type === 'quick' ? (
               <QuickEntryCard
+                key={entry.id}
+                entry={entry}
+                expanded={expandedId === entry.id}
+                onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                onDelete={() => remove(entry.id)}
+              />
+            ) : entry.type === 'thought' ? (
+              <ThoughtEntryCard
                 key={entry.id}
                 entry={entry}
                 expanded={expandedId === entry.id}
@@ -691,6 +809,35 @@ function QuickEntryCard({
         <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Response</p>
         <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{entry.response}</p>
       </div>
+    </EntryCardShell>
+  )
+}
+
+function ThoughtEntryCard({
+  entry,
+  expanded,
+  onToggle,
+  onDelete,
+}: {
+  entry: ThoughtEntry
+  expanded: boolean
+  onToggle: () => void
+  onDelete: () => void
+}) {
+  const theme = THOUGHT_THEMES.find((t) => t.key === entry.theme)
+  return (
+    <EntryCardShell
+      badge={`Intrusive thought · ${theme?.label ?? entry.theme}`}
+      badgeClass="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+      date={entry.date}
+      extra={entry.mood ? <MoodBadge moodKey={entry.mood} /> : undefined}
+      expanded={expanded}
+      onToggle={onToggle}
+      onDelete={onDelete}
+    >
+      <p className="text-sm text-slate-600 dark:text-slate-300">
+        Noticed and tagged — no other detail was saved with this entry, by design.
+      </p>
     </EntryCardShell>
   )
 }

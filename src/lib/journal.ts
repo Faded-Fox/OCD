@@ -141,7 +141,42 @@ export interface QuickPromptEntry {
   mood?: string
 }
 
-export type JournalEntry = StructuredJournalEntry | QuickPromptEntry
+export type ThoughtTheme =
+  | 'contamination'
+  | 'harm'
+  | 'relationship'
+  | 'moral'
+  | 'checking'
+  | 'health'
+  | 'existential'
+  | 'other'
+
+export const THOUGHT_THEMES: { key: ThoughtTheme; label: string }[] = [
+  { key: 'contamination', label: 'Contamination' },
+  { key: 'harm', label: 'Harm' },
+  { key: 'relationship', label: 'Relationship' },
+  { key: 'moral', label: 'Moral' },
+  { key: 'checking', label: 'Checking' },
+  { key: 'health', label: 'Health' },
+  { key: 'existential', label: 'Existential' },
+  { key: 'other', label: 'Other' },
+]
+
+/** A one-tap capture for noticing an intrusive thought without engaging it — no
+ *  free-text field on purpose. Writing the thought out (even to reframe it) is
+ *  still a form of engaging with its content; naming the theme and moving on is
+ *  the exercise. */
+export interface ThoughtEntry {
+  id: string
+  type: 'thought'
+  date: string
+  createdAt: string
+  theme: ThoughtTheme
+  /** A FeelingChartEntry.key, if a mood check-in was picked. Optional — never required to save. */
+  mood?: string
+}
+
+export type JournalEntry = StructuredJournalEntry | QuickPromptEntry | ThoughtEntry
 
 export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
   morning: {
