@@ -33,6 +33,19 @@ jobs:
           key: gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties', 'android/build.gradle', 'android/app/build.gradle') }}
           restore-keys: gradle-
 
+      # Every GitHub Actions run starts from a brand-new VM, and Gradle's
+      # default debug signing config auto-generates ~/.android/debug.keystore
+      # with a fresh random key if the file doesn't exist — so without this
+      # cache, every run signs the APK with a *different* key, Android treats
+      # each build as a different app, and installing a new one over an old
+      # one fails (forcing an uninstall first). Caching the keystore itself
+      # keeps the signing key identical across runs, so future installs
+      # update in place instead.
+      - uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: debug-keystore-v1
+
       - run: npm ci
 
       # Rooted at "/" instead of "/OCD/" — the native app loads its assets from
