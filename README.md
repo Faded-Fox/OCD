@@ -195,3 +195,21 @@ cd android
 `/OCD/` for GitHub Pages — the native app instead loads its assets from its
 own local root, so it needs the `CAPACITOR_BUILD=1` env var (see
 `vite.config.ts`) to build with base path `/`.
+
+**Or skip building it locally entirely:** the "Build Android APK" GitHub
+Actions workflow (`.github/workflows/android-apk.yml`) does the same steps on
+GitHub's own runners, which — unlike the sandbox this was scaffolded in —
+have normal access to Google's servers. It's manual-only (it doesn't run on
+every push); trigger it from the repo's Actions tab → "Build Android APK" →
+"Run workflow". Once it finishes, the APK is published to the same URL every
+time, so it's safe to bookmark or open straight from a phone's browser:
+
+```
+https://github.com/Faded-Fox/OCD/releases/download/android-apk-latest/app-debug.apk
+```
+
+Opening that link on an Android phone downloads the APK; Android will ask for
+one-time permission to "install unknown apps" for whichever app did the
+download (Chrome, Files, etc.), then installs it like any other app. It's an
+unsigned debug build — fine for sideloading onto your own device, not meant
+for the Play Store.

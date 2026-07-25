@@ -1,0 +1,73 @@
+name: Build Android APK
+
+# Manual only — this doesn't run on every push, since most commits don't touch
+# the native Android wrapper at all. Trigger it from the Actions tab whenever
+# you want a fresh APK built from the current main branch.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties', 'android/build.gradle', 'android/app/build.gradle') }}
+          restore-keys: gradle-
+
+      - run: npm ci
+
+      # Rooted at "/" instead of "/OCD/" — the native app loads its assets from
+      # its own local root, not a GitHub Pages subpath. See CAPACITOR_BUILD in
+      # vite.config.ts.
+      - run: npm run build:capacitor
+      - run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      # Uploads to the same release tag every run, so the download URL never
+      # changes — the whole point is a stable link to open on a phone.
+      - name: Publish to a stable rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=android/app/build/outputs/apk/debug/app-debug.apk
+          TAG=android-apk-latest
+          NOTES="Unsigned debug build for sideloading only — not signed for or published to the Play Store. Built from commit ${GITHUB_SHA} on $(date -u +%Y-%m-%d). This same URL is replaced with the newest build every time this workflow runs, so it's safe to bookmark."
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$APK" --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes "$NOTES"
+          else
+            gh release create "$TAG" "$APK" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "PocketFox Companion — Android (debug APK)" \
+              --notes "$NOTES"
+          fi
+          {
+            echo "### APK ready"
+            echo "Download URL (open this on the phone you want to install it on):"
+            echo ""
+            echo "https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/app-debug.apk"
+          } >> "$GITHUB_STEP_SUMMARY"
