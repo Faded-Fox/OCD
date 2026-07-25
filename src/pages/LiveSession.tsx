@@ -6,6 +6,8 @@ import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session }
 import { colorForHierarchy } from '../lib/colors'
 import { displayCurve } from '../lib/insights'
 import { useFearLadders } from '../lib/useFearLadders'
+import { useValuesGuide } from '../lib/useValuesGuide'
+import { pickRandomValue, type ValueItem } from '../lib/values'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput } from '../components/SessionFields'
 import SudsChart from '../components/SudsChart'
@@ -41,6 +43,9 @@ function formatElapsed(ms: number): string {
 export default function LiveSession() {
   const navigate = useNavigate()
   const { ladders } = useFearLadders()
+  const { guide: valuesGuide, loading: valuesLoading } = useValuesGuide()
+  const [reminder, setReminder] = useState<ValueItem | null>(null)
+  const [reminderPicked, setReminderPicked] = useState(false)
   const [phase, setPhase] = useState<Phase>('setup')
   const [session, setSession] = useState<Session>(createEmptySession)
   const [startedAt, setStartedAt] = useState<number | null>(null)
@@ -60,6 +65,15 @@ export default function LiveSession() {
       setRestoredNotice(true)
     }
   }, [])
+
+  // Pick once per visit to this screen rather than re-rolling on every keystroke —
+  // reads as a single "remember this" moment, not a slot machine.
+  useEffect(() => {
+    if (!valuesLoading && !reminderPicked) {
+      setReminder(pickRandomValue(valuesGuide))
+      setReminderPicked(true)
+    }
+  }, [valuesLoading, valuesGuide, reminderPicked])
 
   // Persist progress once a session is actually underway — nothing to lose during setup.
   useEffect(() => {
@@ -175,6 +189,14 @@ export default function LiveSession() {
             device the whole time.
           </p>
         </div>
+        {reminder && (
+          <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">
+              <span className="mr-1 text-lg leading-none">{reminder.icon || '⭐'}</span>
+              Remember — you're doing this because <span className="font-medium">{reminder.label}</span> matters.
+            </p>
+          </Card>
+        )}
         <Card className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Hierarchy">

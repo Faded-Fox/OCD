@@ -6,6 +6,8 @@ import { useFocusPlanEntries } from '../lib/useFocusPlanEntries'
 import { useFearLadders } from '../lib/useFearLadders'
 import { useFlareGuide } from '../lib/useFlareGuide'
 import { isFlareGuideEmpty } from '../lib/flareGuide'
+import { useValuesGuide } from '../lib/useValuesGuide'
+import { isValuesGuideEmpty } from '../lib/values'
 import {
   compulsionResistanceRate,
   compulsionResistanceRateByHierarchy,
@@ -28,6 +30,7 @@ export default function Dashboard() {
   const { entries: focusPlans } = useFocusPlanEntries()
   const { ladders: fearLadders } = useFearLadders()
   const { guide: flareGuide } = useFlareGuide()
+  const { guide: valuesGuide } = useValuesGuide()
   const [showReminder, setShowReminder] = useState(false)
   const [reminderExporting, setReminderExporting] = useState(false)
 
@@ -83,6 +86,7 @@ export default function Dashboard() {
   const journalThisWeek = journalEntries.filter((e) => e.date >= sevenDaysAgo).length
   const focusPlansPending = focusPlans.filter((e) => e.completed === null).length
   const flareGuideReady = Boolean(flareGuide && !isFlareGuideEmpty(flareGuide))
+  const valuesReady = Boolean(valuesGuide && !isValuesGuideEmpty(valuesGuide))
 
   const readySignals = progression.filter((r) => r.readySignal)
 
@@ -138,7 +142,7 @@ export default function Dashboard() {
 
       <div>
         <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Elsewhere in the app</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <LinkStatTile to="/journal" label="Journal" value={journalThisWeek} sub="entries this week" />
           <LinkStatTile
             to="/focus-plan"
@@ -151,6 +155,12 @@ export default function Dashboard() {
             label="Ladders"
             value={fearLadders.length}
             sub={fearLadders.length === 1 ? 'hierarchy planned' : 'hierarchies planned'}
+          />
+          <LinkStatTile
+            to="/values"
+            label="Values"
+            value={valuesReady ? valuesGuide!.values.length : 'Not set up'}
+            sub={valuesReady ? (valuesGuide!.values.length === 1 ? 'value written' : 'values written') : undefined}
           />
           <LinkStatTile
             to="/flare-guide"

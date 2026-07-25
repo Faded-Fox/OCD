@@ -28,6 +28,11 @@ describe('looksLikeBackup', () => {
     expect(looksLikeBackup('{"flareGuide": null}')).toBe(false)
   })
 
+  it('accepts an object with a truthy valuesGuide but rejects a null one with nothing else', () => {
+    expect(looksLikeBackup('{"valuesGuide": {"values": []}}')).toBe(true)
+    expect(looksLikeBackup('{"valuesGuide": null}')).toBe(false)
+  })
+
   it('tolerates surrounding whitespace', () => {
     expect(looksLikeBackup('  \n {"sessions": []}\n  ')).toBe(true)
   })
@@ -41,6 +46,7 @@ describe('countBackupEntries', () => {
       focusPlans: [{}, {}, {}],
       fearLadders: [],
       flareGuide: { introNote: 'hi' },
+      valuesGuide: { values: [] },
     })
     expect(countBackupEntries(raw)).toEqual({
       sessions: 2,
@@ -48,6 +54,7 @@ describe('countBackupEntries', () => {
       focusPlans: 3,
       fearLadders: 0,
       flareGuide: 1,
+      valuesGuide: 1,
     })
   })
 
@@ -58,11 +65,16 @@ describe('countBackupEntries', () => {
       focusPlans: 0,
       fearLadders: 0,
       flareGuide: 0,
+      valuesGuide: 0,
     })
   })
 
   it('treats an explicit null flareGuide as zero, not one', () => {
     expect(countBackupEntries('{"flareGuide": null}').flareGuide).toBe(0)
+  })
+
+  it('treats an explicit null valuesGuide as zero, not one', () => {
+    expect(countBackupEntries('{"valuesGuide": null}').valuesGuide).toBe(0)
   })
 
   it('ignores a field that is present but not actually an array', () => {
@@ -76,12 +88,20 @@ describe('countBackupEntries', () => {
       focusPlans: 0,
       fearLadders: 0,
       flareGuide: 0,
+      valuesGuide: 0,
     })
   })
 })
 
 describe('describeBackupCounts', () => {
-  const zero: BackupCounts = { sessions: 0, journalEntries: 0, focusPlans: 0, fearLadders: 0, flareGuide: 0 }
+  const zero: BackupCounts = {
+    sessions: 0,
+    journalEntries: 0,
+    focusPlans: 0,
+    fearLadders: 0,
+    flareGuide: 0,
+    valuesGuide: 0,
+  }
 
   it('says "nothing" when every count is zero', () => {
     expect(describeBackupCounts(zero)).toBe('nothing')
@@ -98,6 +118,10 @@ describe('describeBackupCounts', () => {
     expect(describeBackupCounts({ ...zero, flareGuide: 1 })).toBe('a flare guide')
   })
 
+  it('describes the values guide as "a values list" regardless of its count', () => {
+    expect(describeBackupCounts({ ...zero, valuesGuide: 1 })).toBe('a values list')
+  })
+
   it('joins exactly two parts with "and" and no comma', () => {
     expect(describeBackupCounts({ ...zero, sessions: 1, focusPlans: 1 })).toBe('1 session and 1 focus plan')
   })
@@ -108,10 +132,10 @@ describe('describeBackupCounts', () => {
     )
   })
 
-  it('always orders parts sessions, journal entries, focus plans, fear ladders, flare guide', () => {
-    expect(describeBackupCounts({ sessions: 1, journalEntries: 0, focusPlans: 1, fearLadders: 1, flareGuide: 1 })).toBe(
-      '1 session, 1 focus plan, 1 fear ladder, and a flare guide',
-    )
+  it('always orders parts sessions, journal entries, focus plans, fear ladders, flare guide, values list', () => {
+    expect(
+      describeBackupCounts({ sessions: 1, journalEntries: 0, focusPlans: 1, fearLadders: 1, flareGuide: 1, valuesGuide: 1 }),
+    ).toBe('1 session, 1 focus plan, 1 fear ladder, a flare guide, and a values list')
   })
 })
 
@@ -187,21 +211,24 @@ describe('parseBackup', () => {
       focusPlans: [],
       fearLadders: [],
       flareGuide: null,
+      valuesGuide: null,
     })
   })
 
-  it('passes through journalEntries, focusPlans, fearLadders, and flareGuide untouched', async () => {
+  it('passes through journalEntries, focusPlans, fearLadders, flareGuide, and valuesGuide untouched', async () => {
     const raw = JSON.stringify({
       journalEntries: [{ id: 'j1' }],
       focusPlans: [{ id: 'f1' }],
       fearLadders: [{ id: 'l1' }],
       flareGuide: { introNote: 'hi' },
+      valuesGuide: { values: [{ id: 'v1', icon: '❤️', label: 'Family', note: '' }] },
     })
     const result = await parseBackup(raw)
     expect(result.journalEntries).toEqual([{ id: 'j1' }])
     expect(result.focusPlans).toEqual([{ id: 'f1' }])
     expect(result.fearLadders).toEqual([{ id: 'l1' }])
     expect(result.flareGuide).toEqual({ introNote: 'hi' })
+    expect(result.valuesGuide).toEqual({ values: [{ id: 'v1', icon: '❤️', label: 'Family', note: '' }] })
   })
 
   it('rejects on invalid JSON rather than silently returning an empty backup', async () => {

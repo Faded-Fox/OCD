@@ -17,6 +17,7 @@ const SessionDetail = lazy(() => import('./pages/SessionDetail'))
 const Settings = lazy(() => import('./pages/Settings'))
 const Help = lazy(() => import('./pages/Help'))
 const FlareGuidePage = lazy(() => import('./pages/FlareGuide'))
+const ValuesPage = lazy(() => import('./pages/Values'))
 const TherapistSummary = lazy(() => import('./pages/TherapistSummary'))
 
 export default function App() {
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/help" element={<Help />} />
           <Route path="/flare-guide" element={<FlareGuidePage />} />
+          <Route path="/values" element={<ValuesPage />} />
           <Route path="/summary" element={<TherapistSummary />} />
         </Route>
       </Routes>

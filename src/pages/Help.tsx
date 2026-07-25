@@ -32,6 +32,7 @@ const SECTIONS: HelpSection[] = [
       'Stop the exposure to fill in the rest (compulsions, techniques, notes) and save — the SUDs curve stays visible on this wrap-up screen too, and updates live if you correct a reading before saving.',
       'Typing in "Techniques used" or "Compulsions targeted" suggests matches as you go — techniques from a small built-in starter list plus anything you\'ve typed before, compulsions purely from your own past sessions (too personal for a built-in list). Tap a suggestion or arrow-key to it and hit Enter; nothing is ever picked automatically.',
       'An optional "Exposure type" field tags the session as in-vivo, imaginal, or interoceptive — leave it as "Not specified" if that distinction doesn\'t matter for what you\'re tracking.',
+      'If you\'ve written anything on the Values page, one is shown at random before you start — a quick reminder of why the exposure is worth doing, not just what it is.',
     ],
   },
   {
@@ -71,6 +72,14 @@ const SECTIONS: HelpSection[] = [
     ],
   },
   {
+    title: 'Values',
+    body: [
+      "ERP isn't about feeling less anxious — it's about being able to live the life anxiety gets in the way of. This page is a short list of the reasons this is worth doing at all: people, hobbies, whatever actually matters to you.",
+      'Each one is an icon or emoji, a short label, and an optional note on why it matters. Nothing is built in — every value starts blank and is written and stored entirely by you on this device.',
+      'One is shown at random on the Live tab before you start an exposure ("Remember — you\'re doing this because ___ matters"), as a reminder of the actual point of the hard part that\'s about to happen.',
+    ],
+  },
+  {
     title: 'Summary',
     body: [
       'A printable report to bring to a therapy session — resistance rates by hierarchy, sessions in the selected period, Focus Plan debriefs, and planned fear ladders — separate from the raw JSON backup in Settings, which is for restoring the app rather than reading.',
@@ -96,7 +105,7 @@ const SECTIONS: HelpSection[] = [
     title: 'Backup, restore, and iPhone storage',
     body: [
       'Everything lives only in this browser\'s local storage — there\'s no account and no cloud sync, so nothing is recoverable if the app is deleted or the browser clears its storage (which iOS can do on its own after a period of disuse).',
-      'The fix: Settings → "Export all data as JSON" downloads everything (sessions, journal entries, focus plans, fear ladders) into one file. Keep that file somewhere that survives an app deletion — the Files app, iCloud Drive, emailing it to yourself.',
+      'The fix: Settings → "Export all data as JSON" downloads everything (sessions, journal entries, focus plans, fear ladders, flare guide, values) into one file. Keep that file somewhere that survives an app deletion — the Files app, iCloud Drive, emailing it to yourself.',
       'To bring it back, paste or upload that same file on the Import screen. It restores by matching IDs, so restoring the same backup twice (or onto a device with some overlapping data) won\'t create duplicates.',
     ],
   },

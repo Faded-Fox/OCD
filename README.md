@@ -21,7 +21,9 @@ data lives only in this browser's IndexedDB until you export or delete it.
   past entries, compulsions purely from your own history, since those are too
   personal for a built-in list. A real dropdown, not the native `<datalist>`
   element, since Safari doesn't reliably render that at all. An optional
-  "Exposure type" field tags a session as in-vivo, imaginal, or interoceptive.
+  "Exposure type" field tags a session as in-vivo, imaginal, or interoceptive. If
+  anything's been written on the Values page, one value is shown at random before
+  starting, as a reminder of why the exposure is worth doing.
 - **Journal**: two structured, timed prompts — a "Morning Anchor" (5–10 min) and an
   "OCD Wind Down" bedtime practice (10 min) — each with the sections, evidence
   citations, and compulsion-warning signs from their source templates built in. A
@@ -60,12 +62,19 @@ data lives only in this browser's IndexedDB until you export or delete it.
 - **Dashboard**: peak-SUDs trend across hierarchies, full-resistance rate, readiness
   signals, recent sessions. An "Elsewhere in the app" row ties in everything else —
   journal entries this week, focus plans awaiting a debrief, hierarchies with a
-  planned ladder, and whether a Flare Guide has been set up — since otherwise
-  those only show up once you go looking for them.
+  planned ladder, how many values have been written down, and whether a Flare
+  Guide has been set up — since otherwise those only show up once you go looking
+  for them.
 - **Fear Ladders**: plan a hierarchy's rungs — a number, a short description, and an
   optional target SUDs range for each — before you've ever run a session in it, since
   otherwise a hierarchy only exists once a session references it. Reachable from its
   own tab, not just from an existing hierarchy's page.
+- **Values**: a short, personal list of why ERP is worth doing at all — not reducing
+  anxiety, but living the life it's in the way of. Each entry is an icon or emoji,
+  a short label, and an optional note on why it matters. Nothing is templated in
+  the app itself — like the Flare Guide, every value starts blank and is written
+  and stored entirely on this device. One is surfaced at random on the Live tab
+  before starting an exposure.
 - **Per-hierarchy view**: rung ladder, attempt counts, resistance streaks, peak-SUDs
   and habituation-speed trends. Merges a planned Fear Ladder (if one exists) with
   actual logged progress — rungs you've planned but not attempted yet show up

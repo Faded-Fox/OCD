@@ -4,6 +4,7 @@ import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
 import { FLARE_GUIDE_ID, type FlareGuide } from './flareGuide'
+import { VALUES_GUIDE_ID, type ValuesGuide } from './values'
 
 class ErpInsightsDb extends Dexie {
   sessions!: Table<Session, string>
@@ -11,6 +12,7 @@ class ErpInsightsDb extends Dexie {
   focusPlans!: Table<FocusPlanEntry, string>
   fearLadders!: Table<FearLadder, string>
   flareGuide!: Table<FlareGuide, string>
+  valuesGuide!: Table<ValuesGuide, string>
 
   constructor() {
     super('erp-insights')
@@ -39,6 +41,14 @@ class ErpInsightsDb extends Dexie {
       focusPlans: 'id, date',
       fearLadders: 'id, hierarchy',
       flareGuide: 'id',
+    })
+    this.version(6).stores({
+      sessions: 'id, date, hierarchy, rung',
+      journalEntries: 'id, date, type',
+      focusPlans: 'id, date',
+      fearLadders: 'id, hierarchy',
+      flareGuide: 'id',
+      valuesGuide: 'id',
     })
   }
 }
@@ -133,6 +143,18 @@ export async function deleteAllFlareGuide(): Promise<void> {
   await db.flareGuide.clear()
 }
 
+export async function getValuesGuide(): Promise<ValuesGuide | undefined> {
+  return db.valuesGuide.get(VALUES_GUIDE_ID)
+}
+
+export async function saveValuesGuide(guide: ValuesGuide): Promise<void> {
+  await db.valuesGuide.put({ ...guide, id: VALUES_GUIDE_ID })
+}
+
+export async function deleteAllValuesGuide(): Promise<void> {
+  await db.valuesGuide.clear()
+}
+
 export async function deleteAllData(): Promise<void> {
   await Promise.all([
     deleteAllSessions(),
@@ -140,19 +162,21 @@ export async function deleteAllData(): Promise<void> {
     deleteAllFocusPlanEntries(),
     deleteAllFearLadders(),
     deleteAllFlareGuide(),
+    deleteAllValuesGuide(),
   ])
 }
 
-/** Restores sessions/journal/focus-plan/fear-ladder/flare-guide data from a parsed
- *  backup. Uses put (upsert) rather than add, so re-restoring the same backup — or
- *  restoring onto a device that already has some overlapping records — replaces
- *  matching ids instead of erroring. */
+/** Restores sessions/journal/focus-plan/fear-ladder/flare-guide/values data from a
+ *  parsed backup. Uses put (upsert) rather than add, so re-restoring the same
+ *  backup — or restoring onto a device that already has some overlapping records
+ *  — replaces matching ids instead of erroring. */
 export async function restoreBackup(data: {
   sessions: Session[]
   journalEntries: JournalEntry[]
   focusPlans: FocusPlanEntry[]
   fearLadders: FearLadder[]
   flareGuide: FlareGuide | null
+  valuesGuide: ValuesGuide | null
 }): Promise<void> {
   await Promise.all([
     data.sessions.length ? db.sessions.bulkPut(data.sessions) : undefined,
@@ -160,6 +184,7 @@ export async function restoreBackup(data: {
     data.focusPlans.length ? db.focusPlans.bulkPut(data.focusPlans) : undefined,
     data.fearLadders.length ? db.fearLadders.bulkPut(data.fearLadders) : undefined,
     data.flareGuide ? db.flareGuide.put(data.flareGuide) : undefined,
+    data.valuesGuide ? db.valuesGuide.put(data.valuesGuide) : undefined,
   ])
 }
 
@@ -173,12 +198,13 @@ function blobToDataUrl(blob: Blob): Promise<string> {
 }
 
 export async function exportAllAsJson(): Promise<string> {
-  const [sessions, journalEntries, focusPlans, fearLadders, flareGuide] = await Promise.all([
+  const [sessions, journalEntries, focusPlans, fearLadders, flareGuide, valuesGuide] = await Promise.all([
     getAllSessions(),
     getAllJournalEntries(),
     getAllFocusPlanEntries(),
     getAllFearLadders(),
     getFlareGuide(),
+    getValuesGuide(),
   ])
   const exportableSessions = await Promise.all(
     sessions.map(async (s) => ({
@@ -187,7 +213,14 @@ export async function exportAllAsJson(): Promise<string> {
     })),
   )
   return JSON.stringify(
-    { sessions: exportableSessions, journalEntries, focusPlans, fearLadders, flareGuide: flareGuide ?? null },
+    {
+      sessions: exportableSessions,
+      journalEntries,
+      focusPlans,
+      fearLadders,
+      flareGuide: flareGuide ?? null,
+      valuesGuide: valuesGuide ?? null,
+    },
     null,
     2,
   )

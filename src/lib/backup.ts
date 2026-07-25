@@ -3,6 +3,7 @@ import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
 import type { FlareGuide } from './flareGuide'
+import type { ValuesGuide } from './values'
 
 export interface BackupData {
   sessions: Session[]
@@ -10,6 +11,7 @@ export interface BackupData {
   focusPlans: FocusPlanEntry[]
   fearLadders: FearLadder[]
   flareGuide: FlareGuide | null
+  valuesGuide: ValuesGuide | null
 }
 
 interface RawBackupSession extends Omit<Session, 'photo'> {
@@ -22,6 +24,7 @@ interface RawBackup {
   focusPlans?: FocusPlanEntry[]
   fearLadders?: FearLadder[]
   flareGuide?: FlareGuide | null
+  valuesGuide?: ValuesGuide | null
 }
 
 /** True if the pasted/uploaded text is this app's own export shape, not a Claude
@@ -38,7 +41,8 @@ export function looksLikeBackup(raw: string): boolean {
       Array.isArray(obj.journalEntries) ||
       Array.isArray(obj.focusPlans) ||
       Array.isArray(obj.fearLadders) ||
-      Boolean(obj.flareGuide)
+      Boolean(obj.flareGuide) ||
+      Boolean(obj.valuesGuide)
     )
   } catch {
     return false
@@ -51,6 +55,7 @@ export interface BackupCounts {
   focusPlans: number
   fearLadders: number
   flareGuide: number
+  valuesGuide: number
 }
 
 export function countBackupEntries(raw: string): BackupCounts {
@@ -62,9 +67,10 @@ export function countBackupEntries(raw: string): BackupCounts {
       focusPlans: Array.isArray(data.focusPlans) ? data.focusPlans.length : 0,
       fearLadders: Array.isArray(data.fearLadders) ? data.fearLadders.length : 0,
       flareGuide: data.flareGuide ? 1 : 0,
+      valuesGuide: data.valuesGuide ? 1 : 0,
     }
   } catch {
-    return { sessions: 0, journalEntries: 0, focusPlans: 0, fearLadders: 0, flareGuide: 0 }
+    return { sessions: 0, journalEntries: 0, focusPlans: 0, fearLadders: 0, flareGuide: 0, valuesGuide: 0 }
   }
 }
 
@@ -78,6 +84,7 @@ export function describeBackupCounts(counts: BackupCounts): string {
   if (counts.focusPlans > 0) parts.push(`${counts.focusPlans} focus plan${counts.focusPlans === 1 ? '' : 's'}`)
   if (counts.fearLadders > 0) parts.push(`${counts.fearLadders} fear ladder${counts.fearLadders === 1 ? '' : 's'}`)
   if (counts.flareGuide > 0) parts.push('a flare guide')
+  if (counts.valuesGuide > 0) parts.push('a values list')
   if (parts.length === 0) return 'nothing'
   if (parts.length === 1) return parts[0]
   if (parts.length === 2) return `${parts[0]} and ${parts[1]}`
@@ -105,5 +112,6 @@ export async function parseBackup(raw: string): Promise<BackupData> {
     focusPlans: data.focusPlans ?? [],
     fearLadders: data.fearLadders ?? [],
     flareGuide: data.flareGuide ?? null,
+    valuesGuide: data.valuesGuide ?? null,
   }
 }
