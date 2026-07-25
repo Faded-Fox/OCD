@@ -33,7 +33,11 @@ data lives only in this browser's IndexedDB until you export or delete it.
   thought" mode is a one-tap capture with no text field at all — tag the thought's
   theme (contamination, harm, relationship, moral, checking, health, existential,
   other) and save, since writing the thought out is itself a way of engaging with
-  it rather than just observing it. The saved-entries view is intentionally
+  it rather than just observing it. Saving one shows a "Caught the fox!" moment
+  instead of the usual confirmation — a reward for noticing without acting, not
+  for detail — along with a lifetime count of how many times that's happened
+  (never a daily streak, so there's nothing to feel like you've broken). The
+  saved-entries view is intentionally
   low-key (mainly for export or bringing to a therapist) since these modes flag
   re-reading past entries — or rerolling to find "the right" one — for
   reassurance as a compulsion warning sign. The two timed templates show how long

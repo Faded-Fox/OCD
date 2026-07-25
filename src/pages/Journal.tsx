@@ -64,6 +64,8 @@ export default function Journal() {
   const [phase, setPhase] = useState<Phase>('landing')
   const [activeType, setActiveType] = useState<JournalType | null>(null)
   const [activePrompt, setActivePrompt] = useState<QuickPrompt | null>(null)
+  const [lastSaved, setLastSaved] = useState<'thought' | 'other'>('other')
+  const { entries: journalEntries, refresh: refreshJournalEntries } = useJournalEntries()
 
   if (phase === 'history') {
     return <HistoryView onBack={() => setPhase('landing')} />
@@ -75,6 +77,7 @@ export default function Journal() {
         type={activeType}
         onDone={() => {
           setActiveType(null)
+          setLastSaved('other')
           setPhase('saved')
         }}
         onCancel={() => {
@@ -88,7 +91,11 @@ export default function Journal() {
   if (phase === 'thought') {
     return (
       <ThoughtCaptureView
-        onDone={() => setPhase('saved')}
+        onDone={async () => {
+          setLastSaved('thought')
+          await refreshJournalEntries()
+          setPhase('saved')
+        }}
         onCancel={() => setPhase('landing')}
       />
     )
@@ -101,6 +108,7 @@ export default function Journal() {
         onReroll={() => setActivePrompt(pickRandomQuickPrompt(activePrompt.id))}
         onDone={() => {
           setActivePrompt(null)
+          setLastSaved('other')
           setPhase('saved')
         }}
         onCancel={() => {
@@ -112,6 +120,27 @@ export default function Journal() {
   }
 
   if (phase === 'saved') {
+    if (lastSaved === 'thought') {
+      const caughtCount = journalEntries.filter((e) => e.type === 'thought').length
+      return (
+        <div className="flex flex-col gap-6 py-4">
+          <Card className="flex flex-col items-center gap-3 py-14 text-center">
+            <img src={foxIntrusiveThought} alt="" className="h-16 w-16" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Caught the fox!</h2>
+            <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
+              No action needed — noticing it without acting on it was the whole exercise.
+            </p>
+            {caughtCount > 0 && (
+              <p className="text-xs text-slate-400">
+                🦊 Caught {caughtCount} time{caughtCount === 1 ? '' : 's'} so far.
+              </p>
+            )}
+            <PrimaryButton onClick={() => setPhase('landing')}>Done</PrimaryButton>
+          </Card>
+        </div>
+      )
+    }
+
     return (
       <div className="flex flex-col gap-6 py-4">
         <Card className="flex flex-col items-center gap-3 py-14 text-center">
