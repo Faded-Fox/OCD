@@ -14,6 +14,7 @@ const SECTIONS: HelpSection[] = [
       'A summary of everything logged so far: peak-SUDs trend across hierarchies, full-resistance rate, readiness signals, and the most recent sessions.',
       'If it\'s been about a week since your last export, a banner appears here nudging you to back up — "Remind me later" snoozes it for a few days, "Export now" downloads a backup and clears it.',
       'An "Elsewhere in the app" row surfaces what\'s happening outside of Sessions — journal entries logged this week, focus plans still awaiting a debrief, how many hierarchies have a planned ladder, and whether a Flare Guide has been set up. Each tile links straight to that tab.',
+      'The small 🦊 next to "Start live session" jumps straight to the Journal tab\'s "Intrusive thought" capture screen — a shortcut for the moment it\'s actually useful in, without a label, since what it does is already explained there.',
     ],
   },
   {

@@ -58,13 +58,14 @@ export default function Dashboard() {
         title="No sessions yet"
         body="Run a live session, or import a conversation export or pasted session text to start seeing trends and patterns here."
         action={
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link to="/live">
               <PrimaryButton>Start live session</PrimaryButton>
             </Link>
             <Link to="/import">
               <SecondaryButton>Import sessions</SecondaryButton>
             </Link>
+            <CaughtFoxButton />
           </div>
         }
       />
@@ -119,13 +120,14 @@ export default function Dashboard() {
             A descriptive summary of logged sessions — not a diagnosis or a treatment recommendation.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Link to="/live">
             <PrimaryButton>Start live session</PrimaryButton>
           </Link>
           <Link to="/import">
             <SecondaryButton>Import more</SecondaryButton>
           </Link>
+          <CaughtFoxButton />
         </div>
       </div>
 
@@ -253,6 +255,22 @@ function LinkStatTile({
   return (
     <Link to={to}>
       <StatTile label={label} value={value} sub={sub} />
+    </Link>
+  )
+}
+
+// Jumps straight into the Journal tab's "Intrusive thought" capture screen —
+// deliberately just the emoji, no label, since what it does is already
+// explained there (the "Caught the fox!" moment on save).
+function CaughtFoxButton() {
+  return (
+    <Link
+      to="/journal?start=thought"
+      title="Caught the fox — log an intrusive thought"
+      aria-label="Log an intrusive thought"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+    >
+      🦊
     </Link>
   )
 }

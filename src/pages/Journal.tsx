@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { addJournalEntry, deleteJournalEntry } from '../lib/db'
 import { newId } from '../lib/session'
 import {
@@ -61,11 +62,28 @@ function formatElapsed(ms: number): string {
 }
 
 export default function Journal() {
-  const [phase, setPhase] = useState<Phase>('landing')
+  const [searchParams, setSearchParams] = useSearchParams()
+  // Lets Dashboard's "Caught the fox" shortcut (/journal?start=thought) jump
+  // straight into the capture screen instead of the landing page. Cleared
+  // right away so reloading or navigating back to landing doesn't re-trigger it.
+  const [phase, setPhase] = useState<Phase>(() => (searchParams.get('start') === 'thought' ? 'thought' : 'landing'))
   const [activeType, setActiveType] = useState<JournalType | null>(null)
   const [activePrompt, setActivePrompt] = useState<QuickPrompt | null>(null)
   const [lastSaved, setLastSaved] = useState<'thought' | 'other'>('other')
   const { entries: journalEntries, refresh: refreshJournalEntries } = useJournalEntries()
+
+  useEffect(() => {
+    if (searchParams.has('start')) {
+      setSearchParams(
+        (prev) => {
+          prev.delete('start')
+          return prev
+        },
+        { replace: true },
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (phase === 'history') {
     return <HistoryView onBack={() => setPhase('landing')} />
