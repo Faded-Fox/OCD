@@ -81,11 +81,37 @@ jobs:
       - run: npm run build:capacitor
       - run: npx cap sync android
 
+      # Temporary diagnostics: the last two attempts at a stable debug key both
+      # restored ~/.android/debug.keystore from cache correctly (confirmed via
+      # "Cache restored from key: ..." in the logs, and the "generate" step
+      # correctly skipped as a result), yet the resulting APK still had a
+      # different signing cert each time. That means Gradle is either
+      # ignoring this file entirely or overwriting it during the build. These
+      # steps make that observable instead of guessed at.
+      - name: Diagnose debug keystore before build
+        run: |
+          echo "--- sha256 before ---"
+          sha256sum ~/.android/debug.keystore || echo "(file missing)"
+          echo "--- keytool fingerprint before ---"
+          keytool -list -keystore ~/.android/debug.keystore -storepass android || true
+
       - name: Build debug APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --info > /tmp/gradle-info.log 2>&1 || { cat /tmp/gradle-info.log; exit 1; }
+          tail -100 /tmp/gradle-info.log
+
+      - name: Diagnose debug keystore after build
+        run: |
+          echo "--- sha256 after ---"
+          sha256sum ~/.android/debug.keystore || echo "(file missing)"
+          echo "--- keytool fingerprint after ---"
+          keytool -list -keystore ~/.android/debug.keystore -storepass android || true
+          echo "--- every debug.keystore on disk ---"
+          find / -xdev -iname "debug.keystore" 2>/dev/null
+          echo "--- gradle --info lines mentioning keystore/signing ---"
+          grep -i -E "keystore|signingConfig|debug.*sign" /tmp/gradle-info.log | head -80
 
       # Uploads to the same release tag every run, so the download URL never
       # changes — the whole point is a stable link to open on a phone.
