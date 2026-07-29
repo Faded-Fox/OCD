@@ -215,10 +215,14 @@ debug build signed with Gradle's auto-generated debug key rather than a real
 release key — fine for sideloading onto your own device, not meant for the
 Play Store.
 
-The workflow caches that debug keystore (`debug-keystore-v1`) across runs so
-every build is signed with the *same* key — otherwise each GitHub Actions run
-starts from a clean VM, Gradle would generate a brand-new random debug key
-every time, and Android would refuse to install a new build over an old one
-(since it looks like a different app with the same package name), forcing an
-uninstall before every single update. With the cache in place, installing a
-newer build over an older one just updates it normally.
+The workflow caches that debug keystore (`~/.config/.android/debug.keystore`,
+cache key `debug-keystore-v3`) across runs so every build is signed with the
+*same* key — otherwise each GitHub Actions run starts from a clean VM, Gradle
+would generate a brand-new random debug key every time, and Android would
+refuse to install a new build over an old one (since it looks like a
+different app with the same package name), forcing an uninstall before every
+single update. With the cache in place, installing a newer build over an
+older one just updates it normally. (`~/.config/.android`, not the more
+commonly assumed `~/.android`, is the path Android's build tooling actually
+reads on this setup — confirmed by checking what changed on disk during a
+build.)
