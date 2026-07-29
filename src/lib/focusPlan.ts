@@ -73,6 +73,46 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
     description:
       "Focusing on the task itself is a legitimate strategy. You don't have to process the thought. Keep your hands busy.",
   },
+  {
+    name: 'Name the Story',
+    description:
+      'Give the pattern a title — e.g. "the not-good-enough story" — then say: "Ah, there\'s that story again." You don\'t have to argue with it or fix it. Naming creates space; just notice it and return to what you were doing.',
+  },
+  {
+    name: 'Physicalise the Thought',
+    description:
+      "Ask what the thought would look like if it had a shape, color, texture, weight. Notice where you feel it in your body. Watching it with curiosity instead of alarm often shows it shifting on its own.",
+  },
+  {
+    name: 'The Observer Self',
+    description:
+      'Say silently: "I notice I am having the thought that ___." There\'s a \'you\' doing the noticing, separate from the thought itself. You are not your thoughts — rest in being the noticer, not the thought.',
+  },
+  {
+    name: 'Leaves on a Stream',
+    description:
+      "Picture a gentle stream. Place each thought on a leaf and watch it float past. You're standing on the bank, not in the water — you don't need to solve the thought, just watch it pass.",
+  },
+  {
+    name: 'Thank Your Mind',
+    description:
+      'When a thought arrives, say (silently or aloud): "Thank you, mind — I see you\'re trying to protect me." You don\'t have to agree with it. Fighting a thought fuels it; thanking it defuses it.',
+  },
+  {
+    name: 'Radio in the Background',
+    description:
+      "Imagine your thoughts as a radio playing in another room. You can hear it without listening to it — focus on what your hands or feet are doing right now. You can function even while the radio plays.",
+  },
+  {
+    name: 'Slow It Down',
+    description:
+      'Notice a spiralling thought and repeat its core word slowly, ten times — e.g. "worthless… worthless… worthless…". Repetition dissolves the illusion of meaning; the words are just sounds, not facts.',
+  },
+  {
+    name: 'Urge Surfing',
+    description:
+      "Notice the urge pulling you in and rate its intensity 1–10. Breathe and watch it rise, peak, and begin to fall like a wave, then re-rate it — it will have dropped. Every wave breaks; you don't have to act on it.",
+  },
 ]
 
 export const FOCUS_PLAN_AFFIRMATION = 'I love you. This is just your brain, not you. Things are okay.'
