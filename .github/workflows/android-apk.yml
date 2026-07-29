@@ -52,14 +52,22 @@ jobs:
         id: debug-keystore-cache
         with:
           path: ~/.android/debug.keystore
-          key: debug-keystore-v1
+          key: debug-keystore-v2
 
+      # -storetype JKS is required here: JDK 9+ keytool defaults to PKCS12,
+      # but the Android Gradle Plugin's own debug-keystore loader expects the
+      # legacy JKS format specifically. A PKCS12 file fails that parse, so
+      # AGP silently discards it and regenerates a fresh (differently-keyed)
+      # JKS keystore in the same path instead of erroring out — which is
+      # exactly what happened on the first attempt at this fix: the cache
+      # faithfully restored our PKCS12 file, but the build ignored it anyway.
       - name: Generate a stable debug keystore if not restored from cache
         if: steps.debug-keystore-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/.android
           keytool -genkeypair -v \
             -keystore ~/.android/debug.keystore \
+            -storetype JKS \
             -storepass android -keypass android \
             -alias androiddebugkey \
             -keyalg RSA -keysize 2048 -validity 10000 \
