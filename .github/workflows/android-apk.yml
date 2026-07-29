@@ -33,18 +33,37 @@ jobs:
           key: gradle-${{ hashFiles('android/gradle/wrapper/gradle-wrapper.properties', 'android/build.gradle', 'android/app/build.gradle') }}
           restore-keys: gradle-
 
-      # Every GitHub Actions run starts from a brand-new VM, and Gradle's
-      # default debug signing config auto-generates ~/.android/debug.keystore
-      # with a fresh random key if the file doesn't exist — so without this
-      # cache, every run signs the APK with a *different* key, Android treats
-      # each build as a different app, and installing a new one over an old
-      # one fails (forcing an uninstall first). Caching the keystore itself
-      # keeps the signing key identical across runs, so future installs
-      # update in place instead.
+      # Every GitHub Actions run starts from a brand-new VM. Left to its own
+      # devices, Gradle's default debug signing config auto-generates
+      # ~/.android/debug.keystore with a fresh random key the first time it's
+      # needed during the build — which happens too late for a plain cache
+      # step to help, since by the time the file exists it may already differ
+      # from previous runs. Without a stable key, every build signs with a
+      # *different* certificate, Android treats each one as a different app,
+      # and installing a new build over an old one fails (forcing an
+      # uninstall first).
+      #
+      # So instead of relying on Gradle to create it, we generate the
+      # keystore ourselves (below) with fixed, standard debug-key parameters
+      # *before* the cache-restore result is checked, and only if the cache
+      # didn't already have one. That guarantees the exact same key persists
+      # across runs, so future installs update in place instead.
       - uses: actions/cache@v4
+        id: debug-keystore-cache
         with:
           path: ~/.android/debug.keystore
           key: debug-keystore-v1
+
+      - name: Generate a stable debug keystore if not restored from cache
+        if: steps.debug-keystore-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.android
+          keytool -genkeypair -v \
+            -keystore ~/.android/debug.keystore \
+            -storepass android -keypass android \
+            -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Android Debug,O=Android,C=US"
 
       - run: npm ci
 
