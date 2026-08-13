@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { createEmptySession } from '../lib/session'
@@ -6,11 +6,24 @@ import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session }
 import { colorForHierarchy } from '../lib/colors'
 import { displayCurve } from '../lib/insights'
 import { useFearLadders } from '../lib/useFearLadders'
+import { useSessions } from '../lib/useSessions'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { pickRandomValue, type ValueItem } from '../lib/values'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
-import SessionFields, { inputClass, Field, TargetRangeInput } from '../components/SessionFields'
+import SessionFields, { inputClass, Field, TargetRangeInput, TextSuggestInput } from '../components/SessionFields'
 import SudsChart from '../components/SudsChart'
+
+function dedupeCaseInsensitive(items: string[]): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
+  for (const item of items) {
+    const key = item.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    out.push(item)
+  }
+  return out
+}
 
 type Phase = 'setup' | 'running' | 'wrapup'
 
@@ -43,6 +56,7 @@ function formatElapsed(ms: number): string {
 export default function LiveSession() {
   const navigate = useNavigate()
   const { ladders } = useFearLadders()
+  const { sessions: pastSessions } = useSessions()
   const { guide: valuesGuide, loading: valuesLoading } = useValuesGuide()
   const [reminder, setReminder] = useState<ValueItem | null>(null)
   const [reminderPicked, setReminderPicked] = useState(false)
@@ -98,6 +112,45 @@ export default function LiveSession() {
   const matchedLadder = ladders.find(
     (l) => l.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && l.hierarchy.trim() !== '',
   )
+
+  // Suggestions for the setup fields below, all drawn from this device's own history
+  // rather than anything built in — same idea as the techniques/compulsions
+  // autocomplete on the wrap-up screen.
+  const hierarchySuggestions = useMemo(
+    () =>
+      dedupeCaseInsensitive([
+        ...pastSessions.map((s) => s.hierarchy),
+        ...ladders.map((l) => l.hierarchy),
+      ].filter((h) => h.trim() !== '')).sort((a, b) => a.localeCompare(b)),
+    [pastSessions, ladders],
+  )
+
+  const sessionsForHierarchy = useMemo(
+    () =>
+      pastSessions.filter(
+        (s) => s.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && s.hierarchy.trim() !== '',
+      ),
+    [pastSessions, session.hierarchy],
+  )
+
+  const rungSuggestions = useMemo(() => {
+    const fromLadder = matchedLadder ? matchedLadder.rungs.map((r) => r.rung) : []
+    const fromHistory = sessionsForHierarchy.map((s) => s.rung).filter((r): r is number => r !== null)
+    return Array.from(new Set([...fromLadder, ...fromHistory])).sort((a, b) => a - b)
+  }, [matchedLadder, sessionsForHierarchy])
+
+  const rangeSuggestions = useMemo(() => {
+    const seen = new Set<string>()
+    const out: [number, number][] = []
+    for (const s of sessionsForHierarchy) {
+      if (!s.target_suds_range) continue
+      const key = `${s.target_suds_range[0]}-${s.target_suds_range[1]}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(s.target_suds_range)
+    }
+    return out.sort((a, b) => a[0] - b[0])
+  }, [sessionsForHierarchy])
 
   const pickRung = (rung: { rung: number; description: string; targetSudsRange: [number, number] | null }) => {
     setSession((s) => ({
@@ -200,22 +253,19 @@ export default function LiveSession() {
         <Card className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Hierarchy">
-              <input
-                type="text"
+              <TextSuggestInput
                 value={session.hierarchy}
-                onChange={(e) => setSession((s) => ({ ...s, hierarchy: e.target.value }))}
+                onChange={(hierarchy) => setSession((s) => ({ ...s, hierarchy }))}
+                suggestions={hierarchySuggestions}
                 placeholder="e.g. Harm/Contamination"
-                className={inputClass}
               />
             </Field>
             <Field label="Rung">
-              <input
-                type="number"
-                value={session.rung ?? ''}
-                onChange={(e) =>
-                  setSession((s) => ({ ...s, rung: e.target.value === '' ? null : Number(e.target.value) }))
-                }
-                className={inputClass}
+              <TextSuggestInput
+                value={session.rung === null ? '' : String(session.rung)}
+                onChange={(v) => setSession((s) => ({ ...s, rung: v.trim() === '' || Number.isNaN(Number(v)) ? null : Number(v) }))}
+                suggestions={rungSuggestions.map(String)}
+                inputMode="numeric"
               />
             </Field>
             <Field label="Variation">
@@ -250,6 +300,20 @@ export default function LiveSession() {
                 value={session.target_suds_range}
                 onChange={(target_suds_range) => setSession((s) => ({ ...s, target_suds_range }))}
               />
+              {rangeSuggestions.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {rangeSuggestions.map((r) => (
+                    <button
+                      key={`${r[0]}-${r[1]}`}
+                      type="button"
+                      onClick={() => setSession((s) => ({ ...s, target_suds_range: r }))}
+                      className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                    >
+                      {r[0]}–{r[1]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </Field>
             <Field label="Scenario / what the exposure is" full>
               <input

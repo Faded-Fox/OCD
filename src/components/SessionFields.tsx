@@ -422,6 +422,105 @@ function TagsInput({
 }
 
 /**
+ * Like TagsInput but for a single value rather than a comma-separated list —
+ * no comma parsing, selecting a suggestion just replaces the whole field.
+ * Shows the full suggestion list on focus (not just once you start typing),
+ * since the point here is browsing existing values, not just autocompleting
+ * a value you're already most of the way through typing.
+ */
+export function TextSuggestInput({
+  value,
+  onChange,
+  suggestions,
+  placeholder,
+  inputMode,
+  className = inputClass,
+}: {
+  value: string
+  onChange: (value: string) => void
+  suggestions: string[]
+  placeholder?: string
+  inputMode?: 'text' | 'numeric'
+  className?: string
+}) {
+  const [focused, setFocused] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+  const [highlighted, setHighlighted] = useState(0)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const trimmed = value.trim().toLowerCase()
+  const matches =
+    focused && !dismissed
+      ? suggestions.filter((s) => trimmed === '' || (s.toLowerCase().includes(trimmed) && s.toLowerCase() !== trimmed)).slice(0, 8)
+      : []
+
+  const select = (s: string) => {
+    onChange(s)
+    setDismissed(true)
+    setHighlighted(0)
+    inputRef.current?.focus()
+  }
+
+  return (
+    <div className="relative">
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode={inputMode}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => {
+          onChange(e.target.value)
+          setDismissed(false)
+          setHighlighted(0)
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        onKeyDown={(e) => {
+          if (matches.length === 0) return
+          if (e.key === 'ArrowDown') {
+            e.preventDefault()
+            setHighlighted((h) => (h + 1) % matches.length)
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault()
+            setHighlighted((h) => (h - 1 + matches.length) % matches.length)
+          } else if (e.key === 'Enter') {
+            e.preventDefault()
+            select(matches[highlighted])
+          } else if (e.key === 'Escape') {
+            setDismissed(true)
+          }
+        }}
+        autoComplete="off"
+        className={className}
+      />
+      {matches.length > 0 && (
+        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-md dark:border-slate-700 dark:bg-slate-950">
+          {matches.map((s, i) => (
+            <li key={s}>
+              <button
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault()
+                  select(s)
+                }}
+                className={`block w-full px-3 py-1.5 text-left text-sm ${
+                  i === highlighted
+                    ? 'bg-amber-100 text-slate-900 dark:bg-amber-950 dark:text-amber-100'
+                    : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                }`}
+              >
+                {s}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+/**
  * The two SUDs range bounds are stored as a single [number, number] tuple, so
  * a naive input bound directly to that tuple has to pick a placeholder (0) for
  * the side you haven't typed yet — and since `0 ?? ''` is still `0`, that box
