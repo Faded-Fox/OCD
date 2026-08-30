@@ -11,7 +11,7 @@ export default function DashboardPeakChart({
 }) {
   return (
     <Card>
-      <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDs over time</h2>
+      <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDS over time</h2>
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
@@ -21,7 +21,7 @@ export default function DashboardPeakChart({
             <Tooltip
               contentStyle={{ borderRadius: 12, fontSize: 12 }}
               formatter={(value, _name, payload) => [
-                `${value} SUDs`,
+                `${value} SUDS`,
                 (payload?.payload as { hierarchy?: string } | undefined)?.hierarchy ?? '',
               ]}
             />

@@ -215,8 +215,8 @@ export default function Sessions() {
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
-              <option value="peak-desc">Highest peak SUDs</option>
-              <option value="peak-asc">Lowest peak SUDs</option>
+              <option value="peak-desc">Highest peak SUDS</option>
+              <option value="peak-asc">Lowest peak SUDS</option>
             </select>
           </label>
           {hasActiveFilters && (

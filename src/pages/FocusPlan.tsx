@@ -265,8 +265,8 @@ function FocusPlanForm({
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <SudsPicker label="Peak SUDs during the task" value={draft.peakSuds} onChange={(peakSuds) => patch({ peakSuds })} />
-          <SudsPicker label="SUDs at the end (did it come down?)" value={draft.endSuds} onChange={(endSuds) => patch({ endSuds })} />
+          <SudsPicker label="Peak SUDS during the task" value={draft.peakSuds} onChange={(peakSuds) => patch({ peakSuds })} />
+          <SudsPicker label="SUDS at the end (did it come down?)" value={draft.endSuds} onChange={(endSuds) => patch({ endSuds })} />
         </div>
 
         <Field label="What worked? What helped me stay on task?">
@@ -333,7 +333,7 @@ function SudsPicker({
   return (
     <Field label={label}>
       <div className="flex flex-wrap gap-1">
-        {Array.from({ length: 10 }, (_, i) => i).map((n) => (
+        {Array.from({ length: 11 }, (_, i) => i).map((n) => (
           <button
             key={n}
             type="button"
@@ -439,7 +439,7 @@ function ErpToolkit() {
         <div className="mt-4 flex flex-col gap-5">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              SUDs scale
+              SUDS scale
             </h3>
             <div className="mt-2 flex flex-col gap-1">
               {SUDS_SCALE.map((s) => (

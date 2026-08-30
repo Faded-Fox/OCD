@@ -9,6 +9,7 @@ import { Card, EmptyState, Badge, SecondaryButton, PrimaryButton } from '../comp
 import HierarchyBadge from '../components/HierarchyBadge'
 import SessionFields from '../components/SessionFields'
 import SudsChart from '../components/SudsChart'
+import { sessionSudsError } from '../lib/suds'
 
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>()
@@ -73,6 +74,7 @@ export default function SessionDetail() {
   }
 
   if (editing && draft) {
+    const sudsError = sessionSudsError(draft)
     return (
       <div className="flex flex-col gap-6 py-4">
         <div>
@@ -88,13 +90,16 @@ export default function SessionDetail() {
         <Card>
           <SessionFields session={draft} onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))} />
         </Card>
-        <div className="flex gap-3">
-          <SecondaryButton onClick={cancelEdit} disabled={saving}>
-            Cancel
-          </SecondaryButton>
-          <PrimaryButton onClick={saveEdit} disabled={saving}>
-            {saving ? 'Saving…' : 'Save changes'}
-          </PrimaryButton>
+        <div className="flex flex-col gap-2">
+          {sudsError && <p className="text-sm text-rose-600 dark:text-rose-400">{sudsError}</p>}
+          <div className="flex gap-3">
+            <SecondaryButton onClick={cancelEdit} disabled={saving}>
+              Cancel
+            </SecondaryButton>
+            <PrimaryButton onClick={saveEdit} disabled={saving || sudsError !== null}>
+              {saving ? 'Saving…' : 'Save changes'}
+            </PrimaryButton>
+          </div>
         </div>
       </div>
     )
@@ -147,11 +152,11 @@ export default function SessionDetail() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Peak SUDs</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Peak SUDS</p>
           <p className="text-xl font-semibold text-slate-900 dark:text-white">{session.peak_suds ?? '—'}</p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">End SUDs</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">End SUDS</p>
           <p className="text-xl font-semibold text-slate-900 dark:text-white">{session.end_suds ?? '—'}</p>
         </Card>
         <Card>
@@ -170,7 +175,7 @@ export default function SessionDetail() {
 
       {curve.length > 1 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs curve</h2>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS curve</h2>
           <SudsChart
             points={curve}
             isTimeBased={isTimeBased}

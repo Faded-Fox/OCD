@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { deleteAllData } from '../lib/db'
+import { deleteAllData, restoreBackup } from '../lib/db'
 import { downloadBackup } from '../lib/export'
 import { useSessions } from '../lib/useSessions'
 import { useJournalEntries } from '../lib/useJournalEntries'
@@ -10,7 +10,7 @@ import { useFlareGuide } from '../lib/useFlareGuide'
 import { isFlareGuideEmpty } from '../lib/flareGuide'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { isValuesGuideEmpty } from '../lib/values'
-import { describeBackupCounts } from '../lib/backup'
+import { countBackupEntries, describeBackupCounts, looksLikeBackup, parseBackup } from '../lib/backup'
 import { useStoragePersistence } from '../lib/useStoragePersistence'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 
@@ -26,6 +26,9 @@ export default function Settings() {
   const navigate = useNavigate()
   const [confirmText, setConfirmText] = useState('')
   const [exporting, setExporting] = useState(false)
+  const [restoreRaw, setRestoreRaw] = useState('')
+  const [restoring, setRestoring] = useState(false)
+  const restoreFileInputRef = useRef<HTMLInputElement>(null)
 
   const hasFlareGuide = Boolean(flareGuide && !isFlareGuideEmpty(flareGuide))
   const hasValuesGuide = Boolean(valuesGuide && !isValuesGuideEmpty(valuesGuide))
@@ -39,6 +42,26 @@ export default function Settings() {
   const handleDeleteAll = async () => {
     await deleteAllData()
     setConfirmText('')
+    navigate('/')
+  }
+
+  const handleRestoreFile = async (file: File) => {
+    setRestoreRaw(await file.text())
+  }
+
+  const isBackup = useMemo(() => looksLikeBackup(restoreRaw), [restoreRaw])
+  const backupCounts = useMemo(() => (isBackup ? countBackupEntries(restoreRaw) : null), [isBackup, restoreRaw])
+
+  const runRestore = async () => {
+    if (!backupCounts || backupCounts.sessions + backupCounts.journalEntries + backupCounts.focusPlans === 0) return
+    const confirmed = confirm(
+      `Restore ${describeBackupCounts(backupCounts)} to this device? Anything already here with a matching ID will be overwritten.`,
+    )
+    if (!confirmed) return
+    setRestoring(true)
+    const data = await parseBackup(restoreRaw)
+    await restoreBackup(data)
+    setRestoring(false)
     navigate('/')
   }
 
@@ -109,11 +132,41 @@ export default function Settings() {
         <PrimaryButton onClick={handleExport} disabled={exporting || !hasData} className="mt-3">
           {exporting ? 'Preparing…' : 'Export all data as JSON'}
         </PrimaryButton>
-        <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-          To restore, go to <Link to="/import" className="font-medium text-emerald-700 hover:underline dark:text-emerald-400">Import</Link> and
-          paste in or upload that same backup file — it's detected automatically and offered back as a
-          restore rather than parsed as a new import.
+        <p className="mt-5 text-sm text-slate-600 dark:text-slate-300">
+          To restore, paste or upload a previously exported backup file below.
         </p>
+        <textarea
+          value={restoreRaw}
+          onChange={(e) => setRestoreRaw(e.target.value)}
+          placeholder="Paste a backup file exported from this screen…"
+          rows={6}
+          className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-amber-900"
+        />
+        {isBackup && backupCounts && (
+          <Card className="mt-3 border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">
+              This looks like a PocketFox Companion backup — {describeBackupCounts(backupCounts)} found. Restoring
+              adds them to this device; anything already here with a matching ID gets overwritten.
+            </p>
+          </Card>
+        )}
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <SecondaryButton onClick={() => restoreFileInputRef.current?.click()}>Upload file…</SecondaryButton>
+          <input
+            ref={restoreFileInputRef}
+            type="file"
+            accept=".json,.txt"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) handleRestoreFile(file)
+              e.target.value = ''
+            }}
+          />
+          <PrimaryButton onClick={runRestore} disabled={!isBackup || restoring}>
+            {restoring ? 'Restoring…' : 'Restore backup'}
+          </PrimaryButton>
+        </div>
       </Card>
 
       <Card>

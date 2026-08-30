@@ -124,7 +124,7 @@ export function pickRandomDefusionTechnique(exclude?: string): { name: string; d
 export const FOCUS_PLAN_AFFIRMATION = 'I love you. This is just your brain, not you. Things are okay.'
 
 export const THERAPIST_FLAGS: string[] = [
-  "SUDs peaked above 8 and didn't come down within 45 minutes",
+  "SUDS peaked above 8 and didn't come down within 45 minutes",
   'You completed a compulsion and the task still feels undone / not "right"',
   'Task avoidance is increasing despite repeated attempts',
   'This worksheet itself is starting to feel like a checking compulsion',

@@ -8,12 +8,7 @@ import { useFlareGuide } from '../lib/useFlareGuide'
 import { isFlareGuideEmpty } from '../lib/flareGuide'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { isValuesGuideEmpty } from '../lib/values'
-import {
-  compulsionResistanceRate,
-  compulsionResistanceRateByHierarchy,
-  rungProgression,
-  sessionFrequency,
-} from '../lib/insights'
+import { rungProgression, sessionFrequency } from '../lib/insights'
 import { downloadBackup } from '../lib/export'
 import { isExportOverdue, snoozeExportReminder } from '../lib/exportReminder'
 import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
@@ -73,8 +68,6 @@ export default function Dashboard() {
   }
 
   const hierarchies = Array.from(new Set(sessions.map((s) => s.hierarchy || 'Unlabeled'))).sort()
-  const overallRate = compulsionResistanceRate(sessions)
-  const rateByHierarchy = compulsionResistanceRateByHierarchy(sessions)
   const progression = rungProgression(sessions)
   const gaps = sessionFrequency(sessions)
   const recent = [...sessions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
@@ -134,11 +127,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatTile label="Sessions logged" value={sessions.length} />
         <StatTile label="Hierarchies" value={hierarchies.length} />
-        <StatTile
-          label="Full resistance rate"
-          value={overallRate.rate !== null ? `${Math.round(overallRate.rate * 100)}%` : '—'}
-          sub={overallRate.knownTotal ? `${overallRate.fullyResistedCount}/${overallRate.knownTotal} sessions` : undefined}
-        />
+        <StatTile label="Rungs attempted" value={progression.length} />
         <StatTile label="Readiness signals" value={readySignals.length} sub="rungs showing two-in-a-row full resistance" />
       </div>
 
@@ -182,8 +171,10 @@ export default function Dashboard() {
         <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">By hierarchy</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {hierarchies.map((h) => {
-            const rate = rateByHierarchy[h]
-            const count = sessions.filter((s) => (s.hierarchy || 'Unlabeled') === h).length
+            const hierarchySessions = sessions.filter((s) => (s.hierarchy || 'Unlabeled') === h)
+            const count = hierarchySessions.length
+            const rungsAttempted = progression.filter((r) => r.hierarchy === h).length
+            const lastAttempted = [...hierarchySessions].map((s) => s.date).sort().slice(-1)[0]
             const gapInfo = gaps.find((g) => g.hierarchy === h)
             return (
               <Link key={h} to={`/hierarchy/${encodeURIComponent(h)}`}>
@@ -193,11 +184,14 @@ export default function Dashboard() {
                     <span className="text-xs text-slate-400">{count} session{count === 1 ? '' : 's'}</span>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-xl font-semibold text-slate-900 dark:text-white">
-                      {rate.rate !== null ? `${Math.round(rate.rate * 100)}%` : '—'}
+                    <span className="text-xl font-semibold text-slate-900 dark:text-white">{rungsAttempted}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      rung{rungsAttempted === 1 ? '' : 's'} attempted
                     </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">full resistance</span>
                   </div>
+                  {lastAttempted && (
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Last attempted {lastAttempted}</p>
+                  )}
                   {gapInfo?.avgGapDays !== null && gapInfo?.avgGapDays !== undefined && (
                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                       ~{Math.round(gapInfo.avgGapDays)} day avg gap between sessions

@@ -2,12 +2,12 @@ import type { Session } from './types'
 import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
-import { compulsionResistanceRate, compulsionResistanceRateByHierarchy, rungProgression, sessionFrequency } from './insights'
+import { rungProgression, sessionFrequency } from './insights'
 
 export interface TherapistSummaryHierarchyRow {
   hierarchy: string
   sessionCount: number
-  resistanceRate: number | null
+  rungsAttempted: number
   avgPeakSuds: number | null
   lastSessionDate: string | null
   readySignalCount: number
@@ -45,7 +45,7 @@ export interface TherapistSummary {
   generatedAt: string
   totalSessions: number
   hierarchyCount: number
-  overallResistanceRate: number | null
+  totalRungsAttempted: number
   hierarchyRows: TherapistSummaryHierarchyRow[]
   sessionRows: TherapistSummarySessionRow[]
   focusPlanRows: TherapistSummaryFocusPlanRow[]
@@ -84,7 +84,6 @@ export function buildTherapistSummary(
   const journalEntries = input.journalEntries.filter((e) => inRange(e.date, from, to))
 
   const hierarchies = Array.from(new Set(sessions.map((s) => s.hierarchy || 'Unlabeled'))).sort()
-  const rateByHierarchy = compulsionResistanceRateByHierarchy(sessions)
   const progression = rungProgression(sessions)
   const gaps = sessionFrequency(sessions)
 
@@ -94,7 +93,7 @@ export function buildTherapistSummary(
     return {
       hierarchy: h,
       sessionCount: list.length,
-      resistanceRate: rateByHierarchy[h]?.rate ?? null,
+      rungsAttempted: progression.filter((r) => r.hierarchy === h).length,
       avgPeakSuds: average(list.map((s) => s.peak_suds)),
       lastSessionDate: [...list].map((s) => s.date).sort().slice(-1)[0] ?? null,
       readySignalCount: progression.filter((r) => r.hierarchy === h && r.readySignal).length,
@@ -137,17 +136,13 @@ export function buildTherapistSummary(
     generatedAt: new Date().toISOString(),
     totalSessions: sessions.length,
     hierarchyCount: hierarchies.length,
-    overallResistanceRate: compulsionResistanceRate(sessions).rate,
+    totalRungsAttempted: progression.length,
     hierarchyRows,
     sessionRows,
     focusPlanRows,
     ladderRows,
     journalEntryCount: journalEntries.length,
   }
-}
-
-function fmtPct(rate: number | null): string {
-  return rate !== null ? `${Math.round(rate * 100)}%` : '—'
 }
 
 function fmtSuds(n: number | null): string {
@@ -168,7 +163,7 @@ export function buildTherapistSummaryText(summary: TherapistSummary): string {
 
   lines.push('OVERVIEW')
   lines.push(
-    `${summary.totalSessions} session${summary.totalSessions === 1 ? '' : 's'} across ${summary.hierarchyCount} hierarch${summary.hierarchyCount === 1 ? 'y' : 'ies'}. Overall full-resistance rate: ${fmtPct(summary.overallResistanceRate)}.`,
+    `${summary.totalSessions} session${summary.totalSessions === 1 ? '' : 's'} across ${summary.hierarchyCount} hierarch${summary.hierarchyCount === 1 ? 'y' : 'ies'}. Total rungs attempted: ${summary.totalRungsAttempted}.`,
     '',
   )
 
@@ -177,8 +172,8 @@ export function buildTherapistSummaryText(summary: TherapistSummary): string {
     for (const r of summary.hierarchyRows) {
       const bits = [
         `${r.sessionCount} session${r.sessionCount === 1 ? '' : 's'}`,
-        `${fmtPct(r.resistanceRate)} full resistance`,
-        `avg peak ${fmtSuds(r.avgPeakSuds)} SUDs`,
+        `${r.rungsAttempted} rung${r.rungsAttempted === 1 ? '' : 's'} attempted`,
+        `avg peak ${fmtSuds(r.avgPeakSuds)} SUDS`,
         `last attempted ${r.lastSessionDate ?? '—'}`,
       ]
       if (r.avgGapDays !== null) bits.push(`~${Math.round(r.avgGapDays)} day avg gap`)

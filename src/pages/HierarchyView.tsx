@@ -125,7 +125,7 @@ export default function HierarchyView() {
 
       {peakTrend.length > 1 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDs trend</h2>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDS trend</h2>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={peakTrend} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
@@ -136,7 +136,7 @@ export default function HierarchyView() {
                   contentStyle={{ borderRadius: 12, fontSize: 12 }}
                   labelFormatter={(_l, payload) => payload?.[0]?.payload?.label}
                 />
-                <Line type="monotone" dataKey="peak_suds" name="Peak SUDs" stroke={color.hex} strokeWidth={2} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="peak_suds" name="Peak SUDS" stroke={color.hex} strokeWidth={2} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>

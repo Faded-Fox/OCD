@@ -7,6 +7,7 @@ import { useSessions } from '../lib/useSessions'
 import { colorForHierarchy } from '../lib/colors'
 import { Card, PrimaryButton, SecondaryButton, EmptyState } from '../components/ui'
 import { inputBaseClass, inputClass, Field, TargetRangeInput } from '../components/SessionFields'
+import { sudsRangeError } from '../lib/suds'
 
 type Phase = 'landing' | 'form'
 
@@ -57,7 +58,7 @@ export default function FearLadders() {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Fear Ladders</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
             Plan a hierarchy's rungs before you've run any exposures in it — what each rung is, and roughly what
-            target SUDs to expect. Once you start logging sessions against it, the per-hierarchy view merges this
+            target SUDS to expect. Once you start logging sessions against it, the per-hierarchy view merges this
             plan with your actual progress.
           </p>
         </div>
@@ -149,6 +150,9 @@ function FearLadderForm({
     setDraft((d) => ({ ...d, rungs: [...d.rungs, createEmptyRung(d.rungs)] }))
   }
 
+  const rungRangeError = draft.rungs.map((r) => sudsRangeError(r.targetSudsRange)).find((e) => e !== null) ?? null
+  const hasInvalidRung = rungRangeError !== null
+
   const save = async () => {
     const hierarchy = draft.hierarchy.trim()
     if (!hierarchy) {
@@ -157,6 +161,10 @@ function FearLadderForm({
     }
     if (existingHierarchies.some((h) => h.toLowerCase() === hierarchy.toLowerCase())) {
       setError('There\'s already a fear ladder for this hierarchy — edit that one instead.')
+      return
+    }
+    if (hasInvalidRung) {
+      setError(rungRangeError)
       return
     }
     setSaving(true)
@@ -229,7 +237,7 @@ function FearLadderForm({
                 </label>
                 <div className="flex flex-col gap-1">
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Target SUDs
+                    Target SUDS
                   </span>
                   <TargetRangeInput
                     value={row.targetSudsRange}
@@ -260,7 +268,7 @@ function FearLadderForm({
         <SecondaryButton onClick={onCancel} disabled={saving}>
           Discard
         </SecondaryButton>
-        <PrimaryButton onClick={save} disabled={saving}>
+        <PrimaryButton onClick={save} disabled={saving || hasInvalidRung}>
           {saving ? 'Saving…' : 'Save ladder'}
         </PrimaryButton>
       </div>

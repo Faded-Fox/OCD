@@ -9,10 +9,6 @@ import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../c
 import HierarchyBadge from '../components/HierarchyBadge'
 import { inputClass } from '../components/SessionFields'
 
-function fmtPct(rate: number | null): string {
-  return rate !== null ? `${Math.round(rate * 100)}%` : '—'
-}
-
 function fmtSuds(n: number | null): string {
   return n !== null ? String(Math.round(n * 10) / 10) : '—'
 }
@@ -121,83 +117,72 @@ export default function TherapistSummary() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatTile label="Sessions" value={summary.totalSessions} sub={rangeLabel(summary)} />
         <StatTile label="Hierarchies" value={summary.hierarchyCount} />
-        <StatTile label="Full resistance rate" value={fmtPct(summary.overallResistanceRate)} />
+        <StatTile label="Rungs attempted" value={summary.totalRungsAttempted} />
         <StatTile label="Journal entries" value={summary.journalEntryCount} sub="logged in this period" />
       </div>
 
       {summary.hierarchyRows.length > 0 && (
-        <Card className="overflow-x-auto">
+        <div>
           <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">By hierarchy</h2>
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <th className="py-1.5 pr-3 font-medium">Hierarchy</th>
-                <th className="py-1.5 pr-3 font-medium">Sessions</th>
-                <th className="py-1.5 pr-3 font-medium">Resistance</th>
-                <th className="py-1.5 pr-3 font-medium">Avg peak</th>
-                <th className="py-1.5 pr-3 font-medium">Last attempted</th>
-                <th className="py-1.5 pr-3 font-medium">Avg gap</th>
-                <th className="py-1.5 font-medium">Ready to progress</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.hierarchyRows.map((r) => (
-                <tr key={r.hierarchy} className="border-b border-slate-100 last:border-0 dark:border-slate-900">
-                  <td className="py-1.5 pr-3">
-                    <HierarchyBadge hierarchy={r.hierarchy} />
-                  </td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">{r.sessionCount}</td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">{fmtPct(r.resistanceRate)}</td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">{fmtSuds(r.avgPeakSuds)}</td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">{r.lastSessionDate ?? '—'}</td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">
-                    {r.avgGapDays !== null ? `~${Math.round(r.avgGapDays)}d` : '—'}
-                  </td>
-                  <td className="py-1.5 text-slate-700 dark:text-slate-300">{r.readySignalCount || '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {summary.hierarchyRows.map((r) => (
+              <Card key={r.hierarchy} className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <HierarchyBadge hierarchy={r.hierarchy} />
+                  <span className="text-xs text-slate-400">
+                    {r.sessionCount} session{r.sessionCount === 1 ? '' : 's'}
+                  </span>
+                </div>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <span className="text-xl font-semibold text-slate-900 dark:text-white">{r.rungsAttempted}</span>
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    rung{r.rungsAttempted === 1 ? '' : 's'} attempted
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Avg peak {fmtSuds(r.avgPeakSuds)} SUDS</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Last attempted {r.lastSessionDate ?? '—'}</p>
+                {r.avgGapDays !== null && (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    ~{Math.round(r.avgGapDays)} day avg gap
+                  </p>
+                )}
+                {r.readySignalCount > 0 && (
+                  <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                    {r.readySignalCount} rung{r.readySignalCount === 1 ? '' : 's'} showing readiness to progress
+                  </p>
+                )}
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
       {summary.sessionRows.length > 0 && (
-        <Card className="overflow-x-auto">
+        <div>
           <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
             Sessions in this period ({summary.sessionRows.length})
           </h2>
-          <table className="w-full min-w-[520px] text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                <th className="py-1.5 pr-3 font-medium">Date</th>
-                <th className="py-1.5 pr-3 font-medium">Hierarchy</th>
-                <th className="py-1.5 pr-3 font-medium">Rung</th>
-                <th className="py-1.5 pr-3 font-medium">Peak → End</th>
-                <th className="py-1.5 font-medium">Resistance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {summary.sessionRows.map((s, i) => (
-                <tr key={i} className="border-b border-slate-100 last:border-0 dark:border-slate-900">
-                  <td className="py-1.5 pr-3 whitespace-nowrap text-slate-700 dark:text-slate-300">{s.date}</td>
-                  <td className="py-1.5 pr-3">
-                    <HierarchyBadge hierarchy={s.hierarchy} />
-                  </td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">
-                    {s.rung ?? '—'}
+          <div className="flex flex-col gap-2">
+            {summary.sessionRows.map((s, i) => (
+              <Card key={i} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                <div className="flex items-center gap-3">
+                  <HierarchyBadge hierarchy={s.hierarchy} />
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                    Rung {s.rung ?? '—'}
                     {s.variation ? ` (${s.variation})` : ''}
-                  </td>
-                  <td className="py-1.5 pr-3 text-slate-700 dark:text-slate-300">
-                    {s.peakSuds ?? '—'} → {s.endSuds ?? '—'}
-                  </td>
-                  <td className="py-1.5 text-slate-700 dark:text-slate-300">
-                    {s.resisted === true ? 'Fully resisted' : s.resisted === false ? 'Partial' : 'Unknown'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Card>
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                  <span>{s.date}</span>
+                  <span>
+                    Peak {s.peakSuds ?? '—'} → End {s.endSuds ?? '—'}
+                  </span>
+                  <span>{s.resisted === true ? 'Fully resisted' : s.resisted === false ? 'Partial' : 'Unknown'}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
 
       {summary.focusPlanRows.length > 0 && (

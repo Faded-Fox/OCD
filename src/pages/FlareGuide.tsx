@@ -58,7 +58,7 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
 
     if (typeof navigator.share === 'function') {
       try {
-        await navigator.share({ title: 'My OCD Flare-Up Guide', text })
+        await navigator.share({ title: 'My OCD Flare Guide', text })
         return
       } catch (err) {
         // AbortError means the person just closed the share sheet — not a failure.
@@ -80,7 +80,7 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Flare-Up Guide</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Flare Guide</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
             Written for the people you trust. Hand them your phone, open to this page, or share it as text.
           </p>
@@ -219,7 +219,7 @@ function FlareGuideForm({
         >
           ← Cancel
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Flare-Up Guide</h1>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Flare Guide</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
           Everything here stays on this device — nothing is ever uploaded. Write it for the specific people you'd
           hand your phone to.

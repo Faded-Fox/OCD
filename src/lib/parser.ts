@@ -356,7 +356,7 @@ function buildSession(block: string, index: number, usedFallback: boolean): Sess
   const exposureType = extractExposureType(block)
   const plannedDuration = extractDuration(block)
   const readings = extractSudsReadings(block)
-  if (readings.length === 0) flags.push('no SUDs readings found — please add manually')
+  if (readings.length === 0) flags.push('no SUDS readings found — please add manually')
 
   const explicitPeak = block.match(/peak\s*suds\s*:?\s*(\d+(?:\.\d+)?)/i)
   const peak = explicitPeak

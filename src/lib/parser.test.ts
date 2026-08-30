@@ -94,7 +94,7 @@ Notes: forgot to log the actual exposure details
         'date not found — please set manually',
         'hierarchy not found — please set manually',
         'rung number not found — please set manually',
-        'no SUDs readings found — please add manually',
+        'no SUDS readings found — please add manually',
       ]),
     )
   })

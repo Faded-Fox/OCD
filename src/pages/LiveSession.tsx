@@ -13,6 +13,7 @@ import { useValuesGuide } from '../lib/useValuesGuide'
 import { pickRandomValue, type ValueItem } from '../lib/values'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput, TextSuggestInput } from '../components/SessionFields'
+import { isValidSudsValue, sessionSudsError, sudsRangeError } from '../lib/suds'
 import SudsChart from '../components/SudsChart'
 
 // How rough counts as "rough" for the auto-surfaced support card: SUDs peaked
@@ -76,6 +77,7 @@ export default function LiveSession() {
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [preSuds, setPreSuds] = useState<number | ''>('')
   const [customSuds, setCustomSuds] = useState('')
+  const customSudsInvalid = customSuds !== '' && !isValidSudsValue(Number(customSuds))
   const [nowTick, setNowTick] = useState(Date.now())
   const [saving, setSaving] = useState(false)
   const [restoredNotice, setRestoredNotice] = useState(false)
@@ -143,7 +145,11 @@ export default function LiveSession() {
   const revealTechnique = () => setSupportTechnique(pickRandomDefusionTechnique(supportTechnique?.name))
   const revealFact = () => setSupportFact(pickRandomFoxFact(supportFact ?? undefined))
 
-  const canStart = session.hierarchy.trim() !== '' && session.rung !== null && preSuds !== ''
+  const canStart =
+    session.hierarchy.trim() !== '' &&
+    session.rung !== null &&
+    preSuds !== '' &&
+    sudsRangeError(session.target_suds_range) === null
 
   const matchedLadder = ladders.find(
     (l) => l.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && l.hierarchy.trim() !== '',
@@ -230,7 +236,7 @@ export default function LiveSession() {
 
   const logCustom = () => {
     const value = Number(customSuds)
-    if (Number.isNaN(value)) return
+    if (!isValidSudsValue(value)) return
     logReading(value)
     setCustomSuds('')
   }
@@ -271,6 +277,7 @@ export default function LiveSession() {
   }
 
   const { points: chartPoints, isTimeBased } = displayCurve(session)
+  const wrapupSudsError = sessionSudsError(session)
 
   if (phase === 'setup') {
     return (
@@ -335,7 +342,7 @@ export default function LiveSession() {
                 ))}
               </select>
             </Field>
-            <Field label="Target SUDs range">
+            <Field label="Target SUDS range">
               <TargetRangeInput
                 value={session.target_suds_range}
                 onChange={(target_suds_range) => setSession((s) => ({ ...s, target_suds_range }))}
@@ -402,7 +409,7 @@ export default function LiveSession() {
 
           <div>
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Pre-exposure SUDs — how anxious do you feel right now?
+              Pre-exposure SUDS — how anxious do you feel right now?
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
               {SUDS_SCALE.map((n) => (
@@ -427,7 +434,7 @@ export default function LiveSession() {
             Start exposure
           </PrimaryButton>
           {!canStart && (
-            <p className="text-xs text-slate-400">Hierarchy, rung, and a pre-exposure SUDs rating are needed to start.</p>
+            <p className="text-xs text-slate-400">Hierarchy, rung, and a pre-exposure SUDS rating are needed to start.</p>
           )}
         </Card>
       </div>
@@ -504,7 +511,7 @@ export default function LiveSession() {
 
         <Card>
           <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Log a SUDs rating
+            Log a SUDS rating
           </span>
           <div className="mt-2 flex flex-wrap gap-2">
             {SUDS_SCALE.map((n) => (
@@ -528,17 +535,18 @@ export default function LiveSession() {
               value={customSuds}
               onChange={(e) => setCustomSuds(e.target.value)}
               placeholder="or a precise value, e.g. 2.5"
-              className={`${inputClass} w-52`}
+              className={`${inputClass} w-52 ${customSudsInvalid ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
             />
-            <SecondaryButton onClick={logCustom} disabled={customSuds === ''}>
+            <SecondaryButton onClick={logCustom} disabled={customSuds === '' || customSudsInvalid}>
               Log
             </SecondaryButton>
           </div>
+          {customSudsInvalid && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">Must be between 0 and 10.</p>}
         </Card>
 
         {chartPoints.length > 0 && (
           <Card>
-            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs so far</h2>
+            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS so far</h2>
             <SudsChart
               points={chartPoints}
               isTimeBased={isTimeBased}
@@ -593,7 +601,7 @@ export default function LiveSession() {
 
       {chartPoints.length > 0 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDs curve</h2>
+          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS curve</h2>
           <SudsChart
             points={chartPoints}
             isTimeBased={isTimeBased}
@@ -606,11 +614,12 @@ export default function LiveSession() {
 
       <Card className="flex flex-col gap-4">
         <SessionFields session={session} onChange={(patch) => setSession((s) => ({ ...s, ...patch }))} />
+        {wrapupSudsError && <p className="text-sm text-rose-600 dark:text-rose-400">{wrapupSudsError}</p>}
         <div className="flex gap-3">
           <SecondaryButton onClick={cancelSession} disabled={saving}>
             Discard
           </SecondaryButton>
-          <PrimaryButton onClick={saveSession} disabled={saving}>
+          <PrimaryButton onClick={saveSession} disabled={saving || wrapupSudsError !== null}>
             {saving ? 'Saving…' : 'Save session'}
           </PrimaryButton>
         </div>

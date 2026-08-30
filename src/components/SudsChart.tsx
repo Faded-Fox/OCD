@@ -27,7 +27,7 @@ export default function SudsChart({
           <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
           <Tooltip
             contentStyle={{ borderRadius: 12, fontSize: 12 }}
-            formatter={(value) => [`${value} SUDs`, '']}
+            formatter={(value) => [`${value} SUDS`, '']}
             labelFormatter={(x, payload) =>
               isTimeBased ? `${payload?.[0]?.payload?.label ?? ''} · ${x} min` : `${payload?.[0]?.payload?.label ?? ''}`
             }

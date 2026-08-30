@@ -48,7 +48,7 @@ export function createEmptyFlareGuide(): FlareGuide {
 /** Formats the guide's filled-in sections into one plain-text block, suitable for
  *  the native share sheet or clipboard — skips any section that's still blank. */
 export function buildFlareGuideText(guide: FlareGuide): string {
-  const lines: string[] = ['My OCD Flare-Up Guide', '']
+  const lines: string[] = ['My OCD Flare Guide', '']
 
   const section = (heading: string | null, body: string) => {
     if (!body.trim()) return

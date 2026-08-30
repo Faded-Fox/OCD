@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session, type SudsReading } from '../lib/types'
 import { useSessions } from '../lib/useSessions'
 import { SUGGESTED_TECHNIQUES } from '../lib/techniques'
+import { SUDS_MAX, SUDS_MIN, isValidSudsValue, sudsRangeError } from '../lib/suds'
 
 function dedupeCaseInsensitive(items: string[]): string[] {
   const seen = new Set<string>()
@@ -33,6 +34,15 @@ export default function SessionFields({
   const compulsionSuggestions = dedupeCaseInsensitive(sessions.flatMap((s) => s.compulsions_targeted)).sort((a, b) =>
     a.localeCompare(b),
   )
+
+  const peakError =
+    session.peak_suds !== null && !isValidSudsValue(session.peak_suds)
+      ? `Peak SUDS must be between ${SUDS_MIN} and ${SUDS_MAX}.`
+      : null
+  const endError =
+    session.end_suds !== null && !isValidSudsValue(session.end_suds)
+      ? `End SUDS must be between ${SUDS_MIN} and ${SUDS_MAX}.`
+      : null
 
   return (
     <div className="flex flex-col gap-5">
@@ -89,7 +99,7 @@ export default function SessionFields({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-        <SectionLabel full>SUDs</SectionLabel>
+        <SectionLabel full>SUDS</SectionLabel>
         <Field label="Target range">
           <TargetRangeInput
             value={session.target_suds_range}
@@ -100,18 +110,25 @@ export default function SessionFields({
           <div className="flex items-center gap-2">
             <input
               type="number"
+              min={SUDS_MIN}
+              max={SUDS_MAX}
               value={session.peak_suds ?? ''}
               onChange={(e) => onChange({ peak_suds: e.target.value === '' ? null : Number(e.target.value) })}
-              className={inputClass}
+              className={`${inputClass} ${peakError ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
             />
             <span className="text-slate-400">/</span>
             <input
               type="number"
+              min={SUDS_MIN}
+              max={SUDS_MAX}
               value={session.end_suds ?? ''}
               onChange={(e) => onChange({ end_suds: e.target.value === '' ? null : Number(e.target.value) })}
-              className={inputClass}
+              className={`${inputClass} ${endError ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
             />
           </div>
+          {(peakError || endError) && (
+            <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{peakError || endError}</p>
+          )}
         </Field>
         <div className="sm:col-span-2">
           <ReadingsEditor
@@ -261,7 +278,7 @@ function ReadingsEditor({
               type="number"
               value={r.suds}
               onChange={(e) => updateReading(i, { suds: Number(e.target.value) })}
-              placeholder="SUDs"
+              placeholder="SUDS"
               className={`${inputBaseClass} w-20`}
             />
             <button
@@ -561,27 +578,36 @@ export function TargetRangeInput({
     }
   }
 
+  const error = sudsRangeError(value)
+
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        value={lowText}
-        onChange={(e) => {
-          setLowText(e.target.value)
-          commit(e.target.value, highText)
-        }}
-        className={inputClass}
-      />
-      <span className="text-slate-400">–</span>
-      <input
-        type="number"
-        value={highText}
-        onChange={(e) => {
-          setHighText(e.target.value)
-          commit(lowText, e.target.value)
-        }}
-        className={inputClass}
-      />
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          min={SUDS_MIN}
+          max={SUDS_MAX}
+          value={lowText}
+          onChange={(e) => {
+            setLowText(e.target.value)
+            commit(e.target.value, highText)
+          }}
+          className={`${inputClass} ${error ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
+        />
+        <span className="text-slate-400">–</span>
+        <input
+          type="number"
+          min={SUDS_MIN}
+          max={SUDS_MAX}
+          value={highText}
+          onChange={(e) => {
+            setHighText(e.target.value)
+            commit(lowText, e.target.value)
+          }}
+          className={`${inputClass} ${error ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
+        />
+      </div>
+      {error && <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p>}
     </div>
   )
 }
