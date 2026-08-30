@@ -115,6 +115,12 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
   },
 ]
 
+export function pickRandomDefusionTechnique(exclude?: string): { name: string; description: string } {
+  const options = exclude ? DEFUSION_TECHNIQUES.filter((t) => t.name !== exclude) : DEFUSION_TECHNIQUES
+  const pool = options.length > 0 ? options : DEFUSION_TECHNIQUES
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
 export const FOCUS_PLAN_AFFIRMATION = 'I love you. This is just your brain, not you. Things are okay.'
 
 export const THERAPIST_FLAGS: string[] = [

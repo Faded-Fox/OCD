@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { createEmptySession } from '../lib/session'
 import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session } from '../lib/types'
 import { colorForHierarchy } from '../lib/colors'
 import { displayCurve } from '../lib/insights'
+import { pickRandomDefusionTechnique } from '../lib/focusPlan'
+import { pickRandomFoxFact } from '../lib/foxFacts'
 import { useFearLadders } from '../lib/useFearLadders'
 import { useSessions } from '../lib/useSessions'
 import { useValuesGuide } from '../lib/useValuesGuide'
@@ -12,6 +14,15 @@ import { pickRandomValue, type ValueItem } from '../lib/values'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput, TextSuggestInput } from '../components/SessionFields'
 import SudsChart from '../components/SudsChart'
+
+// How rough counts as "rough" for the auto-surfaced support card: SUDs peaked
+// at 8+ and hasn't meaningfully come down after a while. Deliberately not the
+// same as the after-the-fact THERAPIST_FLAGS threshold (45 min) — that flags a
+// session as worth mentioning to a specialist after it's over; this is a much
+// earlier, gentler nudge offered *during* the exposure, not a suggestion to
+// stop it (leaving early because SUDs is high would just be a compulsion).
+const ROUGH_SUDS_THRESHOLD = 8
+const ROUGH_ELAPSED_MS = 15 * 60 * 1000
 
 function dedupeCaseInsensitive(items: string[]): string[] {
   const seen = new Set<string>()
@@ -68,6 +79,10 @@ export default function LiveSession() {
   const [nowTick, setNowTick] = useState(Date.now())
   const [saving, setSaving] = useState(false)
   const [restoredNotice, setRestoredNotice] = useState(false)
+  const [supportOpen, setSupportOpen] = useState(false)
+  const [supportTechnique, setSupportTechnique] = useState<{ name: string; description: string } | null>(null)
+  const [supportFact, setSupportFact] = useState<string | null>(null)
+  const wasRoughRef = useRef(false)
 
   // Restore an in-progress session if one exists (e.g. after an accidental reload).
   useEffect(() => {
@@ -106,6 +121,27 @@ export default function LiveSession() {
 
   const elapsedMs = phase === 'running' && startedAt ? nowTick - startedAt : 0
   const color = colorForHierarchy(session.hierarchy)
+
+  const lastReadingSuds = session.readings.length > 0 ? session.readings[session.readings.length - 1].suds : null
+  const roughSession =
+    phase === 'running' &&
+    session.peak_suds !== null &&
+    session.peak_suds >= ROUGH_SUDS_THRESHOLD &&
+    elapsedMs >= ROUGH_ELAPSED_MS &&
+    (lastReadingSuds === null || lastReadingSuds >= ROUGH_SUDS_THRESHOLD - 1)
+
+  // Auto-open once when a rough stretch starts, not on every render while it
+  // continues — closing it shouldn't make it immediately pop back open, only
+  // a *new* rough stretch (SUDs having come back down and climbed again) should.
+  useEffect(() => {
+    if (roughSession && !wasRoughRef.current) {
+      setSupportOpen(true)
+    }
+    wasRoughRef.current = roughSession
+  }, [roughSession])
+
+  const revealTechnique = () => setSupportTechnique(pickRandomDefusionTechnique(supportTechnique?.name))
+  const revealFact = () => setSupportFact(pickRandomFoxFact(supportFact ?? undefined))
 
   const canStart = session.hierarchy.trim() !== '' && session.rung !== null && preSuds !== ''
 
@@ -171,6 +207,10 @@ export default function LiveSession() {
     }))
     setStartedAt(now)
     setPhase('running')
+    setSupportOpen(false)
+    setSupportTechnique(null)
+    setSupportFact(null)
+    wasRoughRef.current = false
   }
 
   const logReading = (suds: number) => {
@@ -414,7 +454,53 @@ export default function LiveSession() {
             {formatElapsed(elapsedMs)}
           </span>
           <span className="text-xs text-slate-400">elapsed</span>
+          {!supportOpen && (
+            <button
+              type="button"
+              onClick={() => setSupportOpen(true)}
+              className="mt-1 text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+            >
+              🦊 Rough stretch? Something to lean on
+            </button>
+          )}
         </Card>
+
+        {supportOpen && (
+          <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm text-amber-900 dark:text-amber-200">
+                {roughSession
+                  ? "This has been sitting high for a while — that's often what it looks like right before it starts to ease. You don't have to do anything differently, but here's something to lean on if it helps."
+                  : "It's okay to keep going — riding this out is what lets it come back down on its own. Here's something to lean on in the meantime."}
+              </p>
+              <button
+                type="button"
+                onClick={() => setSupportOpen(false)}
+                aria-label="Close"
+                className="shrink-0 rounded-lg px-1.5 py-0.5 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-950"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <SecondaryButton onClick={revealTechnique}>
+                {supportTechnique ? 'Another technique' : 'Grounding technique'}
+              </SecondaryButton>
+              <SecondaryButton onClick={revealFact}>{supportFact ? 'Another fox fact' : 'Fox fact'}</SecondaryButton>
+            </div>
+            {supportTechnique && (
+              <div className="mt-3 rounded-lg bg-white/70 p-3 dark:bg-black/20">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">{supportTechnique.name}</p>
+                <p className="mt-0.5 text-sm text-amber-800 dark:text-amber-200">{supportTechnique.description}</p>
+              </div>
+            )}
+            {supportFact && (
+              <div className="mt-3 rounded-lg bg-white/70 p-3 dark:bg-black/20">
+                <p className="text-sm text-amber-800 dark:text-amber-200">🦊 {supportFact}</p>
+              </div>
+            )}
+          </Card>
+        )}
 
         <Card>
           <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
