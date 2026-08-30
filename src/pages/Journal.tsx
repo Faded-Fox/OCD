@@ -24,7 +24,7 @@ import foxMorning from '../assets/fox-morning.webp'
 import foxWindDown from '../assets/fox-wind-down.webp'
 import foxQuickPrompt from '../assets/fox-quick-prompt.webp'
 import foxIntrusiveThought from '../assets/fox-intrusive-thought.webp'
-import foxChecklist from '../assets/fox-checklist.webp'
+import foxObsessiveThought from '../assets/fox-obsessive-thought.webp'
 import foxMoodAngry from '../assets/mood/fox-mood-angry.webp'
 import foxMoodCalm from '../assets/mood/fox-mood-calm.webp'
 import foxMoodFrustrated from '../assets/mood/fox-mood-frustrated.webp'
@@ -246,9 +246,9 @@ export default function Journal() {
       </Card>
 
       <Card className="flex flex-col gap-3">
-        <img src={foxChecklist} alt="" className="h-16 w-16 self-start" />
+        <img src={foxObsessiveThought} alt="" className="h-16 w-16 self-start" />
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Thought Record</h2>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Obsessive Thought</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             A structured CBT worksheet for testing one intrusive thought — five timed sections (automatic
             thought, evidence for, evidence against, a balanced alternative, close), each with its own
@@ -744,7 +744,7 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
           <button type="button" onClick={onCancel} className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
             ← Journal
           </button>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Thought Record</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Obsessive Thought</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             30-minute hard cap — stop at the timer, regardless of section.
           </p>
@@ -1168,7 +1168,7 @@ function ThoughtRecordEntryCard({
 }) {
   return (
     <EntryCardShell
-      badge="Thought Record"
+      badge="Obsessive Thought"
       badgeClass="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
       date={entry.date}
       extra={

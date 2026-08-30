@@ -176,7 +176,7 @@ export interface ThoughtEntry {
   mood?: string
 }
 
-/** One step of the Thought Record's fixed sequence. Unlike the morning/evening
+/** One step of the Obsessive Thought record's fixed sequence. Unlike the morning/evening
  *  templates above (all sections shown at once under one overall timer), each
  *  of these gets its own countdown — the source worksheet is explicit that a
  *  30-minute hard cap and per-section pacing are the point, not a suggestion. */
