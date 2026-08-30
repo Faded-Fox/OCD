@@ -183,8 +183,9 @@ export default function Import() {
       {mode === 'text' ? (
         <Card className="flex flex-col gap-4">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Paste a Claude.ai conversation export (JSON) or plain conversation text containing ERP session
-            logs, and this device will pick out the structured session data automatically.
+            Paste plain conversation text or a JSON conversation export (including exports from Claude.ai)
+            containing ERP session logs, and this device will pick out the structured session data
+            automatically.
           </p>
           <textarea
             value={raw}
