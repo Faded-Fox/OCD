@@ -1,0 +1,58 @@
+name: iOS — TestFlight build
+
+# Manual only, like the Android APK workflow — trigger from the Actions tab
+# whenever you want a fresh TestFlight build from the current main branch.
+# Requires the signing secrets produced by "iOS — bootstrap signing" (run
+# that one first, exactly once) plus the same App Store Connect API key
+# secrets it uses.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-upload:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Rooted at "/" instead of "/OCD/" — the native app loads its assets
+      # from its own local root, same reasoning as the Android build.
+      - run: npm run build:capacitor
+      - run: npx cap sync ios
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Decode signing assets
+        run: |
+          mkdir -p "$RUNNER_TEMP/signing"
+          echo "${{ secrets.IOS_DIST_CERT_P12_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/signing/cert.p12"
+          echo "${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/signing/profile.mobileprovision"
+
+      - name: Build and upload to TestFlight
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_DIST_CERT_P12_PATH: ${{ runner.temp }}/signing/cert.p12
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          IOS_PROVISION_PROFILE_PATH: ${{ runner.temp }}/signing/profile.mobileprovision
+        run: bundle exec fastlane ios beta
+
+      - name: Clean up decoded signing assets
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/signing"

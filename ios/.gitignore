@@ -1,0 +1,21 @@
+App/build
+App/Pods
+App/output
+App/App/public
+DerivedData
+xcuserdata
+
+# Cordova plugins for Capacitor
+capacitor-cordova-ios-plugins
+
+# Generated Config files
+App/App/capacitor.config.json
+App/App/config.xml
+
+# fastlane — signing/ holds a private key + password when bootstrap_signing
+# runs locally; never commit it (CI uploads it as a short-lived artifact
+# instead, see .github/workflows/ios-bootstrap-signing.yml)
+signing/
+fastlane/report.xml
+fastlane/README.md
+.env

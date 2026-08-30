@@ -1,0 +1,102 @@
+require "securerandom"
+
+default_platform(:ios)
+
+# All auth here goes through an App Store Connect API key (Issuer ID + Key ID +
+# .p8 key content) — never an Apple ID password or 2FA prompt, which is the
+# only way any of this can run unattended on a CI runner nobody is sitting at.
+def api_key
+  app_store_connect_api_key(
+    key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+    issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
+    key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
+    is_key_content_base64: true,
+  )
+end
+
+platform :ios do
+  # Run this lane exactly once (manually, via the "iOS — bootstrap signing"
+  # GitHub Actions workflow) to create a fresh Apple Distribution certificate
+  # and App Store provisioning profile for this app, and print out the
+  # secrets to store for the ongoing "beta" lane below.
+  #
+  # This only works cleanly the FIRST time, before any "Apple Distribution"
+  # certificate exists for this account under this key's access — Apple never
+  # lets you re-download a certificate's private key after the fact, so if a
+  # certificate already exists from elsewhere, revoke it in App Store Connect
+  # first (Certificates, IDs & Profiles) so this generates a fresh, exportable
+  # cert+key pair instead of reusing one whose key it can't retrieve.
+  desc "Create a distribution certificate + provisioning profile, export as CI secrets"
+  lane :bootstrap_signing do
+    api_key
+
+    cert_password = SecureRandom.hex(16)
+
+    get_certificates(
+      output_path: "./signing",
+      generate_apple_certs: true,
+    )
+
+    get_provisioning_profile(
+      output_path: "./signing",
+      filename: "profile.mobileprovision",
+    )
+
+    p12_path = Dir.glob("./signing/*.p12").first
+    UI.user_error!("No .p12 was produced — see the note above about revoking an existing certificate first") unless p12_path
+
+    sh("openssl base64 -A -in #{p12_path} -out ./signing/cert_base64.txt")
+    sh("openssl base64 -A -in ./signing/profile.mobileprovision -out ./signing/profile_base64.txt")
+    File.write("./signing/cert_password.txt", cert_password)
+
+    UI.important("Bootstrap complete. The 'iOS — bootstrap signing' workflow uploads ./ios/signing/ as a build artifact — download it, then add these repo secrets before deleting the artifact: IOS_DIST_CERT_P12_BASE64 (cert_base64.txt), IOS_DIST_CERT_PASSWORD (cert_password.txt), IOS_PROVISION_PROFILE_BASE64 (profile_base64.txt).")
+  end
+
+  desc "Build and upload a TestFlight build using the secrets bootstrap_signing produced"
+  lane :beta do
+    api_key
+
+    keychain_password = SecureRandom.hex(16)
+    create_keychain(
+      name: "ci-build.keychain",
+      password: keychain_password,
+      default_keychain: true,
+      unlock: true,
+      timeout: 1800,
+    )
+
+    import_certificate(
+      certificate_path: ENV["IOS_DIST_CERT_P12_PATH"],
+      certificate_password: ENV["IOS_DIST_CERT_PASSWORD"],
+      keychain_name: "ci-build.keychain",
+      keychain_password: keychain_password,
+    )
+
+    install_provisioning_profile(path: ENV["IOS_PROVISION_PROFILE_PATH"])
+
+    # Reference the just-installed profile by UUID rather than name — avoids
+    # any assumption about what get_provisioning_profile happened to call it
+    # during bootstrap_signing.
+    profile_uuid = sh(
+      "security cms -D -i '#{ENV["IOS_PROVISION_PROFILE_PATH"]}' | " \
+      "/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin"
+    ).strip
+
+    increment_build_number(build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"))
+
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      export_method: "app-store",
+      export_options: {
+        provisioningProfiles: {
+          "com.pocketfox.companion" => profile_uuid
+        }
+      },
+    )
+
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  ensure
+    delete_keychain(name: "ci-build.keychain") rescue nil
+  end
+end

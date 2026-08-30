@@ -1,0 +1,67 @@
+name: iOS — bootstrap signing
+
+# Manual only, and normally run just once (or again if the certificate/profile
+# expire, roughly yearly). Creates a fresh Apple Distribution certificate and
+# App Store provisioning profile via the App Store Connect API key below —
+# no Apple ID password or 2FA, so it can run unattended here with no Mac
+# involved at all. Downloads the result as a build artifact; you then copy
+# those values into the three IOS_* secrets that "iOS — TestFlight build"
+# reads on every ongoing run.
+#
+# Required repo secrets before running this:
+#   APP_STORE_CONNECT_API_KEY_ID     — from App Store Connect > Users and Access > Keys
+#   APP_STORE_CONNECT_API_ISSUER_ID  — same Keys page, shown above the key list
+#   APP_STORE_CONNECT_API_KEY_CONTENT — the downloaded .p8 file, base64-encoded
+#                                        (e.g. `base64 -i AuthKey_XXXX.p8 | pbcopy`
+#                                        on a Mac, or `base64 -w0 AuthKey_XXXX.p8`
+#                                        on Linux — either machine works, this is
+#                                        just encoding a text file)
+#   APPLE_TEAM_ID                    — App Store Connect > Membership
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: ios
+
+      - name: Generate certificate + provisioning profile
+        working-directory: ios
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bundle exec fastlane ios bootstrap_signing
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-signing-secrets
+          path: |
+            ios/signing/cert_base64.txt
+            ios/signing/cert_password.txt
+            ios/signing/profile_base64.txt
+          retention-days: 1
+
+      - name: Summary
+        run: |
+          {
+            echo "### Signing assets ready"
+            echo "Download the **ios-signing-secrets** artifact above, then add these repo secrets (Settings > Secrets and variables > Actions) using each file's contents as the value:"
+            echo ""
+            echo "- \`IOS_DIST_CERT_P12_BASE64\` <- cert_base64.txt"
+            echo "- \`IOS_DIST_CERT_PASSWORD\` <- cert_password.txt"
+            echo "- \`IOS_PROVISION_PROFILE_BASE64\` <- profile_base64.txt"
+            echo ""
+            echo "Then delete this artifact (it contains a private signing key) and run the **iOS — TestFlight build** workflow."
+          } >> "$GITHUB_STEP_SUMMARY"
