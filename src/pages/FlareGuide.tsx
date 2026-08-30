@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { saveFlareGuide } from '../lib/db'
 import { buildFlareGuideText, createEmptyFlareGuide, isFlareGuideEmpty, type FlareGuide } from '../lib/flareGuide'
 import { useFlareGuide } from '../lib/useFlareGuide'
@@ -194,6 +194,21 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
   )
 }
 
+function FormSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details
+      open
+      className="group rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 open:pb-2 dark:bg-slate-900 dark:ring-slate-800"
+    >
+      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-800 marker:content-none dark:text-slate-100">
+        <span className="mr-2 inline-block transition-transform group-open:rotate-90">›</span>
+        {title}
+      </summary>
+      <div className="flex flex-col gap-4 px-4 pb-2">{children}</div>
+    </details>
+  )
+}
+
 function FlareGuideForm({
   draft,
   onChange,
@@ -226,123 +241,140 @@ function FlareGuideForm({
         </p>
       </div>
 
-      <Card className="flex flex-col gap-4">
-        <Field label="A note from you">
-          <textarea
-            value={draft.introNote}
-            onChange={(e) => patch({ introNote: e.target.value })}
-            placeholder="Why you're sharing this, and what you want the reader to know going in."
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="What it looks like when things are hard">
-          <textarea
-            value={draft.signs}
-            onChange={(e) => patch({ signs: e.target.value })}
-            placeholder="Signs someone close to you might notice."
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="What helps most">
-          <textarea
-            value={draft.whatHelps}
-            onChange={(e) => patch({ whatHelps: e.target.value })}
-            placeholder="Things that genuinely help in the moment."
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="The single most helpful thing">
-          <textarea
-            value={draft.mostHelpfulThing}
-            onChange={(e) => patch({ mostHelpfulThing: e.target.value })}
-            placeholder="If there's one thing that reliably works, put it here."
-            rows={2}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="What doesn't help (even if it seems kind)">
-          <textarea
-            value={draft.whatDoesntHelp}
-            onChange={(e) => patch({ whatDoesntHelp: e.target.value })}
-            placeholder="Well-intentioned things that can make it worse."
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="If reassurance is asked for">
-          <textarea
-            value={draft.reassuranceNote}
-            onChange={(e) => patch({ reassuranceNote: e.target.value })}
-            placeholder="What's going on if you ask the same question more than once, and why."
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="The agreed phrase">
-          <input
-            type="text"
-            value={draft.agreedPhrase}
-            onChange={(e) => patch({ agreedPhrase: e.target.value })}
-            placeholder="The exact words that help, said calmly."
-            className={inputClass}
-          />
-        </Field>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Support contact name">
+      <div className="flex flex-col gap-3">
+        <FormSection title="What this looks like">
+          <Field label="A note from you">
+            <textarea
+              value={draft.introNote}
+              onChange={(e) => patch({ introNote: e.target.value })}
+              placeholder="Why you're sharing this, and what you want the reader to know going in."
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="What it looks like when things are hard">
+            <textarea
+              value={draft.signs}
+              onChange={(e) => patch({ signs: e.target.value })}
+              placeholder="Signs someone close to you might notice."
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+        </FormSection>
+
+        <FormSection title="What helps">
+          <Field label="What helps most">
+            <textarea
+              value={draft.whatHelps}
+              onChange={(e) => patch({ whatHelps: e.target.value })}
+              placeholder="Things that genuinely help in the moment."
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="The single most helpful thing">
+            <textarea
+              value={draft.mostHelpfulThing}
+              onChange={(e) => patch({ mostHelpfulThing: e.target.value })}
+              placeholder="If there's one thing that reliably works, put it here."
+              rows={2}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="What doesn't help (even if it seems kind)">
+            <textarea
+              value={draft.whatDoesntHelp}
+              onChange={(e) => patch({ whatDoesntHelp: e.target.value })}
+              placeholder="Well-intentioned things that can make it worse."
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+        </FormSection>
+
+        <FormSection title="Reassurance & compulsions">
+          <Field label="If reassurance is asked for">
+            <textarea
+              value={draft.reassuranceNote}
+              onChange={(e) => patch({ reassuranceNote: e.target.value })}
+              placeholder="What's going on if you ask the same question more than once, and why."
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="The agreed phrase">
             <input
               type="text"
-              value={draft.contactName}
-              onChange={(e) => patch({ contactName: e.target.value })}
+              value={draft.agreedPhrase}
+              onChange={(e) => patch({ agreedPhrase: e.target.value })}
+              placeholder="The exact words that help, said calmly."
               className={inputClass}
             />
           </Field>
-          <Field label="Support contact phone">
-            <input
-              type="tel"
-              value={draft.contactPhone}
-              onChange={(e) => patch({ contactPhone: e.target.value })}
+        </FormSection>
+
+        <FormSection title="Support person">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Support contact name">
+              <input
+                type="text"
+                value={draft.contactName}
+                onChange={(e) => patch({ contactName: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Support contact phone">
+              <input
+                type="tel"
+                value={draft.contactPhone}
+                onChange={(e) => patch({ contactPhone: e.target.value })}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+        </FormSection>
+
+        <FormSection title="If things get really hard">
+          <Field label="Space or stay">
+            <textarea
+              value={draft.spaceOrStayNote}
+              onChange={(e) => patch({ spaceOrStayNote: e.target.value })}
+              placeholder="How to tell whether you want company or space, and how to ask."
+              rows={2}
               className={inputClass}
             />
           </Field>
-        </div>
-        <Field label="Space or stay">
-          <textarea
-            value={draft.spaceOrStayNote}
-            onChange={(e) => patch({ spaceOrStayNote: e.target.value })}
-            placeholder="How to tell whether you want company or space, and how to ask."
-            rows={2}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="What not to do if things feel really bad">
-          <textarea
-            value={draft.whatNotToDo}
-            onChange={(e) => patch({ whatNotToDo: e.target.value })}
-            rows={2}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Signs things are getting better">
-          <textarea
-            value={draft.recoverySigns}
-            onChange={(e) => patch({ recoverySigns: e.target.value })}
-            rows={3}
-            className={inputClass}
-          />
-        </Field>
-        <Field label="Closing note">
-          <textarea
-            value={draft.closingNote}
-            onChange={(e) => patch({ closingNote: e.target.value })}
-            placeholder="Anything you want to say at the end."
-            rows={2}
-            className={inputClass}
-          />
-        </Field>
-      </Card>
+          <Field label="What not to do if things feel really bad">
+            <textarea
+              value={draft.whatNotToDo}
+              onChange={(e) => patch({ whatNotToDo: e.target.value })}
+              rows={2}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Signs things are getting better">
+            <textarea
+              value={draft.recoverySigns}
+              onChange={(e) => patch({ recoverySigns: e.target.value })}
+              rows={3}
+              className={inputClass}
+            />
+          </Field>
+        </FormSection>
+
+        <FormSection title="Closing note">
+          <Field label="Closing note">
+            <textarea
+              value={draft.closingNote}
+              onChange={(e) => patch({ closingNote: e.target.value })}
+              placeholder="Anything you want to say at the end."
+              rows={2}
+              className={inputClass}
+            />
+          </Field>
+        </FormSection>
+      </div>
 
       <div className="flex gap-3">
         <SecondaryButton onClick={onCancel} disabled={saving}>

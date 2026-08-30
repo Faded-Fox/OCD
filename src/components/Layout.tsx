@@ -1,13 +1,19 @@
-import { Suspense } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { Suspense, useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useTheme } from '../lib/useTheme'
 import pawLogo from '../assets/paw-logo.png'
 
-const navItems = [
+// The four things reached most often stay as always-visible top-level pills;
+// everything else lives behind "More" so the mobile header doesn't wrap into
+// several rows of equally-weighted tabs.
+const primaryNavItems = [
   { to: '/', label: 'Dashboard', end: true },
   { to: '/sessions', label: 'Sessions' },
   { to: '/live', label: 'Live' },
   { to: '/journal', label: 'Journal' },
+]
+
+const secondaryNavItems = [
   { to: '/focus-plan', label: 'Focus Plan' },
   { to: '/ladders', label: 'Fear Ladders' },
   { to: '/values', label: 'Values' },
@@ -44,6 +50,62 @@ function HelpIcon() {
   )
 }
 
+function navLinkClass({ isActive }: { isActive: boolean }) {
+  return `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+    isActive
+      ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
+      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+  }`
+}
+
+function MoreMenu() {
+  const location = useLocation()
+  const [open, setOpen] = useState(false)
+  const isSecondaryActive = secondaryNavItems.some((item) => item.to === location.pathname)
+
+  // Any navigation — from this menu or anywhere else — should leave it closed.
+  useEffect(() => setOpen(false), [location.pathname])
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+          isSecondaryActive
+            ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
+            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+        }`}
+      >
+        More
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-20 mt-2 flex w-52 flex-col gap-0.5 rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+            {secondaryNavItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function Layout() {
   const { theme, toggle } = useTheme()
 
@@ -57,22 +119,12 @@ export default function Layout() {
           </span>
         </NavLink>
         <nav className="flex flex-wrap items-center gap-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
-                    : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-                }`
-              }
-            >
+          {primaryNavItems.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
               {item.label}
             </NavLink>
           ))}
+          <MoreMenu />
           <NavLink
             to="/help"
             aria-label="Help"

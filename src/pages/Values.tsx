@@ -4,7 +4,7 @@ import { newId } from '../lib/session'
 import { createEmptyValuesGuide, isValuesGuideEmpty, type ValueItem, type ValuesGuide } from '../lib/values'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { Card, PrimaryButton, SecondaryButton, EmptyState } from '../components/ui'
-import { inputBaseClass, inputClass } from '../components/SessionFields'
+import { inputBaseClass, inputClass, Field } from '../components/SessionFields'
 
 export default function ValuesPage() {
   const { guide, loading, refresh } = useValuesGuide()
@@ -46,7 +46,7 @@ export default function ValuesPage() {
     return (
       <EmptyState
         title="No values set yet"
-        body="The reasons this hard work is worth doing — people, hobbies, whatever actually matters to you. Written by you, stored only on this device."
+        body="The reasons this hard work is worth doing — people, hobbies, whatever actually matters to you."
         action={<PrimaryButton onClick={startEdit}>Get started</PrimaryButton>}
       />
     )
@@ -119,8 +119,7 @@ function ValuesForm({
         </button>
         <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Values</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Everything here stays on this device. A few words each is plenty — an icon or emoji, a short label,
-          and an optional note on why it matters.
+          A few words each is plenty — an icon or emoji, a short label, and an optional note on why it matters.
         </p>
       </div>
 
@@ -131,40 +130,47 @@ function ValuesForm({
         {draft.values.map((v) => (
           <div
             key={v.id}
-            className="flex items-start gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0 dark:border-slate-800"
+            className="flex flex-col gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0 dark:border-slate-800 sm:flex-row sm:items-start"
           >
-            <input
-              type="text"
-              value={v.icon}
-              onChange={(e) => patchItem(v.id, { icon: e.target.value })}
-              placeholder="🦊"
-              maxLength={4}
-              aria-label="Icon"
-              className={`${inputBaseClass} w-14 text-center text-lg`}
-            />
-            <div className="flex flex-1 flex-col gap-1.5">
+            <Field label="Icon">
               <input
                 type="text"
-                value={v.label}
-                onChange={(e) => patchItem(v.id, { label: e.target.value })}
-                placeholder="e.g. Family"
-                aria-label="Value"
-                className={inputClass}
+                value={v.icon}
+                onChange={(e) => patchItem(v.id, { icon: e.target.value })}
+                placeholder="🦊"
+                maxLength={4}
+                className={`${inputBaseClass} w-14 text-center text-lg`}
               />
-              <input
-                type="text"
-                value={v.note}
-                onChange={(e) => patchItem(v.id, { note: e.target.value })}
-                placeholder="Why this matters — optional"
-                aria-label="Note"
-                className={inputClass}
-              />
+            </Field>
+            <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+              <div className="flex-1">
+                <Field label="Value">
+                  <input
+                    type="text"
+                    value={v.label}
+                    onChange={(e) => patchItem(v.id, { label: e.target.value })}
+                    placeholder="e.g. Family"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <div className="flex-1">
+                <Field label="Note (optional)">
+                  <input
+                    type="text"
+                    value={v.note}
+                    onChange={(e) => patchItem(v.id, { note: e.target.value })}
+                    placeholder="Why this matters"
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => removeItem(v.id)}
               aria-label="Remove value"
-              className="rounded-lg px-2 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950"
+              className="self-start rounded-lg px-2 py-1.5 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950 sm:mt-5"
             >
               ✕
             </button>
