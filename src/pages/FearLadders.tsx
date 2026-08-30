@@ -150,6 +150,14 @@ function FearLadderForm({
   const [draft, setDraft] = useState(ladder)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Rungs that already have a description start collapsed, so opening a ladder with
+  // many planned/attempted rungs doesn't mean scrolling past all of them to add a new
+  // one — a newly-added rung (no description yet) is never in this set, so it always
+  // opens expanded. Keyed by object identity, which stays stable across edits to
+  // *other* rungs and across removals.
+  const [collapsed, setCollapsed] = useState<Set<FearLadderRung>>(
+    () => new Set(ladder.rungs.filter((r) => r.description.trim() !== '')),
+  )
 
   const patch = (p: Partial<FearLadder>) => {
     setDraft((d) => ({ ...d, ...p }))
@@ -166,6 +174,15 @@ function FearLadderForm({
 
   const addRung = () => {
     setDraft((d) => ({ ...d, rungs: [...d.rungs, createEmptyRung(d.rungs)] }))
+  }
+
+  const toggleCollapsed = (rung: FearLadderRung) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      if (next.has(rung)) next.delete(rung)
+      else next.add(rung)
+      return next
+    })
   }
 
   const rungRangeError = draft.rungs.map((r) => sudsRangeError(r.targetSudsRange)).find((e) => e !== null) ?? null
@@ -192,8 +209,8 @@ function FearLadderForm({
   }
 
   const sortedRungs = draft.rungs
-    .map((r, i) => ({ ...r, index: i }))
-    .sort((a, b) => a.rung - b.rung)
+    .map((r, i) => ({ r, index: i }))
+    .sort((a, b) => a.r.rung - b.r.rung)
 
   return (
     <div className="flex flex-col gap-6 py-4">
@@ -226,51 +243,87 @@ function FearLadderForm({
           <p className="text-sm text-slate-400">No rungs yet — add the first one below.</p>
         )}
         <div className="flex flex-col gap-3">
-          {sortedRungs.map((row) => (
-            <div key={row.index} className="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-                <label className="flex flex-col gap-1 sm:w-20">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Rung
+          {sortedRungs.map(({ r: row, index }) => {
+            const isCollapsed = collapsed.has(row) && row.description.trim() !== ''
+            if (isCollapsed) {
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => toggleCollapsed(row)}
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 text-left dark:border-slate-800"
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    {row.rung}
                   </span>
-                  <input
-                    type="number"
-                    value={row.rung}
-                    onChange={(e) => updateRung(row.index, { rung: Number(e.target.value) })}
-                    className={inputBaseClass}
-                  />
-                </label>
-                <label className="flex flex-1 flex-col gap-1">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Description
+                  <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
+                    {row.description}
                   </span>
-                  <input
-                    type="text"
-                    value={row.description}
-                    onChange={(e) => updateRung(row.index, { description: e.target.value })}
-                    placeholder="e.g. Touch a doorknob without washing after"
-                    className={inputBaseClass}
-                  />
-                </label>
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Target SUDS
-                  </span>
-                  <TargetRangeInput
-                    value={row.targetSudsRange}
-                    onChange={(targetSudsRange) => updateRung(row.index, { targetSudsRange })}
-                  />
+                  {row.targetSudsRange && (
+                    <span className="shrink-0 text-xs text-slate-400">
+                      target {row.targetSudsRange[0]}–{row.targetSudsRange[1]}
+                    </span>
+                  )}
+                </button>
+              )
+            }
+            return (
+              <div key={index} className="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                  <label className="flex flex-col gap-1 sm:w-20">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Rung
+                    </span>
+                    <input
+                      type="number"
+                      value={row.rung}
+                      onChange={(e) => updateRung(index, { rung: Number(e.target.value) })}
+                      className={inputBaseClass}
+                    />
+                  </label>
+                  <label className="flex flex-1 flex-col gap-1">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Description
+                    </span>
+                    <textarea
+                      value={row.description}
+                      onChange={(e) => updateRung(index, { description: e.target.value })}
+                      placeholder="e.g. Touch a doorknob without washing after"
+                      rows={2}
+                      className={`${inputBaseClass} w-full resize-none`}
+                    />
+                  </label>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      Target SUDS
+                    </span>
+                    <TargetRangeInput
+                      value={row.targetSudsRange}
+                      onChange={(targetSudsRange) => updateRung(index, { targetSudsRange })}
+                    />
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => removeRung(index)}
+                    className="text-xs font-medium text-rose-600 hover:underline dark:text-rose-400"
+                  >
+                    Remove
+                  </button>
+                  {row.description.trim() !== '' && (
+                    <button
+                      type="button"
+                      onClick={() => toggleCollapsed(row)}
+                      className="text-xs font-medium text-slate-500 hover:underline dark:text-slate-400"
+                    >
+                      Collapse
+                    </button>
+                  )}
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => removeRung(row.index)}
-                className="mt-2 text-xs font-medium text-rose-600 hover:underline dark:text-rose-400"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+            )
+          })}
         </div>
         <button
           type="button"
