@@ -6,6 +6,7 @@ import HierarchyBadge from '../components/HierarchyBadge'
 import { inputClass } from '../components/SessionFields'
 import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type Session } from '../lib/types'
 import { distinctHierarchies, hierarchyKey } from '../lib/hierarchy'
+import { urgeResponseLabel } from '../lib/session'
 
 type SortOrder = 'newest' | 'oldest' | 'peak-desc' | 'peak-asc'
 type ResistanceFilter = 'any' | 'full' | 'partial' | 'unknown'
@@ -147,7 +148,7 @@ export default function Sessions() {
           </label>
           <label className="flex min-w-0 flex-col gap-1">
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Resistance
+              Response to urges
             </span>
             <select
               value={filters.resistance}
@@ -155,9 +156,9 @@ export default function Sessions() {
               className={`${inputClass} h-10 min-w-0 py-0`}
             >
               <option value="any">Any</option>
-              <option value="full">Fully resisted</option>
-              <option value="partial">Partial</option>
-              <option value="unknown">Unknown</option>
+              <option value="full">{urgeResponseLabel(true)}</option>
+              <option value="partial">{urgeResponseLabel(false)}</option>
+              <option value="unknown">{urgeResponseLabel(null)}</option>
             </select>
           </label>
           <label className="flex min-w-0 flex-col gap-1">
@@ -259,13 +260,7 @@ export default function Sessions() {
                   <span>
                     Peak {s.peak_suds ?? '—'} → End {s.end_suds ?? '—'}
                   </span>
-                  <span>
-                    {s.compulsions_resisted === true
-                      ? 'Fully resisted'
-                      : s.compulsions_resisted === false
-                        ? 'Partial resistance'
-                        : 'Resistance unknown'}
-                  </span>
+                  <span>{urgeResponseLabel(s.compulsions_resisted)}</span>
                 </div>
               </Card>
             </Link>

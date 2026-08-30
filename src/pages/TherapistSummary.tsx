@@ -8,6 +8,7 @@ import { buildTherapistSummary, buildTherapistSummaryText, rangeLabel } from '..
 import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
 import { inputClass } from '../components/SessionFields'
+import { urgeResponseLabel } from '../lib/session'
 
 function fmtSuds(n: number | null): string {
   return n !== null ? String(Math.round(n * 10) / 10) : '—'
@@ -177,7 +178,7 @@ export default function TherapistSummary() {
                   <span>
                     Peak {s.peakSuds ?? '—'} → End {s.endSuds ?? '—'}
                   </span>
-                  <span>{s.resisted === true ? 'Fully resisted' : s.resisted === false ? 'Partial' : 'Unknown'}</span>
+                  <span>{urgeResponseLabel(s.resisted)}</span>
                 </div>
               </Card>
             ))}

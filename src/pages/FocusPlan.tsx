@@ -223,7 +223,7 @@ function FocusPlanForm({
           place to judge yourself.
         </p>
 
-        <Field label="Did I complete the task?">
+        <Field label="Did I attempt/complete the task?">
           <select
             value={draft.completed ?? ''}
             onChange={(e) => patch({ completed: e.target.value === '' ? null : (e.target.value as FocusPlanEntry['completed']) })}
@@ -236,7 +236,7 @@ function FocusPlanForm({
           </select>
         </Field>
 
-        <Field label="What intrusions showed up? (list as weather — no analysis)">
+        <Field label="What showed up? (list as weather — no analysis)">
           <textarea
             value={draft.intrusionsThatShowedUp}
             onChange={(e) => patch({ intrusionsThatShowedUp: e.target.value })}
@@ -245,31 +245,31 @@ function FocusPlanForm({
           />
         </Field>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field label="Compulsions I resisted">
-            <textarea
-              value={draft.compulsionsResisted}
-              onChange={(e) => patch({ compulsionsResisted: e.target.value })}
-              rows={2}
-              className={inputClass}
-            />
-          </Field>
-          <Field label="Compulsions I gave in to (no judgment — just data)">
-            <textarea
-              value={draft.compulsionsGaveInTo}
-              onChange={(e) => patch({ compulsionsGaveInTo: e.target.value })}
-              rows={2}
-              className={inputClass}
-            />
-          </Field>
+        <div>
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            What did I practice instead of compulsions?
+          </span>
+          <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field label="What I did instead of the compulsion">
+              <textarea
+                value={draft.compulsionsResisted}
+                onChange={(e) => patch({ compulsionsResisted: e.target.value })}
+                rows={2}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Compulsion done, if any (no judgment — just data)">
+              <textarea
+                value={draft.compulsionsGaveInTo}
+                onChange={(e) => patch({ compulsionsGaveInTo: e.target.value })}
+                rows={2}
+                className={inputClass}
+              />
+            </Field>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <SudsPicker label="Peak SUDS during the task" value={draft.peakSuds} onChange={(peakSuds) => patch({ peakSuds })} />
-          <SudsPicker label="SUDS at the end (did it come down?)" value={draft.endSuds} onChange={(endSuds) => patch({ endSuds })} />
-        </div>
-
-        <Field label="What worked? What helped me stay on task?">
+        <Field label="What helped me continue while uncomfortable?">
           <textarea
             value={draft.whatWorked}
             onChange={(e) => patch({ whatWorked: e.target.value })}
@@ -277,7 +277,7 @@ function FocusPlanForm({
             className={inputClass}
           />
         </Field>
-        <Field label="What would I do differently next time?">
+        <Field label="What will I try next time?">
           <textarea
             value={draft.whatWouldDoDifferently}
             onChange={(e) => patch({ whatWouldDoDifferently: e.target.value })}
@@ -285,6 +285,13 @@ function FocusPlanForm({
             className={inputClass}
           />
         </Field>
+
+        <SudsRatingsDisclosure
+          peakSuds={draft.peakSuds}
+          endSuds={draft.endSuds}
+          onChangePeak={(peakSuds) => patch({ peakSuds })}
+          onChangeEnd={(endSuds) => patch({ endSuds })}
+        />
       </Card>
 
       <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
@@ -349,6 +356,34 @@ function SudsPicker({
         ))}
       </div>
     </Field>
+  )
+}
+
+function SudsRatingsDisclosure({
+  peakSuds,
+  endSuds,
+  onChangePeak,
+  onChangeEnd,
+}: {
+  peakSuds: number | null
+  endSuds: number | null
+  onChangePeak: (n: number | null) => void
+  onChangeEnd: (n: number | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between text-left">
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">SUDS ratings (optional)</span>
+        <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
+      </button>
+      {open && (
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <SudsPicker label="Peak SUDS during the task" value={peakSuds} onChange={onChangePeak} />
+          <SudsPicker label="SUDS at the end" value={endSuds} onChange={onChangeEnd} />
+        </div>
+      )}
+    </div>
   )
 }
 

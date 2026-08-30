@@ -4,6 +4,7 @@ import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
 import { rungProgression, sessionFrequency } from './insights'
 import { distinctHierarchies, hierarchyKey, sessionsForHierarchy } from './hierarchy'
+import { urgeResponseLabel } from './session'
 
 export interface TherapistSummaryHierarchyRow {
   hierarchy: string
@@ -187,7 +188,7 @@ export function buildTherapistSummaryText(summary: TherapistSummary): string {
   if (summary.sessionRows.length) {
     lines.push('SESSIONS IN THIS PERIOD')
     for (const s of summary.sessionRows) {
-      const resisted = s.resisted === true ? 'fully resisted' : s.resisted === false ? 'partial resistance' : 'resistance unknown'
+      const resisted = urgeResponseLabel(s.resisted).toLowerCase()
       lines.push(
         `${s.date}  ${s.hierarchy}  Rung ${s.rung ?? '—'}${s.variation ? ` (${s.variation})` : ''}  Peak ${s.peakSuds ?? '—'} -> End ${s.endSuds ?? '—'}  ${resisted}`,
       )

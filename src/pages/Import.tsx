@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { addSessions } from '../lib/db'
 import { parseImportText } from '../lib/parser'
 import { looksLikeBackup } from '../lib/backup'
+import { urgeResponseLabel } from '../lib/session'
 import type { Session } from '../lib/types'
 import { Card, PrimaryButton, SecondaryButton, Badge } from '../components/ui'
 import HierarchyBadge from '../components/HierarchyBadge'
@@ -267,12 +268,7 @@ function SessionEditCard({
 }) {
   const [expanded, setExpanded] = useState(session.flags.length > 0)
 
-  const resistedText =
-    session.compulsions_resisted === true
-      ? 'Fully resisted'
-      : session.compulsions_resisted === false
-        ? 'Partial resistance'
-        : null
+  const resistedText = session.compulsions_resisted === null ? null : urgeResponseLabel(session.compulsions_resisted)
 
   return (
     <Card className={session.flags.length ? 'border-amber-300 dark:border-amber-900' : ''}>

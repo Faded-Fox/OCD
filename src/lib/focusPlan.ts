@@ -66,12 +66,12 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
   {
     name: 'Ride the Wave',
     description:
-      "Anxiety peaks and then falls. You don't have to make it stop — just let it crest. Keep working while it does.",
+      "Anxiety rises and falls in waves whether or not you fight it. You don't have to make it stop — just let it be here while you keep working.",
   },
   {
-    name: 'Distraction is valid',
+    name: 'Return to the Task',
     description:
-      "Focusing on the task itself is a legitimate strategy. You don't have to process the thought. Keep your hands busy.",
+      "This isn't about making the thought go away — it's choosing to keep your attention on the activity while the thought is still there in the background. If you're using it to feel like you've resolved something, that's the same loop again.",
   },
   {
     name: 'Name the Story',
@@ -81,7 +81,7 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
   {
     name: 'Physicalise the Thought',
     description:
-      "Ask what the thought would look like if it had a shape, color, texture, weight. Notice where you feel it in your body. Watching it with curiosity instead of alarm often shows it shifting on its own.",
+      "Ask what the thought would look like if it had a shape, color, texture, weight. Notice where you feel it in your body — you're not trying to change it, just observing it as an experience.",
   },
   {
     name: 'The Observer Self',
@@ -96,7 +96,7 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
   {
     name: 'Thank Your Mind',
     description:
-      'When a thought arrives, say (silently or aloud): "Thank you, mind — I see you\'re trying to protect me." You don\'t have to agree with it. Fighting a thought fuels it; thanking it defuses it.',
+      'When a thought arrives, say (silently or aloud): "Thank you, mind — I see you\'re trying to protect me." You don\'t have to agree with it or fight it — thanking it is a way of acknowledging it without engaging further. It might still stick around, and that\'s okay.',
   },
   {
     name: 'Radio in the Background',
@@ -106,12 +106,12 @@ export const DEFUSION_TECHNIQUES: { name: string; description: string }[] = [
   {
     name: 'Slow It Down',
     description:
-      'Notice a spiralling thought and repeat its core word slowly, ten times — e.g. "worthless… worthless… worthless…". Repetition dissolves the illusion of meaning; the words are just sounds, not facts.',
+      'Notice a spiralling thought and repeat its core word slowly, ten times — e.g. "worthless… worthless… worthless…". Repetition can loosen the sense that these words are facts rather than sounds.',
   },
   {
     name: 'Urge Surfing',
     description:
-      "Notice the urge pulling you in and rate its intensity 1–10. Breathe and watch it rise, peak, and begin to fall like a wave, then re-rate it — it will have dropped. Every wave breaks; you don't have to act on it.",
+      "Notice the urge pulling you in and rate its intensity 1–10. Breathe and watch what it does as you keep going — urges rise and fall in their own time, and you don't have to act on it either way.",
   },
 ]
 
@@ -124,10 +124,11 @@ export function pickRandomDefusionTechnique(exclude?: string): { name: string; d
 export const FOCUS_PLAN_AFFIRMATION = 'I love you. This is just your brain, not you. Things are okay.'
 
 export const THERAPIST_FLAGS: string[] = [
-  "SUDS peaked above 8 and didn't come down within 45 minutes",
-  'You completed a compulsion and the task still feels undone / not "right"',
-  'Task avoidance is increasing despite repeated attempts',
-  'This worksheet itself is starting to feel like a checking compulsion',
+  'Planning is becoming a way to delay starting the task',
+  'This worksheet is being repeated until it feels right',
+  'Avoidance of the task is increasing over time',
+  'The worksheet itself is becoming a checking/reassurance ritual',
+  'Unsure how this task fits into the overall ERP plan — worth checking with your therapist',
 ]
 
 export function createEmptyFocusPlan(): FocusPlanEntry {

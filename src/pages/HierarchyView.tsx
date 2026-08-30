@@ -12,6 +12,7 @@ import { useSessions } from '../lib/useSessions'
 import { useFearLadders } from '../lib/useFearLadders'
 import { habituationTrend, peakSudsTrend, rungProgression, type RungProgressionRow } from '../lib/insights'
 import { hierarchyKey, sessionsForHierarchy } from '../lib/hierarchy'
+import { urgeResponseLabel } from '../lib/session'
 import { colorForHierarchy } from '../lib/colors'
 import { Card, EmptyState, Badge } from '../components/ui'
 
@@ -102,7 +103,7 @@ export default function HierarchyView() {
                       {progress
                         ? `${progress.attempts} attempt${progress.attempts === 1 ? '' : 's'} · last ${progress.lastAttemptDate}`
                         : 'Not attempted yet'}
-                      {targetRange ? ` · target ${targetRange[0]}–${targetRange[1]}` : ''}
+                      {targetRange ? ` · expected ${targetRange[0]}–${targetRange[1]}` : ''}
                     </p>
                   </div>
                 </div>
@@ -180,13 +181,7 @@ export default function HierarchyView() {
                   <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                     <span>{s.date || 'no date'}</span>
                     <span>Peak {s.peak_suds ?? '—'} → End {s.end_suds ?? '—'}</span>
-                    <span>
-                      {s.compulsions_resisted === true
-                        ? 'Fully resisted'
-                        : s.compulsions_resisted === false
-                          ? 'Partial resistance'
-                          : 'Resistance unknown'}
-                    </span>
+                    <span>{urgeResponseLabel(s.compulsions_resisted)}</span>
                   </div>
                 </Card>
               </Link>

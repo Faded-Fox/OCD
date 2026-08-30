@@ -6,7 +6,7 @@ export const SUGGESTED_TECHNIQUES = [
   'Defusion',
   'Diaphragmatic breathing',
   'Box breathing',
-  'Distraction',
+  'Refocusing on the task',
   'Naming the thought as OCD',
   'Urge surfing',
   'Opposite action',

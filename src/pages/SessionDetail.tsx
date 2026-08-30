@@ -10,6 +10,7 @@ import HierarchyBadge from '../components/HierarchyBadge'
 import SessionFields from '../components/SessionFields'
 import SudsChart from '../components/SudsChart'
 import { sessionSudsError } from '../lib/suds'
+import { urgeResponseLabel } from '../lib/session'
 
 export default function SessionDetail() {
   const { id } = useParams<{ id: string }>()
@@ -160,15 +161,15 @@ export default function SessionDetail() {
           <p className="text-xl font-semibold text-slate-900 dark:text-white">{session.end_suds ?? '—'}</p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Target range</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Expected difficulty</p>
           <p className="text-xl font-semibold text-slate-900 dark:text-white">
             {session.target_suds_range ? `${session.target_suds_range[0]}–${session.target_suds_range[1]}` : '—'}
           </p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Resistance</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Response to urges</p>
           <p className="text-xl font-semibold text-slate-900 dark:text-white">
-            {session.compulsions_resisted === true ? 'Full' : session.compulsions_resisted === false ? 'Partial' : '—'}
+            {session.compulsions_resisted === null ? '—' : urgeResponseLabel(session.compulsions_resisted)}
           </p>
         </Card>
       </div>

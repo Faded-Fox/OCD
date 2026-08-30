@@ -39,6 +39,7 @@ function dedupeCaseInsensitive(items: string[]): string[] {
 }
 
 type Phase = 'setup' | 'running' | 'wrapup'
+type SetupMode = 'planned' | 'custom'
 
 interface Draft {
   phase: Phase
@@ -66,9 +67,25 @@ function formatElapsed(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`
 }
 
+function ModeButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+        active
+          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
+          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+      }`}
+    >
+      {children}
+    </button>
+  )
+}
+
 export default function LiveSession() {
   const navigate = useNavigate()
-  const { ladders } = useFearLadders()
+  const { ladders, loading: laddersLoading } = useFearLadders()
   const { sessions: pastSessions } = useSessions()
   const { guide: valuesGuide, loading: valuesLoading } = useValuesGuide()
   const [reminder, setReminder] = useState<ValueItem | null>(null)
@@ -86,6 +103,20 @@ export default function LiveSession() {
   const [supportTechnique, setSupportTechnique] = useState<{ name: string; description: string } | null>(null)
   const [supportFact, setSupportFact] = useState<string | null>(null)
   const wasRoughRef = useRef(false)
+  const [setupMode, setSetupMode] = useState<SetupMode>('custom')
+  const [setupModeDefaulted, setSetupModeDefaulted] = useState(false)
+  const [selectedLadderHierarchy, setSelectedLadderHierarchy] = useState('')
+  const [sudsTrackingOpen, setSudsTrackingOpen] = useState(false)
+
+  // Once ladders finish loading, default to the planned flow if there's at
+  // least one to choose from — but only ever apply this default once, so it
+  // doesn't override a choice already made while ladders were still loading.
+  useEffect(() => {
+    if (!laddersLoading && !setupModeDefaulted) {
+      if (ladders.length > 0) setSetupMode('planned')
+      setSetupModeDefaulted(true)
+    }
+  }, [laddersLoading, ladders.length, setupModeDefaulted])
 
   // Restore an in-progress session if one exists (e.g. after an accidental reload).
   useEffect(() => {
@@ -155,6 +186,16 @@ export default function LiveSession() {
   const matchedLadder = ladders.find(
     (l) => hierarchyKey(l.hierarchy) === hierarchyKey(session.hierarchy) && l.hierarchy.trim() !== '',
   )
+
+  const selectedLadder = ladders.find((l) => l.hierarchy === selectedLadderHierarchy)
+  // In planned mode the rung list comes from whichever ladder is picked from the
+  // dropdown; in custom mode it's the existing implicit match on typed text.
+  const rungPickerLadder = setupMode === 'planned' ? selectedLadder : matchedLadder
+
+  const pickLadder = (hierarchy: string) => {
+    setSelectedLadderHierarchy(hierarchy)
+    setSession((s) => ({ ...s, hierarchy }))
+  }
 
   // Suggestions for the setup fields below, all drawn from this device's own history
   // rather than anything built in — same idea as the techniques/compulsions
@@ -299,15 +340,42 @@ export default function LiveSession() {
           </Card>
         )}
         <Card className="flex flex-col gap-4">
+          {ladders.length > 0 && (
+            <div className="inline-flex w-fit rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+              <ModeButton active={setupMode === 'planned'} onClick={() => setSetupMode('planned')}>
+                Planned (from a Fear Ladder)
+              </ModeButton>
+              <ModeButton active={setupMode === 'custom'} onClick={() => setSetupMode('custom')}>
+                Custom exposure
+              </ModeButton>
+            </div>
+          )}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Field label="Hierarchy">
-              <TextSuggestInput
-                value={session.hierarchy}
-                onChange={(hierarchy) => setSession((s) => ({ ...s, hierarchy }))}
-                suggestions={hierarchySuggestions}
-                placeholder="e.g. Harm/Contamination"
-              />
-            </Field>
+            {setupMode === 'planned' && ladders.length > 0 ? (
+              <Field label="Fear Ladder">
+                <select
+                  value={selectedLadderHierarchy}
+                  onChange={(e) => pickLadder(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Choose a hierarchy…</option>
+                  {ladders.map((l) => (
+                    <option key={l.id} value={l.hierarchy}>
+                      {l.hierarchy.trim() || 'Untitled hierarchy'}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            ) : (
+              <Field label="Hierarchy">
+                <TextSuggestInput
+                  value={session.hierarchy}
+                  onChange={(hierarchy) => setSession((s) => ({ ...s, hierarchy }))}
+                  suggestions={hierarchySuggestions}
+                  placeholder="e.g. Harm/Contamination"
+                />
+              </Field>
+            )}
             <Field label="Rung">
               <TextSuggestInput
                 value={session.rung === null ? '' : String(session.rung)}
@@ -343,7 +411,7 @@ export default function LiveSession() {
                 ))}
               </select>
             </Field>
-            <Field label="Target SUDS range">
+            <Field label="Expected difficulty (0–10)">
               <TargetRangeInput
                 value={session.target_suds_range}
                 onChange={(target_suds_range) => setSession((s) => ({ ...s, target_suds_range }))}
@@ -373,13 +441,13 @@ export default function LiveSession() {
             </Field>
           </div>
 
-          {matchedLadder && matchedLadder.rungs.length > 0 && (
+          {rungPickerLadder && rungPickerLadder.rungs.length > 0 && (
             <div>
               <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                Planned rungs for {matchedLadder.hierarchy}
+                Planned rungs for {rungPickerLadder.hierarchy}
               </span>
               <div className="mt-2 flex flex-col gap-1.5">
-                {[...matchedLadder.rungs]
+                {[...rungPickerLadder.rungs]
                   .sort((a, b) => a.rung - b.rung)
                   .map((r) => (
                     <button
@@ -396,21 +464,21 @@ export default function LiveSession() {
                       {r.description && <span className="truncate">{r.description}</span>}
                       {r.targetSudsRange && (
                         <span className="ml-auto shrink-0 text-xs opacity-75">
-                          target {r.targetSudsRange[0]}–{r.targetSudsRange[1]}
+                          expected {r.targetSudsRange[0]}–{r.targetSudsRange[1]}
                         </span>
                       )}
                     </button>
                   ))}
               </div>
               <p className="mt-1.5 text-xs text-slate-400">
-                Tap a rung to fill in its description and target range — you can still edit anything above.
+                Tap a rung to fill in its description and expected difficulty — you can still edit anything above.
               </p>
             </div>
           )}
 
           <div>
             <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Pre-exposure SUDS — how anxious do you feel right now?
+              Pre-exposure rating — how distressed or uncomfortable do you feel right now?
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
               {SUDS_SCALE.map((n) => (
@@ -435,7 +503,7 @@ export default function LiveSession() {
             Start exposure
           </PrimaryButton>
           {!canStart && (
-            <p className="text-xs text-slate-400">Hierarchy, rung, and a pre-exposure SUDS rating are needed to start.</p>
+            <p className="text-xs text-slate-400">Hierarchy, rung, and a pre-exposure rating are needed to start.</p>
           )}
         </Card>
       </div>
@@ -473,13 +541,22 @@ export default function LiveSession() {
           )}
         </Card>
 
+        {reminder && (
+          <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
+            <p className="text-sm text-emerald-800 dark:text-emerald-300">
+              <span className="mr-1 text-lg leading-none">{reminder.icon || '⭐'}</span>
+              Remember — you're doing this because <span className="font-medium">{reminder.label}</span> matters.
+            </p>
+          </Card>
+        )}
+
         {supportOpen && (
           <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm text-amber-900 dark:text-amber-200">
                 {roughSession
-                  ? "This has been sitting high for a while — that's often what it looks like right before it starts to ease. You don't have to do anything differently, but here's something to lean on if it helps."
-                  : "It's okay to keep going — riding this out is what lets it come back down on its own. Here's something to lean on in the meantime."}
+                  ? "This has been sitting high for a while. You don't have to do anything differently — here's something to lean on if it helps."
+                  : "You don't need to make this feeling go away. You can keep going while it's here — here's something to lean on in the meantime."}
               </p>
               <button
                 type="button"
@@ -511,72 +588,88 @@ export default function LiveSession() {
         )}
 
         <Card>
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Log a SUDS rating
-          </span>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {SUDS_SCALE.map((n) => (
-              <button
-                key={n}
-                type="button"
-                onClick={() => logReading(n)}
-                className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95"
-                style={{ backgroundColor: color.hex }}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <input
-              type="number"
-              step="0.1"
-              min="0"
-              max="10"
-              value={customSuds}
-              onChange={(e) => setCustomSuds(e.target.value)}
-              placeholder="or a precise value, e.g. 2.5"
-              className={`${inputClass} w-52 ${customSudsInvalid ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
-            />
-            <SecondaryButton onClick={logCustom} disabled={customSuds === '' || customSudsInvalid}>
-              Log
-            </SecondaryButton>
-          </div>
-          {customSudsInvalid && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">Must be between 0 and 10.</p>}
-        </Card>
+          <button
+            type="button"
+            onClick={() => setSudsTrackingOpen((o) => !o)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">SUDS tracking (optional)</span>
+            <span className="text-sm text-emerald-700 dark:text-emerald-400">{sudsTrackingOpen ? 'Hide' : 'Show'}</span>
+          </button>
+          {sudsTrackingOpen && (
+            <div className="mt-4 flex flex-col gap-4">
+              <div>
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Log a rating, if you want to
+                </span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {SUDS_SCALE.map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => logReading(n)}
+                      className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95"
+                      style={{ backgroundColor: color.hex }}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="10"
+                    value={customSuds}
+                    onChange={(e) => setCustomSuds(e.target.value)}
+                    placeholder="or a precise value, e.g. 2.5"
+                    className={`${inputClass} w-52 ${customSudsInvalid ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
+                  />
+                  <SecondaryButton onClick={logCustom} disabled={customSuds === '' || customSudsInvalid}>
+                    Log
+                  </SecondaryButton>
+                </div>
+                {customSudsInvalid && (
+                  <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">Must be between 0 and 10.</p>
+                )}
+              </div>
 
-        {chartPoints.length > 0 && (
-          <Card>
-            <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS so far</h2>
-            <SudsChart
-              points={chartPoints}
-              isTimeBased={isTimeBased}
-              targetRange={session.target_suds_range}
-              colorHex={color.hex}
-            />
-          </Card>
-        )}
+              {chartPoints.length > 0 && (
+                <div>
+                  <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS so far</h2>
+                  <SudsChart
+                    points={chartPoints}
+                    isTimeBased={isTimeBased}
+                    targetRange={session.target_suds_range}
+                    colorHex={color.hex}
+                  />
+                </div>
+              )}
 
-        {session.readings.length > 0 && (
-          <Card>
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Readings logged
-            </span>
-            <div className="mt-1.5 flex flex-wrap gap-2">
-              {session.readings.map((r, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => removeReading(i)}
-                  title="Tap to remove"
-                  className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-rose-100 hover:text-rose-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950 dark:hover:text-rose-300"
-                >
-                  {r.label}: {r.suds} ✕
-                </button>
-              ))}
+              {session.readings.length > 0 && (
+                <div>
+                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Readings logged
+                  </span>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {session.readings.map((r, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => removeReading(i)}
+                        title="Tap to remove"
+                        className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-rose-100 hover:text-rose-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950 dark:hover:text-rose-300"
+                      >
+                        {r.label}: {r.suds} ✕
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </Card>
-        )}
+          )}
+        </Card>
 
         <div className="flex gap-3">
           <SecondaryButton

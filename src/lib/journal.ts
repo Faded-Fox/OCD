@@ -144,18 +144,28 @@ export interface QuickPromptEntry {
 export type ThoughtTheme =
   | 'contamination'
   | 'harm'
+  | 'sexual'
   | 'relationship'
   | 'moral'
+  | 'just_right'
+  | 'responsibility'
   | 'checking'
   | 'health'
   | 'existential'
   | 'other'
 
+// Additive only — never remove or rename a key here. `ThoughtEntry.theme` stores
+// one of these keys directly, so an existing entry's theme would stop matching
+// anything in this list (and disappear from its own badge label) if a key it
+// used were ever removed or renamed.
 export const THOUGHT_THEMES: { key: ThoughtTheme; label: string }[] = [
   { key: 'contamination', label: 'Contamination' },
   { key: 'harm', label: 'Harm' },
+  { key: 'sexual', label: 'Sexual' },
   { key: 'relationship', label: 'Relationship' },
-  { key: 'moral', label: 'Moral' },
+  { key: 'moral', label: 'Scrupulosity / Moral' },
+  { key: 'just_right', label: 'Just-right / Incompleteness' },
+  { key: 'responsibility', label: 'Responsibility / Mistakes' },
   { key: 'checking', label: 'Checking' },
   { key: 'health', label: 'Health' },
   { key: 'existential', label: 'Existential' },
@@ -197,7 +207,11 @@ export interface ThoughtRecordSection {
 
 export const THOUGHT_RECORD_HARD_CAP_MINUTES = 30
 
-export const THOUGHT_RECORD_SECTIONS: ThoughtRecordSection[] = [
+/** The original evidence-for/evidence-against structure — kept only so that
+ *  entries saved before the OCD-specific rewrite (below) still display with
+ *  their original section titles and helper text in the history view. Never
+ *  used to create new entries. */
+export const LEGACY_THOUGHT_RECORD_SECTIONS: ThoughtRecordSection[] = [
   {
     key: 'automatic_thought',
     title: 'Automatic Thought',
@@ -241,6 +255,59 @@ export const THOUGHT_RECORD_SECTIONS: ThoughtRecordSection[] = [
   },
 ]
 
+/** OCD-specific structure: names the obsession and the process it's running
+ *  (certainty-seeking, checking, reassurance, etc.) instead of debating
+ *  whether the obsession's content is true — debating content is itself a
+ *  reassurance-seeking compulsion. `name_obsession` binds to the entry's
+ *  top-level `situation` field rather than `fields`; `next_action` (kind
+ *  'close') is both a real question and the wrap-up step. */
+export const THOUGHT_RECORD_SECTIONS: ThoughtRecordSection[] = [
+  {
+    key: 'name_obsession',
+    title: 'Name the obsession',
+    timerMinutes: 2,
+    timerLabel: '2 min',
+    helper: 'One or two sentences. No editing once written.',
+    kind: 'text',
+  },
+  {
+    key: 'ocd_demand',
+    title: 'What is OCD demanding?',
+    timerMinutes: 3,
+    timerLabel: '~3 min',
+    helper:
+      'What does the mind say you must know, prove, prevent, check, confess, review, or feel certain about?',
+    kind: 'text',
+  },
+  {
+    key: 'spot_trap',
+    title: 'Spot the trap',
+    timerMinutes: 3,
+    timerLabel: '~3 min',
+    helper:
+      "Name the process, not the content — certainty seeking, checking, reassurance, thought-action fusion, inflated responsibility, feelings-checking. What's the loop doing, not whether the thought is true.",
+    kind: 'text',
+  },
+  {
+    key: 'practice_uncertainty',
+    title: 'Practice uncertainty',
+    timerMinutes: 3,
+    timerLabel: '~3 min',
+    helper: 'Write a short, non-reassuring uncertainty statement — or use the one below.',
+    kind: 'text',
+  },
+  {
+    key: 'next_action',
+    title: 'Choose the next action',
+    timerMinutes: 2,
+    timerLabel: '2 min — hard stop',
+    helper: 'What will you do next, without first resolving the obsession? Close the notebook here — no rereading.',
+    kind: 'close',
+  },
+]
+
+export const UNCERTAINTY_STATEMENT_SUGGESTION = "Maybe, maybe not. I don't need to solve that right now."
+
 export interface ThoughtRecordEntry {
   id: string
   type: 'thought-record'
@@ -249,13 +316,24 @@ export interface ThoughtRecordEntry {
   situation: string
   startTime: string
   stopTime: string
-  believabilityBefore: number
-  believabilityAfter: number
-  /** Keyed by ThoughtRecordSection.key, one entry per 'text' section. */
+  /** Legacy 0–100% "believability" rating — only ever present on entries saved
+   *  before the OCD-specific rewrite (`version` absent). Never written to new
+   *  entries. */
+  believabilityBefore?: number
+  believabilityAfter?: number
+  /** 0–10 "urge to solve/check this right now" rating — v2 entries only. This
+   *  number is not expected to go down; it's descriptive, not a target. */
+  urgeToSolveBefore?: number
+  urgeToSolveAfter?: number
+  /** Keyed by ThoughtRecordSection.key (legacy or current, matching `version`),
+   *  one entry per 'text'-kind section. */
   fields: Record<string, string>
   durationSeconds: number
   /** A FeelingChartEntry.key, if a mood check-in was picked. Optional — never required to save. */
   mood?: string
+  /** Absent = legacy (evidence-for/against structure, believability %).
+   *  2 = the OCD-specific structure above, with the urge-to-solve rating. */
+  version?: 2
 }
 
 export type JournalEntry = StructuredJournalEntry | QuickPromptEntry | ThoughtEntry | ThoughtRecordEntry
@@ -324,7 +402,8 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
     type: 'evening',
     title: 'OCD Wind Down Journal',
     subtitle: 'A structured 10-minute bedtime practice',
-    instructions: 'Close this journal when the timer ends. Do not re-read, edit, or add.',
+    instructions:
+      "Close this journal when the timer ends. Do not re-read, edit, or add. Not every field needs to be filled in — stopping when the timer ends matters more than completing every section.",
     timerMinutes: 10,
     sections: [
       {
@@ -351,7 +430,7 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
           {
             key: 'observe',
             label: 'Log it',
-            placeholder: 'The [thought] showed up. I noticed it. I did / did not act on it. I move on.',
+            placeholder: 'The thought/urge showed up. What I did next: ___.',
             multiline: true,
           },
         ],
@@ -393,7 +472,7 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
 
 // One entry per short prompt, grouped by `category`. Original wording covering
 // the same OCD-subtype ground a specialist would (general intrusive thoughts,
-// harm, sexual/SO-OCD, ROCD, postpartum, CBT/ACT reframing) — not sourced from
+// harm, sexual/SO-OCD, ROCD, postpartum, defusion & values) — not sourced from
 // any single outside article.
 export const QUICK_PROMPTS: QuickPrompt[] = [
   {
@@ -424,7 +503,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'general-6',
     category: 'General',
-    text: "What's different in your day, week, or environment on days this thought shows up more?",
+    text: "Without digging for why it's here, what's one thing you could do in the next five minutes that has nothing to do with this thought?",
   },
   {
     id: 'general-7',
@@ -444,7 +523,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'harm-2',
     category: 'Harm OCD',
-    text: 'Has this thought ever actually turned into an action, across however long you\'ve had it? What does that track record tell you?',
+    text: "This thought is asking for a guarantee no one gets to have. What would it look like to let the question stay open, right now, without answering it?",
   },
   {
     id: 'harm-3',
@@ -454,7 +533,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'harm-4',
     category: 'Harm OCD',
-    text: 'If someone else told you they had this exact fear about someone they love, what would that tell you about how much they cared?',
+    text: 'What would it look like to care for this person today without first needing this thought to go away?',
   },
   {
     id: 'harm-5',
@@ -484,12 +563,12 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'sexual-3',
     category: 'Sexual Intrusive Thoughts',
-    text: 'What does your actual life — your choices, your relationships, your track record — say about who you are, separate from what your mind hands you?',
+    text: "A thought isn't a verdict on who you are. What's one thing you can do right now that has nothing to do with settling that question?",
   },
   {
     id: 'sexual-4',
     category: 'Sexual Intrusive Thoughts',
-    text: "If you can name roughly when these thoughts started, what was happening then? Naming an origin doesn't make the thought true — it just makes it less mysterious.",
+    text: "You don't need to know why this thought showed up to decide what to do next. What's the next thing on your plan for today?",
   },
   {
     id: 'sexual-5',
@@ -514,7 +593,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'rocd-3',
     category: 'Relationship OCD (ROCD)',
-    text: 'Is this doubt something you could actually investigate with real information, or is it the kind no amount of certainty would ever satisfy?',
+    text: 'This is the kind of doubt no amount of certainty ever fully satisfies. What would it look like to notice that and let it stay unanswered today?',
   },
   {
     id: 'rocd-4',
@@ -529,7 +608,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'rocd-6',
     category: 'Relationship OCD (ROCD)',
-    text: 'Write down three specific, concrete things your partner did this week that you appreciated — actions, not feelings.',
+    text: 'What would it look like to spend five minutes with your partner today without mentally auditing how you feel about them?',
   },
   {
     id: 'rocd-7',
@@ -539,7 +618,7 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   {
     id: 'postpartum-1',
     category: 'Postpartum',
-    text: 'Write the general shape of the thought, then underneath it write: "My mind is scanning for threats to someone I love — that\'s a sign of care, not danger."',
+    text: 'Write the general shape of the thought, then underneath it write: "I\'m having the thought that ___. I don\'t need to decide what it means about me right now."',
   },
   {
     id: 'postpartum-2',
@@ -573,42 +652,42 @@ export const QUICK_PROMPTS: QuickPrompt[] = [
   },
   {
     id: 'reframe-1',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: 'Take a thought you had today and rewrite it starting with "I\'m having the thought that…" What\'s different about it on the page?',
   },
   {
     id: 'reframe-2',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: 'Picture the thought said aloud in a silly voice. Does it carry the same weight?',
   },
   {
     id: 'reframe-3',
-    category: 'Reframing (CBT/ACT)',
-    text: 'Name a time your mind was completely certain about something that turned out to be wrong. What does that do to how much you trust this thought?',
+    category: 'Defusion & Values',
+    text: "Your mind hands you thoughts as if they were facts — that's just what minds do. What's one thing you can do today that doesn't wait on this one being resolved?",
   },
   {
     id: 'reframe-4',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: 'What would it look like to greet the thought — "oh, you again" — instead of trying to shut the door on it?',
   },
   {
     id: 'reframe-5',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: "What's the difference between living alongside this thought and needing to defeat it before you can move on with your day?",
   },
   {
     id: 'reframe-6',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: 'How much attention does this thought actually deserve today, on a scale that has nothing to do with how loud it feels?',
   },
   {
     id: 'reframe-7',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: 'Name one value you want to move toward today regardless of what your mind hands you, and one small action that lives inside it.',
   },
   {
     id: 'reframe-8',
-    category: 'Reframing (CBT/ACT)',
+    category: 'Defusion & Values',
     text: "Write a short note to the part of you that's scared of your own thoughts. What does that part need to hear right now?",
   },
 ]

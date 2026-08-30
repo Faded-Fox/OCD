@@ -5,6 +5,7 @@ import { useFearLadders } from '../lib/useFearLadders'
 import { SUGGESTED_TECHNIQUES } from '../lib/techniques'
 import { SUDS_MAX, SUDS_MIN, isValidSudsValue, sudsRangeError } from '../lib/suds'
 import { hierarchyKey } from '../lib/hierarchy'
+import { urgeResponseLabel } from '../lib/session'
 
 function dedupeCaseInsensitive(items: string[]): string[] {
   const seen = new Set<string>()
@@ -115,7 +116,7 @@ export default function SessionFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
         <SectionLabel full>SUDS</SectionLabel>
-        <Field label="Target range">
+        <Field label="Expected difficulty (0–10)">
           <TargetRangeInput
             value={session.target_suds_range}
             onChange={(target_suds_range) => onChange({ target_suds_range })}
@@ -155,7 +156,7 @@ export default function SessionFields({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
         <SectionLabel full>What happened</SectionLabel>
-        <Field label="Compulsions resisted">
+        <Field label="Response to urges">
           <select
             value={session.compulsions_resisted === null ? 'unknown' : session.compulsions_resisted ? 'yes' : 'partial'}
             onChange={(e) =>
@@ -165,9 +166,9 @@ export default function SessionFields({
             }
             className={inputClass}
           >
-            <option value="yes">Fully resisted</option>
-            <option value="partial">Partial / completed</option>
-            <option value="unknown">Unknown</option>
+            <option value="yes">{urgeResponseLabel(true)}</option>
+            <option value="partial">{urgeResponseLabel(false)}</option>
+            <option value="unknown">{urgeResponseLabel(null)}</option>
           </select>
         </Field>
         <Field label="Techniques used">

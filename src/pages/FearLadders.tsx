@@ -73,9 +73,9 @@ export default function FearLadders() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Fear Ladders</h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-            Plan a hierarchy's rungs before you've run any exposures in it — what each rung is, and roughly what
-            target SUDS to expect. Once you start logging sessions against it, the per-hierarchy view merges this
-            plan with your actual progress.
+            Plan a hierarchy's rungs before you've run any exposures in it — what each rung is, and roughly how
+            hard it's expected to be. Once you start logging sessions against it, the per-hierarchy view merges
+            this plan with your actual progress.
           </p>
         </div>
         <PrimaryButton onClick={startNew}>New ladder</PrimaryButton>
@@ -261,7 +261,7 @@ function FearLadderForm({
                   </span>
                   {row.targetSudsRange && (
                     <span className="shrink-0 text-xs text-slate-400">
-                      target {row.targetSudsRange[0]}–{row.targetSudsRange[1]}
+                      expected {row.targetSudsRange[0]}–{row.targetSudsRange[1]}
                     </span>
                   )}
                 </button>
@@ -295,7 +295,7 @@ function FearLadderForm({
                   </label>
                   <div className="flex flex-col gap-1">
                     <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      Target SUDS
+                      Expected difficulty
                     </span>
                     <TargetRangeInput
                       value={row.targetSudsRange}

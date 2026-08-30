@@ -5,10 +5,12 @@ import { newId } from '../lib/session'
 import {
   FEELINGS_CHART,
   JOURNAL_TEMPLATES,
+  LEGACY_THOUGHT_RECORD_SECTIONS,
   QUICK_PROMPTS,
   THOUGHT_RECORD_HARD_CAP_MINUTES,
   THOUGHT_RECORD_SECTIONS,
   THOUGHT_THEMES,
+  UNCERTAINTY_STATEMENT_SUGGESTION,
   pickRandomQuickPrompt,
   type JournalType,
   type QuickPrompt,
@@ -250,9 +252,9 @@ export default function Journal() {
         <div>
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Obsessive Thought</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            A structured CBT worksheet for testing one intrusive thought — five timed sections (automatic
-            thought, evidence for, evidence against, a balanced alternative, close), each with its own
-            countdown, inside a 30-minute hard cap.
+            An OCD-specific worksheet for one obsession — five timed steps (name it, what OCD's demanding,
+            spot the trap, practice uncertainty, choose the next action), each with its own countdown, inside
+            a 30-minute hard cap. Not about deciding whether the thought is true.
           </p>
         </div>
         <PrimaryButton onClick={() => setPhase('thought-record')} className="self-start">
@@ -611,6 +613,7 @@ function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel
             </button>
           ))}
         </div>
+        <p className="mt-3 text-xs text-slate-400">Pick the closest fit. It doesn't have to be exact.</p>
       </Card>
 
       <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
@@ -634,7 +637,7 @@ function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel
   )
 }
 
-function BelievabilitySlider({
+function UrgeRatingPicker({
   label,
   value,
   onChange,
@@ -645,23 +648,24 @@ function BelievabilitySlider({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
-        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{value}%</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+      <div className="flex flex-wrap gap-1.5">
+        {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+          <button
+            key={n}
+            type="button"
+            onClick={() => onChange(n)}
+            className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
+              value === n
+                ? 'bg-amber-500 text-white'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+            }`}
+          >
+            {n}
+          </button>
+        ))}
       </div>
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={5}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full accent-amber-500"
-      />
-      <div className="flex justify-between text-[11px] text-slate-400">
-        <span>0% — don't believe it at all</span>
-        <span>100% — completely believe it</span>
-      </div>
+      <p className="text-[11px] text-slate-400">This number doesn't need to go down.</p>
     </div>
   )
 }
@@ -678,8 +682,8 @@ function BelievabilitySlider({
 function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
   const [phase, setPhase] = useState<'intro' | 'section'>('intro')
   const [situation, setSituation] = useState('')
-  const [believabilityBefore, setBelievabilityBefore] = useState(50)
-  const [believabilityAfter, setBelievabilityAfter] = useState(50)
+  const [urgeToSolveBefore, setUrgeToSolveBefore] = useState(5)
+  const [urgeToSolveAfter, setUrgeToSolveAfter] = useState(5)
   const [startedAt, setStartedAt] = useState<number | null>(null)
   const [sectionIndex, setSectionIndex] = useState(0)
   const [sectionStartedAt, setSectionStartedAt] = useState<number | null>(null)
@@ -726,11 +730,12 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
       situation,
       startTime: new Date(startedAt ?? now).toISOString(),
       stopTime: new Date(now).toISOString(),
-      believabilityBefore,
-      believabilityAfter,
+      urgeToSolveBefore,
+      urgeToSolveAfter,
       fields,
       durationSeconds: startedAt ? Math.round((now - startedAt) / 1000) : 0,
       mood: mood ?? undefined,
+      version: 2,
     }
     await addJournalEntry(entry)
     setSaving(false)
@@ -746,27 +751,16 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
           </button>
           <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Obsessive Thought</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            30-minute hard cap — stop at the timer, regardless of section.
+            30-minute hard cap — stop at the timer, regardless of section. Not about deciding whether the
+            obsession is true — about naming the process it's running and choosing what to do next.
           </p>
         </div>
 
         <Card className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Situation / obsession theme
-            </span>
-            <input
-              type="text"
-              value={situation}
-              onChange={(e) => setSituation(e.target.value)}
-              placeholder="What's the thought or situation this record is about?"
-              className={inputClass}
-            />
-          </label>
-          <BelievabilitySlider
-            label="Believability of the automatic thought, right now, before writing"
-            value={believabilityBefore}
-            onChange={setBelievabilityBefore}
+          <UrgeRatingPicker
+            label="Urge to solve/check this right now"
+            value={urgeToSolveBefore}
+            onChange={setUrgeToSolveBefore}
           />
         </Card>
 
@@ -831,19 +825,39 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
 
       <Card className="flex flex-col gap-3">
         <p className="text-sm text-slate-500 dark:text-slate-400">{section.helper}</p>
-        {section.kind === 'text' ? (
+        {section.key === 'name_obsession' ? (
           <textarea
-            value={fields[section.key] ?? ''}
-            onChange={(e) => setFields((f) => ({ ...f, [section.key]: e.target.value }))}
-            rows={6}
+            value={situation}
+            onChange={(e) => setSituation(e.target.value)}
+            rows={4}
             autoFocus
             className={inputClass}
           />
         ) : (
-          <BelievabilitySlider
-            label="Believability of original thought now"
-            value={believabilityAfter}
-            onChange={setBelievabilityAfter}
+          <>
+            <textarea
+              value={fields[section.key] ?? ''}
+              onChange={(e) => setFields((f) => ({ ...f, [section.key]: e.target.value }))}
+              rows={section.kind === 'close' ? 3 : 6}
+              autoFocus
+              className={inputClass}
+            />
+            {section.key === 'practice_uncertainty' && (
+              <button
+                type="button"
+                onClick={() => setFields((f) => ({ ...f, practice_uncertainty: UNCERTAINTY_STATEMENT_SUGGESTION }))}
+                className="self-start rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              >
+                Use: "{UNCERTAINTY_STATEMENT_SUGGESTION}"
+              </button>
+            )}
+          </>
+        )}
+        {section.kind === 'close' && (
+          <UrgeRatingPicker
+            label="Urge to solve/check this right now"
+            value={urgeToSolveAfter}
+            onChange={setUrgeToSolveAfter}
           />
         )}
       </Card>
@@ -1184,15 +1198,24 @@ function ThoughtRecordEntryCard({
       {entry.situation.trim() && (
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-            Situation / obsession theme
+            {entry.version === 2 ? 'Name the obsession' : 'Situation / obsession theme'}
           </p>
           <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{entry.situation}</p>
         </div>
       )}
-      <p className="text-sm text-slate-600 dark:text-slate-300">
-        Believability {entry.believabilityBefore}% before → {entry.believabilityAfter}% after
-      </p>
-      {THOUGHT_RECORD_SECTIONS.filter((s) => s.kind === 'text').map((s) =>
+      {entry.version === 2 ? (
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Urge to solve/check {entry.urgeToSolveBefore} before → {entry.urgeToSolveAfter} after
+        </p>
+      ) : (
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          Believability {entry.believabilityBefore}% before → {entry.believabilityAfter}% after
+        </p>
+      )}
+      {(entry.version === 2
+        ? THOUGHT_RECORD_SECTIONS.filter((s) => s.key !== 'name_obsession')
+        : LEGACY_THOUGHT_RECORD_SECTIONS.filter((s) => s.kind === 'text')
+      ).map((s) =>
         entry.fields[s.key]?.trim() ? (
           <div key={s.key}>
             <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{s.title}</p>

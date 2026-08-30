@@ -1,5 +1,14 @@
 import type { Session } from './types'
 
+/** Observational, non-grade-like label for a session's stored `compulsions_resisted`
+ *  value — kept as a boolean|null for compatibility, but described to the user as a
+ *  response to the urge rather than a pass/fail score. */
+export function urgeResponseLabel(resisted: boolean | null): string {
+  if (resisted === true) return 'No compulsion done'
+  if (resisted === false) return 'Did the compulsion'
+  return 'Not sure / not tracked'
+}
+
 export function newId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   return `id-${Date.now()}-${Math.random().toString(36).slice(2)}`
