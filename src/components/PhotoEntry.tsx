@@ -3,6 +3,7 @@ import { createEmptySession } from '../lib/session'
 import type { Session } from '../lib/types'
 import { Card, PrimaryButton, SecondaryButton } from './ui'
 import SessionFields from './SessionFields'
+import { sessionSudsError } from '../lib/suds'
 
 const MAX_DIMENSION = 1600
 const JPEG_QUALITY = 0.85
@@ -124,6 +125,8 @@ export default function PhotoEntry({ onSave }: { onSave: (session: Session) => P
     )
   }
 
+  const sudsError = sessionSudsError(session)
+
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:items-start">
       <Card className="flex flex-col gap-2 lg:sticky lg:top-4">
@@ -149,11 +152,12 @@ export default function PhotoEntry({ onSave }: { onSave: (session: Session) => P
 
       <Card className="flex flex-col gap-4">
         <SessionFields session={session} onChange={update} />
+        {sudsError && <p className="text-sm text-rose-600 dark:text-rose-400">{sudsError}</p>}
         <div className="flex gap-3">
           <SecondaryButton onClick={clearPhoto} disabled={saving}>
             Start over
           </SecondaryButton>
-          <PrimaryButton onClick={save} disabled={saving}>
+          <PrimaryButton onClick={save} disabled={saving || sudsError !== null}>
             {saving ? 'Saving…' : 'Save session'}
           </PrimaryButton>
         </div>

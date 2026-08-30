@@ -6,8 +6,9 @@ import { useFearLadders } from '../lib/useFearLadders'
 import { useSessions } from '../lib/useSessions'
 import { colorForHierarchy } from '../lib/colors'
 import { Card, PrimaryButton, SecondaryButton, EmptyState } from '../components/ui'
-import { inputBaseClass, inputClass, Field, TargetRangeInput } from '../components/SessionFields'
+import { inputBaseClass, Field, TargetRangeInput, TextSuggestInput } from '../components/SessionFields'
 import { sudsRangeError } from '../lib/suds'
+import { hierarchyKey } from '../lib/hierarchy'
 
 type Phase = 'landing' | 'form'
 
@@ -34,10 +35,25 @@ export default function FearLadders() {
   }
 
   if (phase === 'form' && activeLadder) {
+    const seenKeys = new Set<string>()
+    const hierarchySuggestions = [
+      ...[...sessions].sort((a, b) => b.date.localeCompare(a.date)).map((s) => s.hierarchy),
+      ...ladders.map((l) => l.hierarchy),
+    ]
+      .filter((h) => h.trim() !== '')
+      .filter((h) => {
+        const key = hierarchyKey(h)
+        if (seenKeys.has(key)) return false
+        seenKeys.add(key)
+        return true
+      })
+      .sort((a, b) => a.localeCompare(b))
+
     return (
       <FearLadderForm
         ladder={activeLadder}
         existingHierarchies={ladders.filter((l) => l.id !== activeLadder.id).map((l) => l.hierarchy)}
+        hierarchySuggestions={hierarchySuggestions}
         onDone={() => {
           setActiveLadder(null)
           setPhase('landing')
@@ -121,11 +137,13 @@ export default function FearLadders() {
 function FearLadderForm({
   ladder,
   existingHierarchies,
+  hierarchySuggestions,
   onDone,
   onCancel,
 }: {
   ladder: FearLadder
   existingHierarchies: string[]
+  hierarchySuggestions: string[]
   onDone: () => void
   onCancel: () => void
 }) {
@@ -159,7 +177,7 @@ function FearLadderForm({
       setError('Give this ladder a hierarchy name.')
       return
     }
-    if (existingHierarchies.some((h) => h.toLowerCase() === hierarchy.toLowerCase())) {
+    if (existingHierarchies.some((h) => hierarchyKey(h) === hierarchyKey(hierarchy))) {
       setError('There\'s already a fear ladder for this hierarchy — edit that one instead.')
       return
     }
@@ -192,12 +210,11 @@ function FearLadderForm({
 
       <Card className="flex flex-col gap-3">
         <Field label="Hierarchy">
-          <input
-            type="text"
+          <TextSuggestInput
             value={draft.hierarchy}
-            onChange={(e) => patch({ hierarchy: e.target.value })}
+            onChange={(hierarchy) => patch({ hierarchy })}
+            suggestions={hierarchySuggestions}
             placeholder="e.g. Harm/Contamination"
-            className={inputClass}
           />
         </Field>
         {error && <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>}

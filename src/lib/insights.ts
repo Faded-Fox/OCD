@@ -1,4 +1,5 @@
 import type { Session, SudsReading } from './types'
+import { hierarchyKey } from './hierarchy'
 
 // All computations below are descriptive summaries of logged data — not clinical
 // interpretation, diagnosis, or treatment recommendations.
@@ -179,15 +180,29 @@ export function compulsionResistanceRate(sessions: Session[]): ResistanceRate {
   }
 }
 
-export function compulsionResistanceRateByHierarchy(sessions: Session[]): Record<string, ResistanceRate> {
-  const byHierarchy: Record<string, Session[]> = {}
+/** Groups sessions by hierarchy, case/whitespace-insensitively (see hierarchyKey),
+ *  picking the most recently-dated session's exact spelling as the display label
+ *  for each group — shared by every insight below that breaks down by hierarchy. */
+function groupByHierarchy(sessions: Session[]): Map<string, { label: string; list: Session[] }> {
+  const byKey = new Map<string, { label: string; labelDate: string; list: Session[] }>()
   for (const s of sessions) {
-    const key = s.hierarchy || 'Unlabeled'
-    ;(byHierarchy[key] ??= []).push(s)
+    const label = s.hierarchy || 'Unlabeled'
+    const key = hierarchyKey(label)
+    const group = byKey.get(key) ?? { label, labelDate: s.date, list: [] }
+    group.list.push(s)
+    if (s.date >= group.labelDate) {
+      group.label = label
+      group.labelDate = s.date
+    }
+    byKey.set(key, group)
   }
+  return byKey
+}
+
+export function compulsionResistanceRateByHierarchy(sessions: Session[]): Record<string, ResistanceRate> {
   const out: Record<string, ResistanceRate> = {}
-  for (const [hierarchy, list] of Object.entries(byHierarchy)) {
-    out[hierarchy] = compulsionResistanceRate(list)
+  for (const { label, list } of groupByHierarchy(sessions).values()) {
+    out[label] = compulsionResistanceRate(list)
   }
   return out
 }
@@ -226,17 +241,22 @@ export function techniqueCorrelation(sessions: Session[]): TechniqueCorrelationR
 }
 
 export function rungProgression(sessions: Session[]): RungProgressionRow[] {
-  const byKey = new Map<string, Session[]>()
+  const byKey = new Map<string, { label: string; labelDate: string; rung: number; list: Session[] }>()
   for (const s of sessions) {
     if (s.rung === null) continue
-    const key = `${s.hierarchy}|||${s.rung}`
-    if (!byKey.has(key)) byKey.set(key, [])
-    byKey.get(key)!.push(s)
+    const label = s.hierarchy || 'Unlabeled'
+    const key = `${hierarchyKey(label)}|||${s.rung}`
+    const group = byKey.get(key) ?? { label, labelDate: s.date, rung: s.rung, list: [] }
+    group.list.push(s)
+    if (s.date >= group.labelDate) {
+      group.label = label
+      group.labelDate = s.date
+    }
+    byKey.set(key, group)
   }
 
   const rows: RungProgressionRow[] = []
-  for (const [key, list] of byKey.entries()) {
-    const [hierarchy, rungStr] = key.split('|||')
+  for (const { label: hierarchy, rung, list } of byKey.values()) {
     const sorted = [...list].sort((a, b) => a.date.localeCompare(b.date))
     const lastTwo = sorted.slice(-2)
     const readySignal =
@@ -254,7 +274,7 @@ export function rungProgression(sessions: Session[]): RungProgressionRow[] {
 
     rows.push({
       hierarchy,
-      rung: Number(rungStr),
+      rung,
       target_suds_range: sorted[sorted.length - 1]?.target_suds_range ?? null,
       attempts: sorted.length,
       lastAttemptDate: sorted[sorted.length - 1]?.date || null,
@@ -267,14 +287,9 @@ export function rungProgression(sessions: Session[]): RungProgressionRow[] {
 }
 
 export function sessionFrequency(sessions: Session[]): HierarchyGap[] {
-  const byHierarchy: Record<string, Session[]> = {}
-  for (const s of sessions) {
-    if (!s.date) continue
-    const key = s.hierarchy || 'Unlabeled'
-    ;(byHierarchy[key] ??= []).push(s)
-  }
+  const withDates = sessions.filter((s) => s.date)
 
-  return Object.entries(byHierarchy).map(([hierarchy, list]) => {
+  return Array.from(groupByHierarchy(withDates).values()).map(({ label: hierarchy, list }) => {
     const dates = [...list].map((s) => s.date).sort()
     const gaps: { fromDate: string; toDate: string; days: number }[] = []
     for (let i = 1; i < dates.length; i++) {

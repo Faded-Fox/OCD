@@ -3,6 +3,7 @@ import type { JournalEntry } from './journal'
 import type { FocusPlanEntry } from './focusPlan'
 import type { FearLadder } from './fearLadder'
 import { rungProgression, sessionFrequency } from './insights'
+import { distinctHierarchies, hierarchyKey, sessionsForHierarchy } from './hierarchy'
 
 export interface TherapistSummaryHierarchyRow {
   hierarchy: string
@@ -83,20 +84,20 @@ export function buildTherapistSummary(
   const focusPlans = input.focusPlans.filter((p) => p.completed !== null && inRange(p.date, from, to))
   const journalEntries = input.journalEntries.filter((e) => inRange(e.date, from, to))
 
-  const hierarchies = Array.from(new Set(sessions.map((s) => s.hierarchy || 'Unlabeled'))).sort()
+  const hierarchies = distinctHierarchies(sessions)
   const progression = rungProgression(sessions)
   const gaps = sessionFrequency(sessions)
 
   const hierarchyRows: TherapistSummaryHierarchyRow[] = hierarchies.map((h) => {
-    const list = sessions.filter((s) => (s.hierarchy || 'Unlabeled') === h)
-    const gapInfo = gaps.find((g) => g.hierarchy === h)
+    const list = sessionsForHierarchy(sessions, h)
+    const gapInfo = gaps.find((g) => hierarchyKey(g.hierarchy) === hierarchyKey(h))
     return {
       hierarchy: h,
       sessionCount: list.length,
-      rungsAttempted: progression.filter((r) => r.hierarchy === h).length,
+      rungsAttempted: progression.filter((r) => hierarchyKey(r.hierarchy) === hierarchyKey(h)).length,
       avgPeakSuds: average(list.map((s) => s.peak_suds)),
       lastSessionDate: [...list].map((s) => s.date).sort().slice(-1)[0] ?? null,
-      readySignalCount: progression.filter((r) => r.hierarchy === h && r.readySignal).length,
+      readySignalCount: progression.filter((r) => hierarchyKey(r.hierarchy) === hierarchyKey(h) && r.readySignal).length,
       avgGapDays: gapInfo?.avgGapDays ?? null,
     }
   })

@@ -14,6 +14,7 @@ import { pickRandomValue, type ValueItem } from '../lib/values'
 import { Card, PrimaryButton, SecondaryButton } from '../components/ui'
 import SessionFields, { inputClass, Field, TargetRangeInput, TextSuggestInput } from '../components/SessionFields'
 import { isValidSudsValue, sessionSudsError, sudsRangeError } from '../lib/suds'
+import { hierarchyKey } from '../lib/hierarchy'
 import SudsChart from '../components/SudsChart'
 
 // How rough counts as "rough" for the auto-surfaced support card: SUDs peaked
@@ -152,7 +153,7 @@ export default function LiveSession() {
     sudsRangeError(session.target_suds_range) === null
 
   const matchedLadder = ladders.find(
-    (l) => l.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && l.hierarchy.trim() !== '',
+    (l) => hierarchyKey(l.hierarchy) === hierarchyKey(session.hierarchy) && l.hierarchy.trim() !== '',
   )
 
   // Suggestions for the setup fields below, all drawn from this device's own history
@@ -170,7 +171,7 @@ export default function LiveSession() {
   const sessionsForHierarchy = useMemo(
     () =>
       pastSessions.filter(
-        (s) => s.hierarchy.trim().toLowerCase() === session.hierarchy.trim().toLowerCase() && s.hierarchy.trim() !== '',
+        (s) => hierarchyKey(s.hierarchy) === hierarchyKey(session.hierarchy) && s.hierarchy.trim() !== '',
       ),
     [pastSessions, session.hierarchy],
   )

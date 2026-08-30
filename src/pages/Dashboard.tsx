@@ -9,6 +9,7 @@ import { isFlareGuideEmpty } from '../lib/flareGuide'
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { isValuesGuideEmpty } from '../lib/values'
 import { rungProgression, sessionFrequency } from '../lib/insights'
+import { distinctHierarchies, hierarchyKey, sessionsForHierarchy } from '../lib/hierarchy'
 import { downloadBackup } from '../lib/export'
 import { isExportOverdue, snoozeExportReminder } from '../lib/exportReminder'
 import { Card, EmptyState, PrimaryButton, SecondaryButton, StatTile } from '../components/ui'
@@ -67,14 +68,20 @@ export default function Dashboard() {
     )
   }
 
-  const hierarchies = Array.from(new Set(sessions.map((s) => s.hierarchy || 'Unlabeled'))).sort()
+  const hierarchies = distinctHierarchies(sessions)
   const progression = rungProgression(sessions)
   const gaps = sessionFrequency(sessions)
   const recent = [...sessions].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6)
 
+  // Maps each session onto one of the canonical `hierarchies` labels above, so a
+  // case/whitespace variant of the same hierarchy lands in the same chart series
+  // instead of silently vanishing (it wouldn't match any series by exact string).
+  const hierarchyLabelByKey = new Map(hierarchies.map((h) => [hierarchyKey(h), h]))
+  const canonicalHierarchy = (raw: string) => hierarchyLabelByKey.get(hierarchyKey(raw || 'Unlabeled')) ?? (raw || 'Unlabeled')
+
   const scatterData = sessions
     .filter((s) => s.peak_suds !== null)
-    .map((s) => ({ date: s.date, peak: s.peak_suds, hierarchy: s.hierarchy || 'Unlabeled', session: s }))
+    .map((s) => ({ date: s.date, peak: s.peak_suds, hierarchy: canonicalHierarchy(s.hierarchy), session: s }))
 
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
   const journalThisWeek = journalEntries.filter((e) => e.date >= sevenDaysAgo).length
@@ -171,11 +178,11 @@ export default function Dashboard() {
         <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">By hierarchy</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {hierarchies.map((h) => {
-            const hierarchySessions = sessions.filter((s) => (s.hierarchy || 'Unlabeled') === h)
+            const hierarchySessions = sessionsForHierarchy(sessions, h)
             const count = hierarchySessions.length
-            const rungsAttempted = progression.filter((r) => r.hierarchy === h).length
+            const rungsAttempted = progression.filter((r) => hierarchyKey(r.hierarchy) === hierarchyKey(h)).length
             const lastAttempted = [...hierarchySessions].map((s) => s.date).sort().slice(-1)[0]
-            const gapInfo = gaps.find((g) => g.hierarchy === h)
+            const gapInfo = gaps.find((g) => hierarchyKey(g.hierarchy) === hierarchyKey(h))
             return (
               <Link key={h} to={`/hierarchy/${encodeURIComponent(h)}`}>
                 <Card className="h-full">

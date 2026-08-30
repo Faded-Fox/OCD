@@ -11,6 +11,7 @@ import {
 import { useSessions } from '../lib/useSessions'
 import { useFearLadders } from '../lib/useFearLadders'
 import { habituationTrend, peakSudsTrend, rungProgression, type RungProgressionRow } from '../lib/insights'
+import { hierarchyKey, sessionsForHierarchy } from '../lib/hierarchy'
 import { colorForHierarchy } from '../lib/colors'
 import { Card, EmptyState, Badge } from '../components/ui'
 
@@ -22,8 +23,8 @@ export default function HierarchyView() {
 
   if (loading || laddersLoading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
 
-  const hierarchySessions = sessions.filter((s) => (s.hierarchy || 'Unlabeled') === hierarchy)
-  const ladder = ladders.find((l) => l.hierarchy === hierarchy)
+  const hierarchySessions = sessionsForHierarchy(sessions, hierarchy)
+  const ladder = ladders.find((l) => hierarchyKey(l.hierarchy) === hierarchyKey(hierarchy))
 
   if (hierarchySessions.length === 0 && !ladder) {
     return <EmptyState title="No sessions found" body="This hierarchy has no logged sessions or planned ladder." />

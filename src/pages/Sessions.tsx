@@ -5,6 +5,7 @@ import { Card, EmptyState, PrimaryButton, SecondaryButton } from '../components/
 import HierarchyBadge from '../components/HierarchyBadge'
 import { inputClass } from '../components/SessionFields'
 import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type Session } from '../lib/types'
+import { distinctHierarchies, hierarchyKey } from '../lib/hierarchy'
 
 type SortOrder = 'newest' | 'oldest' | 'peak-desc' | 'peak-asc'
 type ResistanceFilter = 'any' | 'full' | 'partial' | 'unknown'
@@ -40,17 +41,14 @@ export default function Sessions() {
   const { sessions, loading } = useSessions()
   const [filters, setFilters] = useState(emptyFilters)
 
-  const hierarchies = useMemo(
-    () => Array.from(new Set(sessions.map((s) => s.hierarchy || 'Unlabeled'))).sort(),
-    [sessions],
-  )
+  const hierarchies = useMemo(() => distinctHierarchies(sessions), [sessions])
 
   const patch = (p: Partial<typeof filters>) => setFilters((f) => ({ ...f, ...p }))
 
   const filtered = useMemo(() => {
     let result = sessions.filter((s) => {
       if (!matchesSearch(s, filters.query)) return false
-      if (filters.hierarchy !== 'all' && (s.hierarchy || 'Unlabeled') !== filters.hierarchy) return false
+      if (filters.hierarchy !== 'all' && hierarchyKey(s.hierarchy || 'Unlabeled') !== hierarchyKey(filters.hierarchy)) return false
       if (filters.resistance === 'full' && s.compulsions_resisted !== true) return false
       if (filters.resistance === 'partial' && s.compulsions_resisted !== false) return false
       if (filters.resistance === 'unknown' && s.compulsions_resisted !== null) return false

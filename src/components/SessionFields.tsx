@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { EXPOSURE_TYPES, EXPOSURE_TYPE_LABELS, type ExposureType, type Session, type SudsReading } from '../lib/types'
 import { useSessions } from '../lib/useSessions'
+import { useFearLadders } from '../lib/useFearLadders'
 import { SUGGESTED_TECHNIQUES } from '../lib/techniques'
 import { SUDS_MAX, SUDS_MIN, isValidSudsValue, sudsRangeError } from '../lib/suds'
+import { hierarchyKey } from '../lib/hierarchy'
 
 function dedupeCaseInsensitive(items: string[]): string[] {
   const seen = new Set<string>()
@@ -27,6 +29,7 @@ export default function SessionFields({
   // are too personal/varied for a baked-in list) plus whatever this person has already
   // typed across their own past sessions, so the list adapts to their own vocabulary.
   const { sessions } = useSessions()
+  const { ladders } = useFearLadders()
   const techniqueSuggestions = dedupeCaseInsensitive([
     ...SUGGESTED_TECHNIQUES,
     ...sessions.flatMap((s) => s.techniques_used),
@@ -34,6 +37,19 @@ export default function SessionFields({
   const compulsionSuggestions = dedupeCaseInsensitive(sessions.flatMap((s) => s.compulsions_targeted)).sort((a, b) =>
     a.localeCompare(b),
   )
+  const seenHierarchyKeys = new Set<string>()
+  const hierarchySuggestions = [
+    ...[...sessions].sort((a, b) => b.date.localeCompare(a.date)).map((s) => s.hierarchy),
+    ...ladders.map((l) => l.hierarchy),
+  ]
+    .filter((h) => h.trim() !== '')
+    .filter((h) => {
+      const key = hierarchyKey(h)
+      if (seenHierarchyKeys.has(key)) return false
+      seenHierarchyKeys.add(key)
+      return true
+    })
+    .sort((a, b) => a.localeCompare(b))
 
   const peakError =
     session.peak_suds !== null && !isValidSudsValue(session.peak_suds)
@@ -56,12 +72,11 @@ export default function SessionFields({
           />
         </Field>
         <Field label="Hierarchy">
-          <input
-            type="text"
+          <TextSuggestInput
             value={session.hierarchy}
-            onChange={(e) => onChange({ hierarchy: e.target.value })}
+            onChange={(hierarchy) => onChange({ hierarchy })}
+            suggestions={hierarchySuggestions}
             placeholder="e.g. Harm/Contamination"
-            className={inputClass}
           />
         </Field>
         <Field label="Rung">
