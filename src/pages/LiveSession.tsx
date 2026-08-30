@@ -16,6 +16,7 @@ import SessionFields, { inputClass, Field, TargetRangeInput, TextSuggestInput } 
 import { isValidSudsValue, sessionSudsError, sudsRangeError } from '../lib/suds'
 import { hierarchyKey } from '../lib/hierarchy'
 import SudsChart from '../components/SudsChart'
+import foxTail from '../assets/fox-tail.webp'
 
 // How rough counts as "rough" for the auto-surfaced support card: SUDs peaked
 // at 8+ and hasn't meaningfully come down after a while. Deliberately not the
@@ -334,7 +335,11 @@ export default function LiveSession() {
         {reminder && (
           <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
             <p className="text-sm text-emerald-800 dark:text-emerald-300">
-              <span className="mr-1 text-lg leading-none">{reminder.icon || '⭐'}</span>
+              {reminder.icon ? (
+                <span className="mr-1 text-lg leading-none">{reminder.icon}</span>
+              ) : (
+                <img src={foxTail} alt="" className="mr-1 inline-block h-4 w-4 align-text-bottom" />
+              )}
               Remember — you're doing this because <span className="font-medium">{reminder.label}</span> matters.
             </p>
           </Card>
@@ -544,7 +549,11 @@ export default function LiveSession() {
         {reminder && (
           <Card className="border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
             <p className="text-sm text-emerald-800 dark:text-emerald-300">
-              <span className="mr-1 text-lg leading-none">{reminder.icon || '⭐'}</span>
+              {reminder.icon ? (
+                <span className="mr-1 text-lg leading-none">{reminder.icon}</span>
+              ) : (
+                <img src={foxTail} alt="" className="mr-1 inline-block h-4 w-4 align-text-bottom" />
+              )}
               Remember — you're doing this because <span className="font-medium">{reminder.label}</span> matters.
             </p>
           </Card>

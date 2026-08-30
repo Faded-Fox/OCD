@@ -5,6 +5,7 @@ import { createEmptyValuesGuide, isValuesGuideEmpty, type ValueItem, type Values
 import { useValuesGuide } from '../lib/useValuesGuide'
 import { Card, PrimaryButton, SecondaryButton, EmptyState } from '../components/ui'
 import { inputBaseClass, inputClass, Field } from '../components/SessionFields'
+import foxTail from '../assets/fox-tail.webp'
 
 export default function ValuesPage() {
   const { guide, loading, refresh } = useValuesGuide()
@@ -72,7 +73,11 @@ function ValuesView({ guide, onEdit }: { guide: ValuesGuide; onEdit: () => void 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {guide.values.map((v) => (
           <Card key={v.id} className="flex items-start gap-3">
-            <span className="text-2xl leading-none">{v.icon || '⭐'}</span>
+            {v.icon ? (
+              <span className="text-2xl leading-none">{v.icon}</span>
+            ) : (
+              <img src={foxTail} alt="" className="h-6 w-6 shrink-0" />
+            )}
             <div className="min-w-0">
               <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{v.label}</h2>
               {v.note.trim() && (
