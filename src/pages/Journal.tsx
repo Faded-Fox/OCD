@@ -6,6 +6,8 @@ import {
   FEELINGS_CHART,
   JOURNAL_TEMPLATES,
   QUICK_PROMPTS,
+  THOUGHT_RECORD_HARD_CAP_MINUTES,
+  THOUGHT_RECORD_SECTIONS,
   THOUGHT_THEMES,
   pickRandomQuickPrompt,
   type JournalType,
@@ -13,6 +15,7 @@ import {
   type QuickPromptEntry,
   type StructuredJournalEntry,
   type ThoughtEntry,
+  type ThoughtRecordEntry,
   type ThoughtTheme,
 } from '../lib/journal'
 import { useJournalEntries } from '../lib/useJournalEntries'
@@ -21,6 +24,7 @@ import foxMorning from '../assets/fox-morning.webp'
 import foxWindDown from '../assets/fox-wind-down.webp'
 import foxQuickPrompt from '../assets/fox-quick-prompt.webp'
 import foxIntrusiveThought from '../assets/fox-intrusive-thought.webp'
+import foxChecklist from '../assets/fox-checklist.webp'
 import foxMoodAngry from '../assets/mood/fox-mood-angry.webp'
 import foxMoodCalm from '../assets/mood/fox-mood-calm.webp'
 import foxMoodFrustrated from '../assets/mood/fox-mood-frustrated.webp'
@@ -49,7 +53,7 @@ const MOOD_IMAGES: Record<string, string> = {
   excited: foxMoodExcited,
 }
 
-type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick' | 'thought'
+type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick' | 'thought' | 'thought-record'
 
 const inputClass =
   'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
@@ -112,6 +116,18 @@ export default function Journal() {
         onDone={async () => {
           setLastSaved('thought')
           await refreshJournalEntries()
+          setPhase('saved')
+        }}
+        onCancel={() => setPhase('landing')}
+      />
+    )
+  }
+
+  if (phase === 'thought-record') {
+    return (
+      <ThoughtRecordView
+        onDone={() => {
+          setLastSaved('other')
           setPhase('saved')
         }}
         onCancel={() => setPhase('landing')}
@@ -182,7 +198,7 @@ export default function Journal() {
       <div>
         <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Journal</h1>
         <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Four short ways to journal — not free-form writing. Each is designed to stay brief and avoid
+          Five short ways to journal — not free-form writing. Each is designed to stay brief and avoid
           becoming reassurance-seeking, and tells you what to watch for.
         </p>
       </div>
@@ -227,6 +243,21 @@ export default function Journal() {
         {QUICK_PROMPTS.length === 0 && (
           <p className="text-xs text-slate-400">No prompts added yet.</p>
         )}
+      </Card>
+
+      <Card className="flex flex-col gap-3">
+        <img src={foxChecklist} alt="" className="h-16 w-16 self-start" />
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Thought Record</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            A structured CBT worksheet for testing one intrusive thought — five timed sections (automatic
+            thought, evidence for, evidence against, a balanced alternative, close), each with its own
+            countdown, inside a 30-minute hard cap.
+          </p>
+        </div>
+        <PrimaryButton onClick={() => setPhase('thought-record')} className="self-start">
+          Start
+        </PrimaryButton>
       </Card>
 
       <Card className="flex flex-col gap-3">
@@ -603,6 +634,240 @@ function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel
   )
 }
 
+function BelievabilitySlider({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (value: number) => void
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">{value}%</span>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={5}
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="w-full accent-amber-500"
+      />
+      <div className="flex justify-between text-[11px] text-slate-400">
+        <span>0% — don't believe it at all</span>
+        <span>100% — completely believe it</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A fixed, timed sequence rather than the all-sections-at-once layout the
+ * morning/evening templates use — the source worksheet's whole design is a
+ * 30-minute hard cap with each section pacing itself, not a suggestion to
+ * take as long as feels right. No back button, deliberately: section 1's own
+ * instruction ("write once, do not refine") is really the ethos of the whole
+ * thing, and the app's saved-entries view already stays low-key for the same
+ * anti-reassurance-seeking reason.
+ */
+function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel: () => void }) {
+  const [phase, setPhase] = useState<'intro' | 'section'>('intro')
+  const [situation, setSituation] = useState('')
+  const [believabilityBefore, setBelievabilityBefore] = useState(50)
+  const [believabilityAfter, setBelievabilityAfter] = useState(50)
+  const [startedAt, setStartedAt] = useState<number | null>(null)
+  const [sectionIndex, setSectionIndex] = useState(0)
+  const [sectionStartedAt, setSectionStartedAt] = useState<number | null>(null)
+  const [fields, setFields] = useState<Record<string, string>>({})
+  const [mood, setMood] = useState<string | null>(null)
+  const [nowTick, setNowTick] = useState(Date.now())
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (phase !== 'section') return
+    const interval = setInterval(() => setNowTick(Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [phase])
+
+  const start = () => {
+    const now = Date.now()
+    setStartedAt(now)
+    setSectionStartedAt(now)
+    setSectionIndex(0)
+    setPhase('section')
+  }
+
+  const section = THOUGHT_RECORD_SECTIONS[sectionIndex]
+  const isLastSection = sectionIndex === THOUGHT_RECORD_SECTIONS.length - 1
+  const overallElapsedMs = startedAt ? nowTick - startedAt : 0
+  const sectionElapsedMs = sectionStartedAt ? nowTick - sectionStartedAt : 0
+  const sectionRemainingMs = Math.max(0, section.timerMinutes * 60000 - sectionElapsedMs)
+  const sectionTimeUp = sectionRemainingMs <= 0
+  const hardCapReached = overallElapsedMs >= THOUGHT_RECORD_HARD_CAP_MINUTES * 60000
+
+  const goToSection = (index: number) => {
+    setSectionIndex(index)
+    setSectionStartedAt(Date.now())
+  }
+
+  const save = async () => {
+    setSaving(true)
+    const now = Date.now()
+    const entry: ThoughtRecordEntry = {
+      id: newId(),
+      type: 'thought-record',
+      date: new Date().toISOString().slice(0, 10),
+      createdAt: new Date().toISOString(),
+      situation,
+      startTime: new Date(startedAt ?? now).toISOString(),
+      stopTime: new Date(now).toISOString(),
+      believabilityBefore,
+      believabilityAfter,
+      fields,
+      durationSeconds: startedAt ? Math.round((now - startedAt) / 1000) : 0,
+      mood: mood ?? undefined,
+    }
+    await addJournalEntry(entry)
+    setSaving(false)
+    onDone()
+  }
+
+  if (phase === 'intro') {
+    return (
+      <div className="flex flex-col gap-6 py-4">
+        <div>
+          <button type="button" onClick={onCancel} className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
+            ← Journal
+          </button>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Thought Record</h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            30-minute hard cap — stop at the timer, regardless of section.
+          </p>
+        </div>
+
+        <Card className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Situation / obsession theme
+            </span>
+            <input
+              type="text"
+              value={situation}
+              onChange={(e) => setSituation(e.target.value)}
+              placeholder="What's the thought or situation this record is about?"
+              className={inputClass}
+            />
+          </label>
+          <BelievabilitySlider
+            label="Believability of the automatic thought, right now, before writing"
+            value={believabilityBefore}
+            onChange={setBelievabilityBefore}
+          />
+        </Card>
+
+        <Card className="flex flex-col gap-1.5">
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">What's ahead</h2>
+          {THOUGHT_RECORD_SECTIONS.map((s, i) => (
+            <p key={s.key} className="text-sm text-slate-500 dark:text-slate-400">
+              {i + 1}. {s.title} <span className="text-slate-400">— {s.timerLabel}</span>
+            </p>
+          ))}
+        </Card>
+
+        <div className="flex gap-3">
+          <SecondaryButton onClick={onCancel}>Cancel</SecondaryButton>
+          <PrimaryButton onClick={start}>Start</PrimaryButton>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6 py-4">
+      <div>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Section {sectionIndex + 1} of {THOUGHT_RECORD_SECTIONS.length} · overall{' '}
+          {formatElapsed(overallElapsedMs)} / {THOUGHT_RECORD_HARD_CAP_MINUTES} min cap
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{section.title}</h1>
+      </div>
+
+      <Card className="flex flex-col items-center gap-1 py-5 text-center">
+        <span
+          className={`text-3xl font-semibold tabular-nums ${
+            sectionTimeUp ? 'text-amber-500' : 'text-slate-900 dark:text-white'
+          }`}
+        >
+          {formatElapsed(sectionRemainingMs)}
+        </span>
+        <span className="text-xs text-slate-400">{section.timerLabel} — time left in this section</span>
+      </Card>
+
+      {sectionTimeUp && (
+        <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            ⏰ Time's up for this section — move on when you're ready, whether or not it feels finished.
+          </p>
+        </Card>
+      )}
+
+      {hardCapReached && !isLastSection && (
+        <Card className="border-rose-300 bg-rose-50 dark:border-rose-900 dark:bg-rose-950/40">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-rose-800 dark:text-rose-300">
+              You're at the 30-minute cap. Stop here regardless of section — head to Close.
+            </p>
+            <SecondaryButton onClick={() => goToSection(THOUGHT_RECORD_SECTIONS.length - 1)}>
+              Skip to Close
+            </SecondaryButton>
+          </div>
+        </Card>
+      )}
+
+      <Card className="flex flex-col gap-3">
+        <p className="text-sm text-slate-500 dark:text-slate-400">{section.helper}</p>
+        {section.kind === 'text' ? (
+          <textarea
+            value={fields[section.key] ?? ''}
+            onChange={(e) => setFields((f) => ({ ...f, [section.key]: e.target.value }))}
+            rows={6}
+            autoFocus
+            className={inputClass}
+          />
+        ) : (
+          <BelievabilitySlider
+            label="Believability of original thought now"
+            value={believabilityAfter}
+            onChange={setBelievabilityAfter}
+          />
+        )}
+      </Card>
+
+      <MoodPicker value={mood} onChange={setMood} />
+
+      <div className="flex gap-3">
+        <SecondaryButton onClick={onCancel} disabled={saving}>
+          Discard
+        </SecondaryButton>
+        {isLastSection ? (
+          <PrimaryButton onClick={save} disabled={saving}>
+            {saving ? 'Saving…' : 'Save entry'}
+          </PrimaryButton>
+        ) : (
+          <PrimaryButton onClick={() => goToSection(sectionIndex + 1)} className={sectionTimeUp ? 'animate-pulse' : ''}>
+            Next section →
+          </PrimaryButton>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood: string | null) => void }) {
   const selected = FEELINGS_CHART.find((f) => f.key === value)
   return (
@@ -689,6 +954,14 @@ function HistoryView({ onBack }: { onBack: () => void }) {
               />
             ) : entry.type === 'thought' ? (
               <ThoughtEntryCard
+                key={entry.id}
+                entry={entry}
+                expanded={expandedId === entry.id}
+                onToggle={() => setExpandedId(expandedId === entry.id ? null : entry.id)}
+                onDelete={() => remove(entry.id)}
+              />
+            ) : entry.type === 'thought-record' ? (
+              <ThoughtRecordEntryCard
                 key={entry.id}
                 entry={entry}
                 expanded={expandedId === entry.id}
@@ -878,6 +1151,55 @@ function ThoughtEntryCard({
       <p className="text-sm text-slate-600 dark:text-slate-300">
         Noticed and tagged — no other detail was saved with this entry, by design.
       </p>
+    </EntryCardShell>
+  )
+}
+
+function ThoughtRecordEntryCard({
+  entry,
+  expanded,
+  onToggle,
+  onDelete,
+}: {
+  entry: ThoughtRecordEntry
+  expanded: boolean
+  onToggle: () => void
+  onDelete: () => void
+}) {
+  return (
+    <EntryCardShell
+      badge="Thought Record"
+      badgeClass="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+      date={entry.date}
+      extra={
+        <>
+          <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
+          {entry.mood && <MoodBadge moodKey={entry.mood} />}
+        </>
+      }
+      expanded={expanded}
+      onToggle={onToggle}
+      onDelete={onDelete}
+    >
+      {entry.situation.trim() && (
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            Situation / obsession theme
+          </p>
+          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{entry.situation}</p>
+        </div>
+      )}
+      <p className="text-sm text-slate-600 dark:text-slate-300">
+        Believability {entry.believabilityBefore}% before → {entry.believabilityAfter}% after
+      </p>
+      {THOUGHT_RECORD_SECTIONS.filter((s) => s.kind === 'text').map((s) =>
+        entry.fields[s.key]?.trim() ? (
+          <div key={s.key}>
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{s.title}</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{entry.fields[s.key]}</p>
+          </div>
+        ) : null,
+      )}
     </EntryCardShell>
   )
 }

@@ -176,7 +176,89 @@ export interface ThoughtEntry {
   mood?: string
 }
 
-export type JournalEntry = StructuredJournalEntry | QuickPromptEntry | ThoughtEntry
+/** One step of the Thought Record's fixed sequence. Unlike the morning/evening
+ *  templates above (all sections shown at once under one overall timer), each
+ *  of these gets its own countdown — the source worksheet is explicit that a
+ *  30-minute hard cap and per-section pacing are the point, not a suggestion. */
+export interface ThoughtRecordSection {
+  key: string
+  title: string
+  /** Drives this section's own countdown. Where the source gives a range
+   *  (e.g. "12–15 min"), this is a single concrete value chosen so the five
+   *  sections sum to the 30-minute cap — the range itself is preserved in
+   *  `timerLabel` for display. */
+  timerMinutes: number
+  timerLabel: string
+  helper: string
+  /** 'close' renders the wrap-up (final believability rating, stop time,
+   *  closing line) instead of a free-text field. */
+  kind: 'text' | 'close'
+}
+
+export const THOUGHT_RECORD_HARD_CAP_MINUTES = 30
+
+export const THOUGHT_RECORD_SECTIONS: ThoughtRecordSection[] = [
+  {
+    key: 'automatic_thought',
+    title: 'Automatic Thought',
+    timerMinutes: 2,
+    timerLabel: '2 min',
+    helper: "State the obsession in one or two sentences. Don't edit once written.",
+    kind: 'text',
+  },
+  {
+    key: 'evidence_for',
+    title: 'Evidence For',
+    timerMinutes: 8,
+    timerLabel: "8 min — OCD's full case",
+    helper: 'Bullet points. Let this be thorough — this section gets its full say.',
+    kind: 'text',
+  },
+  {
+    key: 'evidence_against',
+    title: 'Evidence Against',
+    timerMinutes: 13,
+    timerLabel: '12–15 min — the core work',
+    helper:
+      'Bullet points. Name the distortion (e.g. "this assumes certainty is possible," "this overestimates my responsibility here") — not just a counter-argument to the specific content.',
+    kind: 'text',
+  },
+  {
+    key: 'balanced_thought',
+    title: 'Balanced / Alternative Thought',
+    timerMinutes: 5,
+    timerLabel: "5 min",
+    helper: "A shorter, more realistic statement that replaces the original automatic thought.",
+    kind: 'text',
+  },
+  {
+    key: 'close',
+    title: 'Close',
+    timerMinutes: 2,
+    timerLabel: '2 min — hard stop',
+    helper: 'Close the notebook here. No rereading.',
+    kind: 'close',
+  },
+]
+
+export interface ThoughtRecordEntry {
+  id: string
+  type: 'thought-record'
+  date: string
+  createdAt: string
+  situation: string
+  startTime: string
+  stopTime: string
+  believabilityBefore: number
+  believabilityAfter: number
+  /** Keyed by ThoughtRecordSection.key, one entry per 'text' section. */
+  fields: Record<string, string>
+  durationSeconds: number
+  /** A FeelingChartEntry.key, if a mood check-in was picked. Optional — never required to save. */
+  mood?: string
+}
+
+export type JournalEntry = StructuredJournalEntry | QuickPromptEntry | ThoughtEntry | ThoughtRecordEntry
 
 export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
   morning: {
