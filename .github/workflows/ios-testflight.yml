@@ -74,6 +74,17 @@ jobs:
             exit 1
           fi
 
+          # Share the exact path used above with later steps via GITHUB_ENV.
+          # An actual run proved both files correct and non-empty right
+          # here, yet the very next step — using ${{ runner.temp }} instead
+          # of this step's $RUNNER_TEMP to build the same path — saw a
+          # certificate that wouldn't import and a profile that looked
+          # completely empty. Whatever the exact reason those two didn't
+          # resolve to the same string on this runner, the fix is to stop
+          # computing the path twice: record the one that's already proven
+          # to work and have every later step reuse it verbatim.
+          echo "IOS_SIGNING_DIR=$RUNNER_TEMP/signing" >> "$GITHUB_ENV"
+
       - name: Build and upload to TestFlight
         working-directory: ios
         env:
@@ -81,10 +92,13 @@ jobs:
           APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
           APP_STORE_CONNECT_API_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_CONTENT }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          IOS_DIST_CERT_P12_PATH: ${{ runner.temp }}/signing/cert.p12
+          IOS_DIST_CERT_P12_PATH: ${{ env.IOS_SIGNING_DIR }}/cert.p12
           IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
-          IOS_PROVISION_PROFILE_PATH: ${{ runner.temp }}/signing/profile.mobileprovision
-        run: bundle exec fastlane ios beta
+          IOS_PROVISION_PROFILE_PATH: ${{ env.IOS_SIGNING_DIR }}/profile.mobileprovision
+        run: |
+          echo "Signing files fastlane will use:"
+          ls -la "$IOS_DIST_CERT_P12_PATH" "$IOS_PROVISION_PROFILE_PATH"
+          bundle exec fastlane ios beta
 
       - name: Clean up decoded signing assets
         if: always()
