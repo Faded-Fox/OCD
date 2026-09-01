@@ -36,10 +36,32 @@ jobs:
           working-directory: ios
 
       - name: Decode signing assets
+        # openssl base64 -d, not the OS's own `base64` binary — the two
+        # secrets are wrapped, multi-line base64 (many short lines, not one
+        # giant one — needed so they can actually be selected in full on a
+        # phone), and macOS's base64 has already proven itself different
+        # from Linux's in this exact project (the earlier OpenSSL curve-name
+        # issue was the same category of surprise). Using the very same
+        # tool that encoded these files in bootstrap_signing's Fastfile
+        # removes any cross-implementation ambiguity about how multi-line
+        # input gets handled.
         run: |
           mkdir -p "$RUNNER_TEMP/signing"
-          echo "${{ secrets.IOS_DIST_CERT_P12_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/signing/cert.p12"
-          echo "${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/signing/profile.mobileprovision"
+          echo "${{ secrets.IOS_DIST_CERT_P12_BASE64 }}" | openssl base64 -d > "$RUNNER_TEMP/signing/cert.p12"
+          echo "${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}" | openssl base64 -d > "$RUNNER_TEMP/signing/profile.mobileprovision"
+
+          # Fail loudly right here if either secret produced nothing usable,
+          # instead of finding out several steps later via a cryptic
+          # "wrong password" or "zero-length data" error from fastlane.
+          ls -la "$RUNNER_TEMP/signing"
+          if [ ! -s "$RUNNER_TEMP/signing/cert.p12" ]; then
+            echo "::error::cert.p12 decoded to zero bytes — the IOS_DIST_CERT_P12_BASE64 secret is empty or missing."
+            exit 1
+          fi
+          if [ ! -s "$RUNNER_TEMP/signing/profile.mobileprovision" ]; then
+            echo "::error::profile.mobileprovision decoded to zero bytes — the IOS_PROVISION_PROFILE_BASE64 secret is empty or missing."
+            exit 1
+          fi
 
       - name: Build and upload to TestFlight
         working-directory: ios
