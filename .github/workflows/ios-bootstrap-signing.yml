@@ -11,11 +11,10 @@ name: iOS — bootstrap signing
 # Required repo secrets before running this:
 #   APP_STORE_CONNECT_API_KEY_ID     — from App Store Connect > Users and Access > Keys
 #   APP_STORE_CONNECT_API_ISSUER_ID  — same Keys page, shown above the key list
-#   APP_STORE_CONNECT_API_KEY_CONTENT — the downloaded .p8 file, base64-encoded
-#                                        (e.g. `base64 -i AuthKey_XXXX.p8 | pbcopy`
-#                                        on a Mac, or `base64 -w0 AuthKey_XXXX.p8`
-#                                        on Linux — either machine works, this is
-#                                        just encoding a text file)
+#   APP_STORE_CONNECT_API_KEY_CONTENT — the downloaded .p8 file's contents,
+#                                        pasted in as-is (it's a plain text
+#                                        file starting with "-----BEGIN
+#                                        PRIVATE KEY-----") — no encoding step
 #   APPLE_TEAM_ID                    — App Store Connect > Membership
 on:
   workflow_dispatch:

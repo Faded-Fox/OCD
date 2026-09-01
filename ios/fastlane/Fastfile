@@ -5,12 +5,16 @@ default_platform(:ios)
 # All auth here goes through an App Store Connect API key (Issuer ID + Key ID +
 # .p8 key content) — never an Apple ID password or 2FA prompt, which is the
 # only way any of this can run unattended on a CI runner nobody is sitting at.
+#
+# key_content takes the .p8 file's raw text as-is (starting with
+# "-----BEGIN PRIVATE KEY-----") — no encoding step needed, so the
+# GitHub secret can just be a copy-paste of the file's contents.
 def api_key
   app_store_connect_api_key(
     key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
     issuer_id: ENV["APP_STORE_CONNECT_API_ISSUER_ID"],
     key_content: ENV["APP_STORE_CONNECT_API_KEY_CONTENT"],
-    is_key_content_base64: true,
+    is_key_content_base64: false,
   )
 end
 
