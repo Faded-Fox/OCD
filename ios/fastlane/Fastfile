@@ -112,9 +112,9 @@ platform :ios do
   # This only works cleanly the FIRST time, before any "Apple Distribution"
   # certificate exists for this account under this key's access — Apple never
   # lets you re-download a certificate's private key after the fact, so if a
-  # certificate already exists from elsewhere, revoke it in App Store Connect
-  # first (Certificates, IDs & Profiles) so this generates a fresh, exportable
-  # cert+key pair instead of reusing one whose key it can't retrieve.
+  # certificate already exists from elsewhere, this lane can't get its key and
+  # tells you exactly which one(s) to revoke in App Store Connect first, so a
+  # fresh, exportable cert+key pair gets generated instead.
   desc "Create a distribution certificate + provisioning profile, export as CI secrets"
   lane :bootstrap_signing do
     api_key
@@ -131,10 +131,48 @@ platform :ios do
       filename: "profile.mobileprovision",
     )
 
-    p12_path = Dir.glob("./signing/*.p12").first
-    UI.user_error!("No .p12 was produced — see the note above about revoking an existing certificate first") unless p12_path
+    # Despite the ".p12" name fastlane's cert action gives this file, it's
+    # actually just the raw, unencrypted private key (confirmed by reading
+    # Spaceship::ConnectAPI::Certificate.create_certificate_signing_request
+    # and cert/runner.rb's create_certificate — it writes the OpenSSL::PKey
+    # object straight to disk, no PKCS#12 packaging or password applied at
+    # all). It's only present when a brand-new certificate was just created;
+    # if the account already has one this key can't retrieve the private key
+    # for, cert silently reuses it and produces no key file here at all.
+    raw_key_path = Dir.glob("./signing/*.p12").first
+    unless raw_key_path
+      existing = Spaceship::ConnectAPI::Certificate.all(filter: { certificateType: "DISTRIBUTION,IOS_DISTRIBUTION" })
+      if existing.any?
+        listing = existing.map { |c| "  - #{c.display_name} (id #{c.id}, expires #{c.expiration_date})" }.join("\n")
+        UI.user_error!(<<~MSG)
+          No new certificate was generated because this account already has a Distribution certificate whose private key this machine never created — Apple never lets you download a certificate's private key after the fact, only whoever originally generated it still has it:
 
-    sh("openssl base64 -A -in #{p12_path} -out ./signing/cert_base64.txt")
+          #{listing}
+
+          Revoke it, then re-run this workflow so it creates a brand-new one it can actually export:
+          1. Go to developer.apple.com/account > Certificates, Identifiers & Profiles > Certificates.
+          2. Select the certificate(s) listed above and choose Revoke.
+          3. Re-run the "iOS — bootstrap signing" workflow.
+        MSG
+      else
+        UI.user_error!("get_certificates didn't produce a private key, and no existing Distribution certificate was found either — check the get_certificates output above this error for what actually happened.")
+      end
+    end
+
+    # Build a real, password-protected PKCS#12 ourselves from the raw key +
+    # cert, since fastlane never does — this is what import_certificate in
+    # the "beta" lane below actually expects.
+    cert_id = File.basename(raw_key_path, ".p12")
+    der_cert_path = "./signing/#{cert_id}.cer"
+    UI.user_error!("Expected a matching certificate file at #{der_cert_path} but didn't find one.") unless File.exist?(der_cert_path)
+
+    pem_cert_path = "./signing/#{cert_id}.pem"
+    sh("openssl x509 -inform DER -in '#{der_cert_path}' -out '#{pem_cert_path}'")
+
+    p12_path = "./signing/dist.p12"
+    sh("openssl pkcs12 -export -inkey '#{raw_key_path}' -in '#{pem_cert_path}' -out '#{p12_path}' -passout pass:#{cert_password}")
+
+    sh("openssl base64 -A -in '#{p12_path}' -out ./signing/cert_base64.txt")
     sh("openssl base64 -A -in ./signing/profile.mobileprovision -out ./signing/profile_base64.txt")
     File.write("./signing/cert_password.txt", cert_password)
 
