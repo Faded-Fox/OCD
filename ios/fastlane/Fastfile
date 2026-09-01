@@ -295,6 +295,31 @@ platform :ios do
       build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"),
     )
 
+    # Passing CODE_SIGN_STYLE=Manual etc. as xcargs to build_app (below) is
+    # not enough on its own — confirmed by an actual run that got past the
+    # "requires a development team" error (proving the xcargs override does
+    # reach xcodebuild) yet still failed to archive, this time with 'No
+    # signing certificate "iOS Distribution" found', a completely different
+    # certificate type name than the "Apple Distribution" one actually
+    # created and passed. That mismatch is the signature of Xcode's
+    # Automatic-signing certificate search still running underneath: the
+    # .xcodeproj file on disk has CODE_SIGN_STYLE=Automatic baked in
+    # (Capacitor's generated default), and once Automatic signing is what
+    # the project itself declares, Xcode manages certificate matching
+    # itself using its own internal legacy-type lookup — ignoring the
+    # CODE_SIGN_IDENTITY override entirely — rather than treating the
+    # command-line xcarg as authoritative. Writing Manual directly into the
+    # project file itself (not just passing it as a build argument) is what
+    # actually turns Automatic signing off before xcodebuild ever runs.
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: File.expand_path("../App/App.xcodeproj", __dir__),
+      targets: ["App"],
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      profile_name: profile_uuid,
+    )
+
     build_app(
       # This Capacitor project uses Swift Package Manager (CapApp-SPM), not
       # CocoaPods — there is no .xcworkspace anywhere in it, only
