@@ -1,6 +1,7 @@
 require "securerandom"
 require "openssl"
 require "fileutils"
+require "plist"
 
 default_platform(:ios)
 
@@ -254,10 +255,25 @@ platform :ios do
     # Reference the just-installed profile by UUID rather than name — avoids
     # any assumption about what get_provisioning_profile happened to call it
     # during bootstrap_signing.
-    profile_uuid = sh(
-      "security cms -D -i '#{ENV["IOS_PROVISION_PROFILE_PATH"]}' | " \
-      "/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin"
-    ).strip
+    #
+    # Extracted directly via OpenSSL rather than shelling out to
+    # `security cms -D` — an actual run proved the profile file itself was
+    # completely correct (right size, right path, confirmed instants
+    # earlier) yet `security cms` still couldn't read it, piping nothing to
+    # PlistBuddy. `security cms -D` verifies the profile's Apple-issued
+    # signature against the keychain's trust store before it'll output
+    # anything, and this lane's "ci-build.keychain" is a bare, freshly
+    # created keychain with no Apple root/intermediate certs in it — so it
+    # never had the trust anchor available to satisfy that check, without
+    # ever saying so directly. Parsing the same PKCS#7/CMS structure
+    # ourselves via OpenSSL::PKCS7 with NOVERIFY reads out the embedded
+    # plist directly and sidesteps that trust check entirely — this profile
+    # was just downloaded from Apple's own API and installed successfully
+    # one line above, so re-verifying its signature here serves no purpose.
+    pkcs7 = OpenSSL::PKCS7.new(File.binread(ENV["IOS_PROVISION_PROFILE_PATH"]))
+    pkcs7.verify([], OpenSSL::X509::Store.new, nil, OpenSSL::PKCS7::NOVERIFY)
+    profile_uuid = Plist.parse_xml(pkcs7.data)["UUID"]
+    UI.user_error!("Could not read a UUID out of the installed provisioning profile.") unless profile_uuid
 
     # xcodeproj: is required here for the same reason as build_app's
     # project: below — without it, this defaults to the current directory,
