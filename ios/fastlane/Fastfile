@@ -213,8 +213,17 @@ platform :ios do
     p12_path = File.join(signing_dir, "dist.p12")
     sh("openssl pkcs12 -export -inkey '#{raw_key_path}' -in '#{pem_cert_path}' -out '#{p12_path}' -passout pass:#{cert_password}")
 
-    sh("openssl base64 -A -in '#{p12_path}' -out '#{File.join(signing_dir, 'cert_base64.txt')}'")
-    sh("openssl base64 -A -in '#{File.join(signing_dir, 'profile.mobileprovision')}' -out '#{File.join(signing_dir, 'profile_base64.txt')}'")
+    # Deliberately NOT -A (single unbroken line) here — these files get
+    # opened and hand-copied on a phone, and a several-thousand-character
+    # line with no breaks is exactly the kind of content a mobile text
+    # preview can silently under-select ("Select All" grabbing only what's
+    # rendered on screen), producing a corrupted or truncated secret no
+    # matter how carefully it's copied. Standard wrapped base64 (the
+    # default, ~64 chars/line) decodes back byte-for-byte identically —
+    # base64 --decode ignores embedded newlines — but is trivially
+    # selectable in full as an ordinary multi-line text file.
+    sh("openssl base64 -in '#{p12_path}' -out '#{File.join(signing_dir, 'cert_base64.txt')}'")
+    sh("openssl base64 -in '#{File.join(signing_dir, 'profile.mobileprovision')}' -out '#{File.join(signing_dir, 'profile_base64.txt')}'")
     File.write(File.join(signing_dir, "cert_password.txt"), cert_password)
 
     UI.important("Bootstrap complete. The 'iOS — bootstrap signing' workflow uploads ./ios/signing/ as a build artifact — download it, then add these repo secrets before deleting the artifact: IOS_DIST_CERT_P12_BASE64 (cert_base64.txt), IOS_DIST_CERT_PASSWORD (cert_password.txt), IOS_PROVISION_PROFILE_BASE64 (profile_base64.txt).")
