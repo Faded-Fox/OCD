@@ -1,5 +1,6 @@
 require "securerandom"
 require "openssl"
+require "fileutils"
 
 default_platform(:ios)
 
@@ -140,11 +141,22 @@ platform :ios do
   lane :bootstrap_signing do
     api_key
 
+    # Absolute, resolved once up front. get_provisioning_profile (called
+    # below) changes Ruby's actual working directory as a side effect and
+    # never restores it — confirmed by an actual run where get_certificates
+    # printed "Successfully generated ... which was imported to the local
+    # machine" (real success) immediately followed by our own file lookup
+    # wrongly reporting nothing was there. Every path used after that point
+    # must be absolute, or a relative lookup silently searches the wrong
+    # directory instead of raising anything.
+    signing_dir = File.expand_path("./signing")
+    FileUtils.mkdir_p(signing_dir)
+
     cert_password = SecureRandom.hex(16)
 
     begin
       get_certificates(
-        output_path: "./signing",
+        output_path: signing_dir,
         generate_apple_certs: true,
       )
     rescue FastlaneCore::Interface::FastlaneError => e
@@ -162,8 +174,15 @@ platform :ios do
       end
     end
 
+    # The exact ID of the certificate get_certificates just produced or
+    # reused, straight from the same Lane Context value the printed table
+    # shows (CERT_CERTIFICATE_ID) — authoritative, unlike guessing it back
+    # out of whatever files happen to be sitting in signing_dir.
+    cert_id = ENV["CER_CERTIFICATE_ID"]
+    UI.user_error!("get_certificates didn't report a certificate ID at all — check its output above this error for what happened.") unless cert_id
+
     get_provisioning_profile(
-      output_path: "./signing",
+      output_path: signing_dir,
       filename: "profile.mobileprovision",
     )
 
@@ -175,25 +194,24 @@ platform :ios do
     # all). It's only present when a brand-new certificate was just created;
     # if the account already has one this key can't retrieve the private key
     # for, cert silently reuses it and produces no key file here at all.
-    raw_key_path = Dir.glob("./signing/*.p12").first
-    raise_existing_certificates_error! unless raw_key_path
+    raw_key_path = File.join(signing_dir, "#{cert_id}.p12")
+    raise_existing_certificates_error! unless File.exist?(raw_key_path)
 
     # Build a real, password-protected PKCS#12 ourselves from the raw key +
     # cert, since fastlane never does — this is what import_certificate in
     # the "beta" lane below actually expects.
-    cert_id = File.basename(raw_key_path, ".p12")
-    der_cert_path = "./signing/#{cert_id}.cer"
+    der_cert_path = File.join(signing_dir, "#{cert_id}.cer")
     UI.user_error!("Expected a matching certificate file at #{der_cert_path} but didn't find one.") unless File.exist?(der_cert_path)
 
-    pem_cert_path = "./signing/#{cert_id}.pem"
+    pem_cert_path = File.join(signing_dir, "#{cert_id}.pem")
     sh("openssl x509 -inform DER -in '#{der_cert_path}' -out '#{pem_cert_path}'")
 
-    p12_path = "./signing/dist.p12"
+    p12_path = File.join(signing_dir, "dist.p12")
     sh("openssl pkcs12 -export -inkey '#{raw_key_path}' -in '#{pem_cert_path}' -out '#{p12_path}' -passout pass:#{cert_password}")
 
-    sh("openssl base64 -A -in '#{p12_path}' -out ./signing/cert_base64.txt")
-    sh("openssl base64 -A -in ./signing/profile.mobileprovision -out ./signing/profile_base64.txt")
-    File.write("./signing/cert_password.txt", cert_password)
+    sh("openssl base64 -A -in '#{p12_path}' -out '#{File.join(signing_dir, 'cert_base64.txt')}'")
+    sh("openssl base64 -A -in '#{File.join(signing_dir, 'profile.mobileprovision')}' -out '#{File.join(signing_dir, 'profile_base64.txt')}'")
+    File.write(File.join(signing_dir, "cert_password.txt"), cert_password)
 
     UI.important("Bootstrap complete. The 'iOS — bootstrap signing' workflow uploads ./ios/signing/ as a build artifact — download it, then add these repo secrets before deleting the artifact: IOS_DIST_CERT_P12_BASE64 (cert_base64.txt), IOS_DIST_CERT_PASSWORD (cert_password.txt), IOS_PROVISION_PROFILE_BASE64 (profile_base64.txt).")
   end
