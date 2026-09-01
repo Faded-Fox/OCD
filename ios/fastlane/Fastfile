@@ -55,6 +55,27 @@ def api_key
   )
 end
 
+# Shared by bootstrap_signing's two failure paths below (get_certificates
+# itself refusing to make a new one, and it silently reusing one this
+# machine has no key for) — both come down to the same fix: something on
+# the account needs revoking by hand before a fresh, exportable certificate
+# can be created.
+def raise_existing_certificates_error!
+  existing = Spaceship::ConnectAPI::Certificate.all(filter: { certificateType: "DISTRIBUTION,IOS_DISTRIBUTION" })
+  listing = existing.any? ? existing.map { |c| "  - #{c.display_name} (id #{c.id}, expires #{c.expiration_date})" }.join("\n") : "  (none found — see the get_certificates output above this error for what actually happened)"
+
+  UI.user_error!(<<~MSG)
+    No new certificate was generated. Apple never lets a certificate's private key be downloaded after the fact — only whoever originally generated it still has it — so any certificate already on this account that this machine didn't just create is dead weight this pipeline can never use, and it can also block a new one from being created once the account hits its certificate limit:
+
+    #{listing}
+
+    Revoke it/them, then re-run this workflow so it creates a brand-new one it can actually export:
+    1. Go to developer.apple.com/account > Certificates, Identifiers & Profiles > Certificates.
+    2. Select the certificate(s) listed above and choose Revoke.
+    3. Re-run the "iOS — bootstrap signing" workflow.
+  MSG
+end
+
 platform :ios do
   # Run this lane once before the first TestFlight build. It registers the
   # bundle ID via the API key (works fine — confirmed by an actual run) and
@@ -121,10 +142,25 @@ platform :ios do
 
     cert_password = SecureRandom.hex(16)
 
-    get_certificates(
-      output_path: "./signing",
-      generate_apple_certs: true,
-    )
+    begin
+      get_certificates(
+        output_path: "./signing",
+        generate_apple_certs: true,
+      )
+    rescue FastlaneCore::Interface::FastlaneError => e
+      # Apple caps how many Distribution certificates an account can have
+      # active at once. cert first deletes any certs it finds it can't use
+      # (no local private key — expected and harmless on a fresh CI runner)
+      # before trying to create a new one, but deleting the *local* leftovers
+      # doesn't revoke them on Apple's side, so old, unusable certificates
+      # can still occupy every slot and block the new one from ever being
+      # created — surfaced by cert's own action as this exact error.
+      if e.to_s.include?("reached the maximum number")
+        raise_existing_certificates_error!
+      else
+        raise e
+      end
+    end
 
     get_provisioning_profile(
       output_path: "./signing",
@@ -140,24 +176,7 @@ platform :ios do
     # if the account already has one this key can't retrieve the private key
     # for, cert silently reuses it and produces no key file here at all.
     raw_key_path = Dir.glob("./signing/*.p12").first
-    unless raw_key_path
-      existing = Spaceship::ConnectAPI::Certificate.all(filter: { certificateType: "DISTRIBUTION,IOS_DISTRIBUTION" })
-      if existing.any?
-        listing = existing.map { |c| "  - #{c.display_name} (id #{c.id}, expires #{c.expiration_date})" }.join("\n")
-        UI.user_error!(<<~MSG)
-          No new certificate was generated because this account already has a Distribution certificate whose private key this machine never created — Apple never lets you download a certificate's private key after the fact, only whoever originally generated it still has it:
-
-          #{listing}
-
-          Revoke it, then re-run this workflow so it creates a brand-new one it can actually export:
-          1. Go to developer.apple.com/account > Certificates, Identifiers & Profiles > Certificates.
-          2. Select the certificate(s) listed above and choose Revoke.
-          3. Re-run the "iOS — bootstrap signing" workflow.
-        MSG
-      else
-        UI.user_error!("get_certificates didn't produce a private key, and no existing Distribution certificate was found either — check the get_certificates output above this error for what actually happened.")
-      end
-    end
+    raise_existing_certificates_error! unless raw_key_path
 
     # Build a real, password-protected PKCS#12 ourselves from the raw key +
     # cert, since fastlane never does — this is what import_certificate in
