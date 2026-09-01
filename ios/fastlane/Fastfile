@@ -211,8 +211,25 @@ platform :ios do
     pem_cert_path = File.join(signing_dir, "#{cert_id}.pem")
     sh("openssl x509 -inform DER -in '#{der_cert_path}' -out '#{pem_cert_path}'")
 
+    # Explicit legacy algorithms here, not openssl's defaults — OpenSSL 3.x
+    # (what's on this runner, confirmed via `openssl version`) defaults
+    # pkcs12 -export to AES-256-CBC encryption with a SHA-256 MAC, which
+    # macOS's `security import`/Keychain cannot read even with the correct
+    # password: it fails with "MAC verification failed during PKCS12 import
+    # (wrong password?)" regardless of whether the password is right. That
+    # exact message showed up on every single run of the "beta" lane below
+    # and was wrongly assumed benign — it's silent because fastlane's own
+    # KeychainImporter only UI.errors on an import failure, it never raises
+    # (see FastlaneCore::KeychainImporter#import_file) — but it means the
+    # keychain build_app later signs from was empty every time, which is the
+    # real reason every certificate/identity build_app ever reported missing
+    # really was missing, no matter what its name was. PBE-SHA1-3DES +
+    # SHA-1 MAC is the classic PKCS#12 format macOS's Keychain has always
+    # supported (and what OpenSSL itself defaulted to before 3.0) — verified
+    # locally that OpenSSL 3.0 can still produce this without needing its
+    # -legacy provider flag, which may not even be available on the runner.
     p12_path = File.join(signing_dir, "dist.p12")
-    sh("openssl pkcs12 -export -inkey '#{raw_key_path}' -in '#{pem_cert_path}' -out '#{p12_path}' -passout pass:#{cert_password}")
+    sh("openssl pkcs12 -export -inkey '#{raw_key_path}' -in '#{pem_cert_path}' -out '#{p12_path}' -passout pass:#{cert_password} -certpbe PBE-SHA1-3DES -keypbe PBE-SHA1-3DES -macalg sha1")
 
     # Deliberately NOT -A (single unbroken line) here — these files get
     # opened and hand-copied on a phone, and a several-thousand-character
@@ -249,6 +266,22 @@ platform :ios do
       keychain_name: "ci-build.keychain",
       keychain_password: keychain_password,
     )
+
+    # import_certificate never raises on a failed import — fastlane's own
+    # KeychainImporter only logs the error and moves on (see
+    # fastlane_core/keychain_importer.rb) — which is exactly how a "MAC
+    # verification failed during PKCS12 import (wrong password?)" line
+    # turned into three more confusing failures downstream instead of
+    # stopping here with an actionable message. Checking the keychain
+    # actually has a usable identity right after the import is the only way
+    # to catch that ourselves instead of it surfacing as a much more
+    # confusing "no signing certificate found" error from build_app later.
+    identities = sh("security find-identity -v -p codesigning ci-build.keychain", error_callback: ->(result) { result })
+    if identities.include?("0 valid identities found")
+      UI.user_error!(<<~MSG)
+        The certificate didn't actually import into the CI keychain — check the "MAC verification failed" or similar warning a few lines up in this same log for why. The most common cause is IOS_DIST_CERT_P12_BASE64/IOS_DIST_CERT_PASSWORD being stale or mismatched with each other (e.g. from a p12 built by a different openssl version than this Fastfile now uses). Re-run the "iOS — bootstrap signing" workflow to produce a fresh certificate/password pair, update those two secrets from its output, then re-run this workflow.
+      MSG
+    end
 
     install_provisioning_profile(path: ENV["IOS_PROVISION_PROFILE_PATH"])
 
