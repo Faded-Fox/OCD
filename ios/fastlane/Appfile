@@ -1,2 +1,8 @@
 app_identifier("com.pocketfox.companion")
-team_id(ENV["APPLE_TEAM_ID"])
+
+# Optional — only set this if a workflow run actually errors out asking for
+# it (fastlane can usually auto-detect the team when the account belongs to
+# just one, which finding the Team ID by hand on Apple's site has turned out
+# to be more trouble than it's worth for). If needed, add an APPLE_TEAM_ID
+# repo secret with the 10-character code from developer.apple.com/account.
+team_id(ENV["APPLE_TEAM_ID"]) if ENV["APPLE_TEAM_ID"] && !ENV["APPLE_TEAM_ID"].empty?

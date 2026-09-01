@@ -15,7 +15,10 @@ name: iOS — bootstrap signing
 #                                        pasted in as-is (it's a plain text
 #                                        file starting with "-----BEGIN
 #                                        PRIVATE KEY-----") — no encoding step
-#   APPLE_TEAM_ID                    — App Store Connect > Membership
+#
+# APPLE_TEAM_ID is optional — leave it unset for now. fastlane can usually
+# auto-detect the team when the account belongs to just one; only add this
+# secret later if a run's error output specifically asks for it.
 on:
   workflow_dispatch:
 
