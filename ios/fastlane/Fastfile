@@ -56,18 +56,24 @@ def api_key
 end
 
 platform :ios do
-  # Run this lane exactly once, before the first TestFlight build — the
-  # upload step later can't create the app record itself, App Store Connect
-  # requires it to already exist. Safe to re-run; skips anything that's
-  # already there instead of erroring.
+  # Run this lane once before the first TestFlight build. It registers the
+  # bundle ID via the API key (works fine — confirmed by an actual run) and
+  # then checks whether the App Store Connect app record exists.
   #
-  # Deliberately calls Spaceship::ConnectAPI directly instead of the `produce`
-  # action — produce's app-creation path still requires a real Apple ID
-  # session (Spaceship.login) even when an API key is configured, which
-  # defeats the entire point of using a key here. BundleId/App.find/create
-  # are the same modern, API-key-authenticated endpoints get_certificates
-  # and upload_to_testflight already use below.
-  desc "Create the App Store Connect app record for this bundle ID"
+  # It cannot create that app record itself, and neither can any other tool
+  # using an API key: Apple's App Store Connect REST API rejects a CREATE on
+  # the "apps" resource unconditionally, for every key, with "The resource
+  # 'apps' does not allow 'CREATE'. Allowed operations are: GET_COLLECTION,
+  # GET_INSTANCE, UPDATE" — confirmed by an actual run against it. This isn't
+  # a permissions gap to work around; new app listings only exist through
+  # appstoreconnect.apple.com's own "+" button. (It's also why fastlane's
+  # `produce` tool needs a real Apple ID session for app creation even when a
+  # key is configured elsewhere — it's hitting this same wall and falls back
+  # to the one path that isn't blocked.)
+  #
+  # So: safe to re-run, and it tells you exactly what to do by hand the one
+  # time the app record doesn't exist yet.
+  desc "Register the bundle ID; verify the App Store Connect app record exists"
   lane :create_app do
     api_key
     bundle_id = "com.pocketfox.companion"
@@ -80,17 +86,21 @@ platform :ios do
     end
 
     if Spaceship::ConnectAPI::App.find(bundle_id)
-      UI.message("App Store Connect app record for #{bundle_id} already exists.")
+      UI.success("App Store Connect app record for #{bundle_id} already exists.")
     else
-      Spaceship::ConnectAPI::App.create(
-        name: "PocketFox Companion",
-        version_string: "1.0",
-        sku: "pocketfoxcompanion001",
-        primary_locale: "en-US",
-        bundle_id: bundle_id,
-        platforms: ["IOS"],
-      )
-      UI.success("Created the App Store Connect app record for #{bundle_id}.")
+      UI.user_error!(<<~MSG)
+        The bundle ID is registered, but there's no App Store Connect app record for #{bundle_id} yet — and no API key can create one; Apple's API blocks that for everyone. It has to be done once, by hand, by the Account Holder or an Admin, on the website:
+
+        1. Go to appstoreconnect.apple.com > Apps > the "+" button > New App.
+        2. Platform: iOS
+        3. Name: PocketFox Companion
+        4. Primary language: English (U.S.)
+        5. Bundle ID: pick com.pocketfox.companion from the dropdown (it's already registered, so it'll be listed).
+        6. SKU: any unique text, e.g. pocketfoxcompanion001 — never shown to users.
+        7. Save.
+
+        Then re-run this workflow — it'll report the app record already exists — and move on to the "iOS — TestFlight build" workflow.
+      MSG
     end
   end
 

@@ -19,6 +19,12 @@ name: iOS — bootstrap signing
 # APPLE_TEAM_ID is optional — leave it unset for now. fastlane can usually
 # auto-detect the team when the account belongs to just one; only add this
 # secret later if a run's error output specifically asks for it.
+#
+# The first step below registers the bundle ID automatically, but it cannot
+# create the actual App Store Connect app listing — Apple's API blocks that
+# for every key, with no exception. If this is the very first run, that step
+# will fail with instructions to create the app once by hand at
+# appstoreconnect.apple.com (Apps > "+" > New App) before re-running.
 on:
   workflow_dispatch:
 
