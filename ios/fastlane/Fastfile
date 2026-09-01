@@ -272,8 +272,20 @@ platform :ios do
     # one line above, so re-verifying its signature here serves no purpose.
     pkcs7 = OpenSSL::PKCS7.new(File.binread(ENV["IOS_PROVISION_PROFILE_PATH"]))
     pkcs7.verify([], OpenSSL::X509::Store.new, nil, OpenSSL::PKCS7::NOVERIFY)
-    profile_uuid = Plist.parse_xml(pkcs7.data)["UUID"]
+    profile_plist = Plist.parse_xml(pkcs7.data)
+    profile_uuid = profile_plist["UUID"]
     UI.user_error!("Could not read a UUID out of the installed provisioning profile.") unless profile_uuid
+
+    # Automatic signing needs an explicit team ID to build under CI — with
+    # no Xcode account signed in to resolve one implicitly, xcodebuild
+    # otherwise refuses the archive with "Signing ... requires a
+    # development team," confirmed by an actual run. Rather than have
+    # someone hunt for this on Apple's site (APPLE_TEAM_ID is deliberately
+    # optional — see the Appfile), read it out of the same profile plist
+    # already parsed above: every provisioning profile embeds the team(s)
+    # it belongs to.
+    team_id = profile_plist["TeamIdentifier"]&.first
+    UI.user_error!("Could not read a TeamIdentifier out of the installed provisioning profile.") unless team_id
 
     # xcodeproj: is required here for the same reason as build_app's
     # project: below — without it, this defaults to the current directory,
@@ -297,8 +309,14 @@ platform :ios do
       export_options: {
         provisioningProfiles: {
           "com.pocketfox.companion" => profile_uuid
-        }
+        },
+        teamID: team_id,
       },
+      # export_options' teamID only covers the export step — the archive
+      # step that fails without a team happens first, driven directly by
+      # xcodebuild's own project settings, so the team has to be passed
+      # here too.
+      xcargs: "DEVELOPMENT_TEAM=#{team_id}",
     )
 
     upload_to_testflight(skip_waiting_for_build_processing: true)
