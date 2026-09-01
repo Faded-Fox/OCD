@@ -15,6 +15,21 @@ def api_key
 end
 
 platform :ios do
+  # Run this lane exactly once, before the first TestFlight build — the
+  # upload step later can't create the app record itself, App Store Connect
+  # requires it to already exist. Safe to re-run; produce just reports the
+  # app already exists rather than erroring.
+  desc "Create the App Store Connect app record for this bundle ID"
+  lane :create_app do
+    api_key
+    produce(
+      app_identifier: "com.pocketfox.companion",
+      app_name: "PocketFox Companion",
+      language: "English (U.S.)",
+      sku: "pocketfoxcompanion001",
+    )
+  end
+
   # Run this lane exactly once (manually, via the "iOS — bootstrap signing"
   # GitHub Actions workflow) to create a fresh Apple Distribution certificate
   # and App Store provisioning profile for this app, and print out the
