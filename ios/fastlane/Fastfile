@@ -141,15 +141,19 @@ platform :ios do
   lane :bootstrap_signing do
     api_key
 
-    # Absolute, resolved once up front. get_provisioning_profile (called
-    # below) changes Ruby's actual working directory as a side effect and
-    # never restores it — confirmed by an actual run where get_certificates
-    # printed "Successfully generated ... which was imported to the local
-    # machine" (real success) immediately followed by our own file lookup
-    # wrongly reporting nothing was there. Every path used after that point
-    # must be absolute, or a relative lookup silently searches the wrong
-    # directory instead of raising anything.
-    signing_dir = File.expand_path("./signing")
+    # Anchored to the Fastfile's own on-disk location, not Dir.pwd — fastlane
+    # itself changes the process's working directory to this "fastlane"
+    # folder (ios/fastlane/) for the entire duration of every lane (see
+    # Fastlane::Runner#execute's Dir.chdir(FastlaneFolder.path)), so
+    # "./signing" resolves one level too deep, to ios/fastlane/signing/
+    # instead of ios/signing/ — confirmed by an actual run that reported
+    # success and even printed "Successfully generated ... which was
+    # imported to the local machine", yet the GitHub Actions upload-artifact
+    # step (looking at ios/signing/*, matching the working-directory: ios
+    # set on the step that runs this lane) found nothing at all. __dir__
+    # is fixed at this file's real path regardless of what any action here
+    # or inside fastlane itself does to the working directory.
+    signing_dir = File.expand_path("../signing", __dir__)
     FileUtils.mkdir_p(signing_dir)
 
     cert_password = SecureRandom.hex(16)
@@ -246,10 +250,23 @@ platform :ios do
       "/usr/libexec/PlistBuddy -c 'Print :UUID' /dev/stdin"
     ).strip
 
-    increment_build_number(build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"))
+    # xcodeproj: is required here for the same reason as build_app's
+    # project: below — without it, this defaults to the current directory,
+    # which during lane execution is ios/fastlane/, not the actual project.
+    increment_build_number(
+      xcodeproj: File.expand_path("../App/App.xcodeproj", __dir__),
+      build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M"),
+    )
 
     build_app(
-      workspace: "App.xcworkspace",
+      # This Capacitor project uses Swift Package Manager (CapApp-SPM), not
+      # CocoaPods — there is no .xcworkspace anywhere in it, only
+      # App.xcodeproj, so this must be `project:`, not `workspace:`.
+      # Absolute and anchored to the Fastfile's own location, not Dir.pwd —
+      # fastlane changes the working directory to ios/fastlane/ for the
+      # whole lane (see the note in bootstrap_signing above), so a bare
+      # relative name would resolve one level too deep and never be found.
+      project: File.expand_path("../App/App.xcodeproj", __dir__),
       scheme: "App",
       export_method: "app-store",
       export_options: {
