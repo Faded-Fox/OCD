@@ -49,11 +49,39 @@ def api_key
   # same key material, just a different ASN.1 wrapper.
   sec1_key = parsed_key.to_pem
 
+  # This key ends up needed in TWO different formats by two different
+  # consumers, and an actual run proved they don't agree on which one they
+  # want. app_store_connect_api_key does double duty: it both (a) creates
+  # the Spaceship::ConnectAPI token used by every Spaceship-based action in
+  # this Fastfile (create_app, get_certificates, get_provisioning_profile —
+  # all confirmed working), via exactly the OpenSSL::PKey::EC.new(key) call
+  # sec1_key above works around, and (b) stores whatever key_content it was
+  # given as the APP_STORE_CONNECT_API_KEY lane context value, which
+  # upload_to_testflight/deliver later read automatically and write
+  # byte-for-byte, unmodified, to an AuthKey_<id>.p8 file for Apple's own
+  # `altool` binary to parse itself (see
+  # FastlaneCore::ItunesTransporter#prepare). altool has its own parser,
+  # entirely separate from Ruby's OpenSSL, and — confirmed by an actual run
+  # — rejects the SEC1 re-encoding as not "a valid authentication key
+  # (-39)": it wants Apple's original PKCS#8 content, unmodified, the exact
+  # opposite of what the Spaceship token needs.
+  #
+  # So: hand app_store_connect_api_key the untouched original (what altool
+  # needs, and what ends up in the lane context for upload_to_testflight to
+  # find), tell it not to also set the Spaceship token from that, and set
+  # that token by hand from sec1_key instead.
   app_store_connect_api_key(
     key_id: key_id,
     issuer_id: issuer_id,
-    key_content: sec1_key,
+    key_content: raw_key,
     is_key_content_base64: false,
+    set_spaceship_token: false,
+  )
+
+  Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.create(
+    key_id: key_id,
+    issuer_id: issuer_id,
+    key: sec1_key,
   )
 end
 
