@@ -127,7 +127,7 @@ const GROUPS: HelpGroup[] = [
       {
         title: 'Import',
         body: [
-          '"Paste conversation text" extracts session data from plain pasted text or a JSON conversation export (including exports from Claude.ai) — everything happens on this device, nothing is uploaded. Every parsed session is shown for review before saving; anything the parser couldn\'t confidently extract is flagged rather than guessed.',
+          '"Paste conversation text" extracts session data from plain pasted text or a JSON conversation export — everything happens on this device, nothing is uploaded. Every parsed session is shown for review before saving; anything the parser couldn\'t confidently extract is flagged rather than guessed.',
           '"Add from a photo" is for handwritten paper logs: take or upload a photo and it\'s shown right next to a blank form so you can transcribe it yourself. There\'s no automatic handwriting recognition — on-device OCR was tested and wasn\'t reliable enough to trust — so the original photo is kept with the session, in case a form field can\'t capture something like a hand-drawn SUDS curve.',
           'This screen is for bringing session data in, not for restoring a PocketFox backup — if you paste a backup file here by mistake, a notice points you to Settings instead. Restoring a backup lives entirely in Settings → "Backup & restore" now, alongside the export button.',
         ],
@@ -170,16 +170,16 @@ export default function Help() {
         <Link to="/" className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Help</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="mt-2 text-2xl font-semibold text-text">Help</h1>
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           What each tab does, and a few workflows that aren't obvious from the UI alone.
         </p>
       </div>
 
       <div className="flex flex-col gap-3">
         {GROUPS.map((group) => (
-          <details key={group.title} className="group rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 open:pb-2 dark:bg-slate-900 dark:ring-slate-800">
-            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-800 marker:content-none dark:text-slate-100">
+          <details key={group.title} className="group rounded-2xl bg-surface shadow-sm ring-1 ring-border open:pb-2">
+            <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-text marker:content-none">
               <span className="mr-2 inline-block transition-transform group-open:rotate-90">›</span>
               {group.title}
             </summary>
@@ -187,12 +187,12 @@ export default function Help() {
               {group.topics.map((topic) => (
                 <div key={topic.title} className="flex flex-col gap-2">
                   {group.topics.length > 1 && (
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
                       {topic.title}
                     </h3>
                   )}
                   {topic.body.map((p, i) => (
-                    <p key={i} className="text-sm text-slate-600 dark:text-slate-300">
+                    <p key={i} className="text-sm text-text-secondary">
                       {p}
                     </p>
                   ))}
@@ -203,12 +203,12 @@ export default function Help() {
         ))}
       </div>
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-text-secondary">
         This app is a descriptive tracking tool, not a diagnostic or treatment-decision tool. Bring what you log
         here to your OCD specialist rather than acting on it alone.
       </p>
 
-      <p className="text-center text-xs text-slate-300 dark:text-slate-600">{APP_VERSION}</p>
+      <p className="text-center text-xs text-text-secondary">{APP_VERSION}</p>
     </div>
   )
 }

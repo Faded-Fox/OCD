@@ -71,8 +71,8 @@ export default function FearLadders() {
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Fear Ladders</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Fear Ladders</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             Plan a hierarchy's rungs before you've run any exposures in it — what each rung is, and roughly how
             hard it's expected to be. Once you start logging sessions against it, the per-hierarchy view merges
             this plan with your actual progress.
@@ -82,7 +82,7 @@ export default function FearLadders() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+        <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
       ) : ladders.length === 0 ? (
         <EmptyState
           title="No fear ladders yet"
@@ -99,10 +99,10 @@ export default function FearLadders() {
                 <button type="button" onClick={() => openLadder(ladder)} className="flex flex-1 items-center gap-3 text-left">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: color.hex }} />
                   <div>
-                    <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                    <p className="text-sm font-medium text-text">
                       {ladder.hierarchy.trim() || 'Untitled hierarchy'}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-text-secondary">
                       {ladder.rungs.length} rung{ladder.rungs.length === 1 ? '' : 's'} planned · {sessionCount}{' '}
                       session{sessionCount === 1 ? '' : 's'} logged
                     </p>
@@ -222,7 +222,7 @@ function FearLadderForm({
         >
           ← Fear Ladders
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Fear Ladder</h1>
+        <h1 className="mt-2 text-2xl font-semibold text-text">Fear Ladder</h1>
       </div>
 
       <Card className="flex flex-col gap-3">
@@ -238,9 +238,9 @@ function FearLadderForm({
       </Card>
 
       <Card className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Rungs</h2>
+        <h2 className="text-sm font-semibold text-text">Rungs</h2>
         {sortedRungs.length === 0 && (
-          <p className="text-sm text-slate-400">No rungs yet — add the first one below.</p>
+          <p className="text-sm text-text-secondary">No rungs yet — add the first one below.</p>
         )}
         <div className="flex flex-col gap-3">
           {sortedRungs.map(({ r: row, index }) => {
@@ -251,16 +251,16 @@ function FearLadderForm({
                   key={index}
                   type="button"
                   onClick={() => toggleCollapsed(row)}
-                  className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 text-left dark:border-slate-800"
+                  className="flex items-center gap-3 rounded-xl border border-border p-3 text-left"
                 >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-muted text-xs font-semibold text-text-secondary">
                     {row.rung}
                   </span>
-                  <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-300">
+                  <span className="flex-1 truncate text-sm text-text">
                     {row.description}
                   </span>
                   {row.targetSudsRange && (
-                    <span className="shrink-0 text-xs text-slate-400">
+                    <span className="shrink-0 text-xs text-text-secondary">
                       expected {row.targetSudsRange[0]}–{row.targetSudsRange[1]}
                     </span>
                   )}
@@ -268,10 +268,10 @@ function FearLadderForm({
               )
             }
             return (
-              <div key={index} className="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+              <div key={index} className="rounded-xl border border-border p-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
                   <label className="flex flex-col gap-1 sm:w-20">
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                       Rung
                     </span>
                     <input
@@ -282,7 +282,7 @@ function FearLadderForm({
                     />
                   </label>
                   <label className="flex flex-1 flex-col gap-1">
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                       Description
                     </span>
                     <textarea
@@ -294,7 +294,7 @@ function FearLadderForm({
                     />
                   </label>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                       Expected difficulty
                     </span>
                     <TargetRangeInput
@@ -315,7 +315,7 @@ function FearLadderForm({
                     <button
                       type="button"
                       onClick={() => toggleCollapsed(row)}
-                      className="text-xs font-medium text-slate-500 hover:underline dark:text-slate-400"
+                      className="text-xs font-medium text-text-secondary hover:underline"
                     >
                       Collapse
                     </button>

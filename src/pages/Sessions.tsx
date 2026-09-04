@@ -90,7 +90,7 @@ export default function Sessions() {
     filters.dateFrom !== '' ||
     filters.dateTo !== ''
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   if (sessions.length === 0) {
     return (
@@ -114,8 +114,8 @@ export default function Sessions() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Sessions</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold text-text">Sessions</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           Search and filter every logged session, across all hierarchies.
         </p>
       </div>
@@ -130,7 +130,7 @@ export default function Sessions() {
         />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <label className="flex min-w-0 flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               Hierarchy
             </span>
             <select
@@ -147,7 +147,7 @@ export default function Sessions() {
             </select>
           </label>
           <label className="flex min-w-0 flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               Response to urges
             </span>
             <select
@@ -162,7 +162,7 @@ export default function Sessions() {
             </select>
           </label>
           <label className="flex min-w-0 flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               Exposure type
             </span>
             <select
@@ -180,7 +180,7 @@ export default function Sessions() {
             </select>
           </label>
           <label className="flex min-w-0 flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               From
             </span>
             <input
@@ -191,7 +191,7 @@ export default function Sessions() {
             />
           </label>
           <label className="flex min-w-0 flex-col gap-1">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               To
             </span>
             <input
@@ -204,7 +204,7 @@ export default function Sessions() {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <label className="flex items-center gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               Sort
             </span>
             <select
@@ -230,13 +230,13 @@ export default function Sessions() {
         </div>
       </Card>
 
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-text-secondary">
         {filtered.length} of {sessions.length} session{sessions.length === 1 ? '' : 's'}
       </p>
 
       {filtered.length === 0 ? (
         <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">No sessions match these filters.</p>
+          <p className="text-sm text-text-secondary">No sessions match these filters.</p>
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
@@ -245,17 +245,17 @@ export default function Sessions() {
               <Card className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div className="flex items-center gap-3">
                   <HierarchyBadge hierarchy={s.hierarchy} />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                  <span className="text-sm text-text">
                     {s.rung !== null ? `Rung ${s.rung}` : 'Rung —'}
                     {s.variation ? ` · ${s.variation}` : ''}
                   </span>
                   {s.exposure_type && (
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <span className="rounded-full bg-surface-muted px-2 py-0.5 text-xs text-text-secondary">
                       {EXPOSURE_TYPE_LABELS[s.exposure_type]}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-4 text-xs text-text-secondary">
                   <span>{s.date || 'no date'}</span>
                   <span>
                     Peak {s.peak_suds ?? '—'} → End {s.end_suds ?? '—'}

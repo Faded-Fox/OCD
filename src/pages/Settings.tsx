@@ -76,8 +76,8 @@ export default function Settings() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Settings</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold text-text">Settings</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           {describeBackupCounts({
             sessions: sessions.length,
             journalEntries: journalEntries.length,
@@ -91,8 +91,8 @@ export default function Settings() {
       </div>
 
       <Card>
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Privacy</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <h2 className="text-sm font-semibold text-text">Privacy</h2>
+        <p className="mt-2 text-sm text-text-secondary">
           This app runs entirely on your device. Session, journal, focus plan, fear ladder, flare guide, and values
           data is stored locally in your browser's IndexedDB. There is no backend, no account, no analytics, and
           nothing is ever transmitted off this device. Uninstalling the app, clearing site data, or (on iPhone) not
@@ -101,8 +101,8 @@ export default function Settings() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Storage persistence</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <h2 className="text-sm font-semibold text-text">Storage persistence</h2>
+        <p className="mt-2 text-sm text-text-secondary">
           {persistenceStatus === 'unsupported' &&
             "This browser doesn't support requesting persistent storage — regular backups (below) are the reliable way to protect your data here."}
           {persistenceStatus === 'checking' && 'Checking…'}
@@ -116,14 +116,14 @@ export default function Settings() {
             {requestingPersistence ? 'Requesting…' : 'Request persistent storage'}
           </SecondaryButton>
         )}
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-text-secondary">
           This is a best-effort browser signal, not a guarantee — it doesn't replace exporting a backup.
         </p>
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Backup &amp; restore</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <h2 className="text-sm font-semibold text-text">Backup &amp; restore</h2>
+        <p className="mt-2 text-sm text-text-secondary">
           Download every logged session, journal entry, focus plan, fear ladder, flare guide, and your values list as
           a single JSON file. Keep it somewhere that survives an app deletion — Files app, iCloud Drive, email to
           yourself — so that if this app ever gets deleted and reinstalled (or iOS clears its storage from disuse),
@@ -132,7 +132,7 @@ export default function Settings() {
         <PrimaryButton onClick={handleExport} disabled={exporting || !hasData} className="mt-3">
           {exporting ? 'Preparing…' : 'Export all data as JSON'}
         </PrimaryButton>
-        <p className="mt-5 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-5 text-sm text-text-secondary">
           To restore, paste or upload a previously exported backup file below.
         </p>
         <textarea
@@ -140,7 +140,7 @@ export default function Settings() {
           onChange={(e) => setRestoreRaw(e.target.value)}
           placeholder="Paste a backup file exported from this screen…"
           rows={6}
-          className="mt-2 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-amber-900"
+          className="mt-2 w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-xs text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
         />
         {isBackup && backupCounts && (
           <Card className="mt-3 border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
@@ -170,8 +170,8 @@ export default function Settings() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Therapist summary</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <h2 className="text-sm font-semibold text-text">Therapist summary</h2>
+        <p className="mt-2 text-sm text-text-secondary">
           A separate, printable report — resistance rates by hierarchy, recent sessions, focus plan debriefs — for
           bringing to a session, rather than handing over the raw backup file above.
         </p>
@@ -182,7 +182,7 @@ export default function Settings() {
 
       <Card className="border-rose-200 dark:border-rose-900">
         <h2 className="text-sm font-semibold text-rose-700 dark:text-rose-400">Delete all data</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-2 text-sm text-text-secondary">
           Permanently erases every session, journal entry, focus plan, fear ladder, flare guide, and your values
           list stored on this device. This cannot be undone — export a backup first if you want to keep a copy.
         </p>
@@ -192,7 +192,7 @@ export default function Settings() {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder='Type "delete" to confirm'
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-rose-900"
+            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:focus:ring-rose-900"
           />
           <SecondaryButton
             onClick={handleDeleteAll}

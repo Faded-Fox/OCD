@@ -114,7 +114,7 @@ export default function SessionFields({
         </Field>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-border pt-4">
         <SectionLabel full>SUDS</SectionLabel>
         <Field label="Expected difficulty (0–10)">
           <TargetRangeInput
@@ -132,7 +132,7 @@ export default function SessionFields({
               onChange={(e) => onChange({ peak_suds: e.target.value === '' ? null : Number(e.target.value) })}
               className={`${inputClass} ${peakError ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
             />
-            <span className="text-slate-400">/</span>
+            <span className="text-text-secondary">/</span>
             <input
               type="number"
               min={SUDS_MIN}
@@ -154,7 +154,7 @@ export default function SessionFields({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-border pt-4">
         <SectionLabel full>What happened</SectionLabel>
         <Field label="Response to urges">
           <select
@@ -233,16 +233,16 @@ function ReadingsEditor({
   if (!editing) {
     return (
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
           Readings
         </span>
         {readings.length === 0 ? (
-          <span className="text-xs text-slate-400">none</span>
+          <span className="text-xs text-text-secondary">none</span>
         ) : (
           readings.map((r, i) => (
             <span
               key={i}
-              className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+              className="rounded-full bg-surface-muted px-2 py-0.5 text-xs text-text-secondary"
             >
               {r.label || '—'}: {r.suds}
             </span>
@@ -262,7 +262,7 @@ function ReadingsEditor({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+        <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
           Readings
         </span>
         <button
@@ -429,7 +429,7 @@ function TagsInput({
         className={inputClass}
       />
       {matches.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-md dark:border-slate-700 dark:bg-slate-950">
+        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface py-1 shadow-md">
           {matches.map((s, i) => (
             <li key={s}>
               <button
@@ -440,8 +440,8 @@ function TagsInput({
                 }}
                 className={`block w-full px-3 py-1.5 text-left text-sm ${
                   i === highlighted
-                    ? 'bg-amber-100 text-slate-900 dark:bg-amber-950 dark:text-amber-100'
-                    : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                    ? 'bg-amber-100 text-text dark:bg-amber-950 dark:text-amber-100'
+                    : 'text-text hover:bg-page'
                 }`}
               >
                 {s}
@@ -528,7 +528,7 @@ export function TextSuggestInput({
         className={className}
       />
       {matches.length > 0 && (
-        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-md dark:border-slate-700 dark:bg-slate-950">
+        <ul className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-surface py-1 shadow-md">
           {matches.map((s, i) => (
             <li key={s}>
               <button
@@ -539,8 +539,8 @@ export function TextSuggestInput({
                 }}
                 className={`block w-full px-3 py-1.5 text-left text-sm ${
                   i === highlighted
-                    ? 'bg-amber-100 text-slate-900 dark:bg-amber-950 dark:text-amber-100'
-                    : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                    ? 'bg-amber-100 text-text dark:bg-amber-950 dark:text-amber-100'
+                    : 'text-text hover:bg-page'
                 }`}
               >
                 {s}
@@ -610,7 +610,7 @@ export function TargetRangeInput({
           }}
           className={`${inputClass} ${error ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-200 dark:focus:ring-rose-900' : ''}`}
         />
-        <span className="text-slate-400">–</span>
+        <span className="text-text-secondary">–</span>
         <input
           type="number"
           min={SUDS_MIN}
@@ -632,14 +632,14 @@ export function TargetRangeInput({
 // columns in the readings row below) can set one without fighting `w-full` for
 // specificity — two width utilities on the same element is a Tailwind footgun.
 export const inputBaseClass =
-  'rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
+  'rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
 
 export const inputClass = `w-full ${inputBaseClass}`
 
 export function Field({ label, children, full }: { label: string; children: ReactNode; full?: boolean }) {
   return (
     <label className={`flex flex-col gap-1 ${full ? 'sm:col-span-2' : ''}`}>
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+      <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
         {label}
       </span>
       {children}
@@ -649,7 +649,7 @@ export function Field({ label, children, full }: { label: string; children: Reac
 
 function SectionLabel({ children, full }: { children: ReactNode; full?: boolean }) {
   return (
-    <span className={`text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 ${full ? 'sm:col-span-2' : ''}`}>
+    <span className={`text-xs font-semibold uppercase tracking-wide text-text-secondary ${full ? 'sm:col-span-2' : ''}`}>
       {children}
     </span>
   )

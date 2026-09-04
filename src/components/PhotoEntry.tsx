@@ -83,8 +83,8 @@ export default function PhotoEntry({ onSave }: { onSave: (session: Session) => P
           </svg>
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Add a photo of a handwritten log</h2>
-          <p className="mt-1 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-semibold text-text">Add a photo of a handwritten log</h2>
+          <p className="mt-1 max-w-sm text-sm text-text-secondary">
             No automatic reading — the photo stays right next to a blank form so you can quickly type in what
             you wrote. Nothing is uploaded anywhere; the photo is stored only on this device.
           </p>
@@ -139,7 +139,7 @@ export default function PhotoEntry({ onSave }: { onSave: (session: Session) => P
           />
         </button>
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">Tap the photo to view full size</span>
+          <span className="text-xs text-text-secondary">Tap the photo to view full size</span>
           <button
             type="button"
             onClick={clearPhoto}

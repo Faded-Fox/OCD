@@ -17,7 +17,7 @@ export default function SudsChart({
     <div className={`${heightClassName} w-full`}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={points} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           {targetRange && <ReferenceArea y1={targetRange[0]} y2={targetRange[1]} fill={colorHex} fillOpacity={0.08} />}
           <XAxis
             dataKey="x"

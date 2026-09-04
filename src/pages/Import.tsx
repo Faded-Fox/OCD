@@ -96,8 +96,8 @@ export default function Import() {
     return (
       <div className="flex flex-col gap-6 py-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Review before saving</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Review before saving</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             Nothing is saved yet. Check the fields the parser flagged, fix anything wrong, then confirm.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function Import() {
 
         {parsed.length === 0 && (
           <Card>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-text-secondary">
               No sessions survived review. Go back and try different input.
             </p>
           </Card>
@@ -166,13 +166,13 @@ export default function Import() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Import a session</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold text-text">Import a session</h1>
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           Everything below happens entirely on this device — nothing is ever uploaded anywhere.
         </p>
       </div>
 
-      <div className="inline-flex w-fit rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <div className="inline-flex w-fit rounded-full bg-surface p-1 shadow-sm ring-1 ring-border">
         <ModeButton active={mode === 'text'} onClick={() => setMode('text')}>
           Paste conversation text
         </ModeButton>
@@ -183,17 +183,16 @@ export default function Import() {
 
       {mode === 'text' ? (
         <Card className="flex flex-col gap-4">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Paste plain conversation text or a JSON conversation export (including exports from Claude.ai)
-            containing ERP session logs, and this device will pick out the structured session data
-            automatically.
+          <p className="text-sm text-text-secondary">
+            Paste conversation text or a JSON conversation export containing ERP session logs. PocketFox
+            will look for structured session data on this device.
           </p>
           <textarea
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
-            placeholder="Paste conversation export JSON or session text here…"
+            placeholder="Paste conversation text or JSON here…"
             rows={14}
-            className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-xs text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-amber-900"
+            className="w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-xs text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
           />
 
           {isBackup && (
@@ -248,8 +247,8 @@ function ModeButton({
       onClick={onClick}
       className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
         active
-          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+          ? 'bg-inverse text-on-inverse'
+          : 'text-text-secondary hover:bg-surface-muted'
       }`}
     >
       {children}
@@ -275,11 +274,11 @@ function SessionEditCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <HierarchyBadge hierarchy={session.hierarchy} />
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          <span className="text-sm font-medium text-text">
             {session.rung !== null ? `Rung ${session.rung}` : 'Rung unknown'}
           </span>
-          <span className="text-sm text-slate-400">·</span>
-          <span className="text-sm text-slate-500 dark:text-slate-400">{session.date || 'no date'}</span>
+          <span className="text-sm text-text-secondary">·</span>
+          <span className="text-sm text-text-secondary">{session.date || 'no date'}</span>
           {session.flags.length > 0 && (
             <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
               {session.flags.length} to review
@@ -305,7 +304,7 @@ function SessionEditCard({
       </div>
 
       {!expanded && (session.peak_suds !== null || session.end_suds !== null || resistedText) && (
-        <p className="mt-1.5 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs text-text-secondary">
           {(session.peak_suds !== null || session.end_suds !== null) && (
             <span>
               Peak {session.peak_suds ?? '—'} → End {session.end_suds ?? '—'}
@@ -324,7 +323,7 @@ function SessionEditCard({
       )}
 
       {expanded && (
-        <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
+        <div className="mt-4 border-t border-border pt-4">
           <SessionFields session={session} onChange={onChange} />
         </div>
       )}

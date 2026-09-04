@@ -11,7 +11,7 @@ export default function FlareGuidePage() {
   const [draft, setDraft] = useState<FlareGuide | null>(null)
   const [saving, setSaving] = useState(false)
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   const startEdit = () => {
     setDraft(guide ?? createEmptyFlareGuide())
@@ -80,8 +80,8 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Flare Guide</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Flare Guide</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             Written for the people you trust. Hand them your phone, open to this page, or share it as text.
           </p>
         </div>
@@ -97,16 +97,16 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
 
       {guide.introNote.trim() && (
         <Card>
-          <p className="whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">{guide.introNote}</p>
+          <p className="whitespace-pre-wrap text-sm text-text">{guide.introNote}</p>
         </Card>
       )}
 
       {guide.signs.trim() && (
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+          <h2 className="mb-2 text-sm font-semibold text-text">
             What it looks like when things are hard
           </h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{guide.signs}</p>
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">{guide.signs}</p>
         </Card>
       )}
 
@@ -128,17 +128,17 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
 
       {guide.whatDoesntHelp.trim() && (
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+          <h2 className="mb-2 text-sm font-semibold text-text">
             What doesn't help (even if it seems kind)
           </h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{guide.whatDoesntHelp}</p>
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">{guide.whatDoesntHelp}</p>
         </Card>
       )}
 
       {guide.reassuranceNote.trim() && (
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">If reassurance is asked for</h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{guide.reassuranceNote}</p>
+          <h2 className="mb-2 text-sm font-semibold text-text">If reassurance is asked for</h2>
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">{guide.reassuranceNote}</p>
         </Card>
       )}
 
@@ -154,7 +154,7 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
       {(guide.contactName.trim() || guide.contactPhone.trim() || guide.spaceOrStayNote.trim() || guide.whatNotToDo.trim()) && (
         <Card className="border-rose-200 dark:border-rose-900">
           <h2 className="mb-2 text-sm font-semibold text-rose-700 dark:text-rose-400">If things feel really bad</h2>
-          <div className="flex flex-col gap-2 text-sm text-slate-700 dark:text-slate-200">
+          <div className="flex flex-col gap-2 text-sm text-text">
             {(guide.contactName.trim() || guide.contactPhone.trim()) && (
               <p>
                 <span className="font-medium">Support contact: </span>
@@ -178,16 +178,16 @@ function FlareGuideView({ guide, onEdit }: { guide: FlareGuide; onEdit: () => vo
 
       {guide.recoverySigns.trim() && (
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-100">
+          <h2 className="mb-2 text-sm font-semibold text-text">
             Signs things are getting better
           </h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{guide.recoverySigns}</p>
+          <p className="whitespace-pre-wrap text-sm text-text-secondary">{guide.recoverySigns}</p>
         </Card>
       )}
 
       {guide.closingNote.trim() && (
         <Card>
-          <p className="whitespace-pre-wrap text-sm italic text-slate-600 dark:text-slate-300">{guide.closingNote}</p>
+          <p className="whitespace-pre-wrap text-sm italic text-text-secondary">{guide.closingNote}</p>
         </Card>
       )}
     </div>
@@ -198,9 +198,9 @@ function FormSection({ title, children }: { title: string; children: ReactNode }
   return (
     <details
       open
-      className="group rounded-2xl bg-white shadow-sm ring-1 ring-slate-100 open:pb-2 dark:bg-slate-900 dark:ring-slate-800"
+      className="group rounded-2xl bg-surface shadow-sm ring-1 ring-border open:pb-2"
     >
-      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-slate-800 marker:content-none dark:text-slate-100">
+      <summary className="cursor-pointer list-none px-4 py-3 text-sm font-semibold text-text marker:content-none">
         <span className="mr-2 inline-block transition-transform group-open:rotate-90">›</span>
         {title}
       </summary>
@@ -234,8 +234,8 @@ function FlareGuideForm({
         >
           ← Cancel
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Flare Guide</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="mt-2 text-2xl font-semibold text-text">Flare Guide</h1>
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           Everything here stays on this device — nothing is ever uploaded. Write it for the specific people you'd
           hand your phone to.
         </p>

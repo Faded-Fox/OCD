@@ -39,6 +39,7 @@ import foxMoodSad from '../assets/mood/fox-mood-sad.webp'
 import foxMoodBored from '../assets/mood/fox-mood-bored.webp'
 import foxMoodLonely from '../assets/mood/fox-mood-lonely.webp'
 import foxMoodExcited from '../assets/mood/fox-mood-excited.webp'
+import foxMoodTired from '../assets/mood/fox-mood-tired.webp'
 
 const MOOD_IMAGES: Record<string, string> = {
   angry: foxMoodAngry,
@@ -53,12 +54,13 @@ const MOOD_IMAGES: Record<string, string> = {
   bored: foxMoodBored,
   lonely: foxMoodLonely,
   excited: foxMoodExcited,
+  tired: foxMoodTired,
 }
 
 type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick' | 'thought' | 'thought-record'
 
 const inputClass =
-  'w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-800 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-amber-900'
+  'w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -162,12 +164,12 @@ export default function Journal() {
         <div className="flex flex-col gap-6 py-4">
           <Card className="flex flex-col items-center gap-3 py-14 text-center">
             <img src={foxIntrusiveThought} alt="" className="h-16 w-16" />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Caught the fox!</h2>
-            <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-semibold text-text">Caught the fox!</h2>
+            <p className="max-w-sm text-sm text-text-secondary">
               No action needed — noticing it without acting on it was the whole exercise.
             </p>
             {caughtCount > 0 && (
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-text-secondary">
                 🦊 Caught {caughtCount} time{caughtCount === 1 ? '' : 's'} so far.
               </p>
             )}
@@ -185,8 +187,8 @@ export default function Journal() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Entry saved</h2>
-          <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-semibold text-text">Entry saved</h2>
+          <p className="max-w-sm text-sm text-text-secondary">
             That's it — no need to re-read it. Close this and go on with your day.
           </p>
           <PrimaryButton onClick={() => setPhase('landing')}>Done</PrimaryButton>
@@ -198,8 +200,8 @@ export default function Journal() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Journal</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold text-text">Journal</h1>
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           Five short ways to journal — not free-form writing. Each is designed to stay brief and avoid
           becoming reassurance-seeking, and tells you what to watch for.
         </p>
@@ -227,8 +229,8 @@ export default function Journal() {
       <Card className="flex flex-col gap-3">
         <img src={foxQuickPrompt} alt="" className="h-16 w-16 self-start" />
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Quick prompt</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-semibold text-text">Quick prompt</h2>
+          <p className="text-sm text-text-secondary">
             One short, random prompt — free write for as long or short as you want, then save it.
           </p>
         </div>
@@ -243,15 +245,15 @@ export default function Journal() {
           Give me a prompt
         </PrimaryButton>
         {QUICK_PROMPTS.length === 0 && (
-          <p className="text-xs text-slate-400">No prompts added yet.</p>
+          <p className="text-xs text-text-secondary">No prompts added yet.</p>
         )}
       </Card>
 
       <Card className="flex flex-col gap-3">
         <img src={foxObsessiveThought} alt="" className="h-16 w-16 self-start" />
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Obsessive Thought</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-semibold text-text">Obsessive Thought</h2>
+          <p className="text-sm text-text-secondary">
             An OCD-specific worksheet for one obsession — five timed steps (name it, what OCD's demanding,
             spot the trap, practice uncertainty, choose the next action), each with its own countdown, inside
             a 30-minute hard cap. Not about deciding whether the thought is true.
@@ -265,8 +267,8 @@ export default function Journal() {
       <Card className="flex flex-col gap-3">
         <img src={foxIntrusiveThought} alt="" className="h-16 w-16 self-start" />
         <div>
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Intrusive thought</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h2 className="text-lg font-semibold text-text">Intrusive thought</h2>
+          <p className="text-sm text-text-secondary">
             Tag the theme and save — no writing, no explaining. Noticing it without acting on it is the exercise.
           </p>
         </div>
@@ -300,10 +302,10 @@ function JournalCard({
     <Card className="flex flex-col gap-3">
       <img src={icon} alt="" className="h-16 w-16 self-start" />
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{template.title}</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{template.subtitle}</p>
+        <h2 className="text-lg font-semibold text-text">{template.title}</h2>
+        <p className="text-sm text-text-secondary">{template.subtitle}</p>
       </div>
-      <p className="text-xs text-slate-400">{template.instructions}</p>
+      <p className="text-xs text-text-secondary">{template.instructions}</p>
       <PrimaryButton onClick={onStart} className="self-start">
         Start
       </PrimaryButton>
@@ -364,15 +366,15 @@ function JournalForm({
         >
           ← Journal
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{template.title}</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{template.instructions}</p>
+        <h1 className="mt-2 text-2xl font-semibold text-text">{template.title}</h1>
+        <p className="mt-1 text-sm text-text-secondary">{template.instructions}</p>
       </div>
 
       <Card className="flex flex-col items-center gap-1 py-5 text-center">
-        <span className={`text-3xl font-semibold tabular-nums ${overTarget ? 'text-amber-500' : 'text-slate-900 dark:text-white'}`}>
+        <span className={`text-3xl font-semibold tabular-nums ${overTarget ? 'text-amber-500' : 'text-text'}`}>
           {formatElapsed(elapsedMs)}
         </span>
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-text-secondary">
           {overTarget ? `past the suggested ${template.timerMinutes} min — wrap up soon` : `suggested ${template.timerMinutes} min`}
         </span>
       </Card>
@@ -380,12 +382,12 @@ function JournalForm({
       {template.sections.map((section) => (
         <Card key={section.title} className="flex flex-col gap-3">
           <div>
-            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{section.title}</h2>
+            <h2 className="text-sm font-semibold text-text">{section.title}</h2>
             {section.evidence && (
-              <p className="mt-0.5 text-xs italic text-slate-400">{section.evidence}</p>
+              <p className="mt-0.5 text-xs italic text-text-secondary">{section.evidence}</p>
             )}
             {section.helper && (
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{section.helper}</p>
+              <p className="mt-1 text-sm text-text-secondary">{section.helper}</p>
             )}
             {section.warning && (
               <p className="mt-1 text-xs font-medium text-amber-600 dark:text-amber-400">⚠ {section.warning}</p>
@@ -396,7 +398,7 @@ function JournalForm({
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {section.fields.map((f) => (
                 <label key={f.key} className="flex flex-col gap-1">
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                     {f.label}
                   </span>
                   <input
@@ -413,7 +415,7 @@ function JournalForm({
             section.fields.map((f) => (
               <div key={f.key} className="flex flex-col gap-1.5">
                 {f.placeholder && (
-                  <p className="text-sm italic text-slate-500 dark:text-slate-400">{f.placeholder}</p>
+                  <p className="text-sm italic text-text-secondary">{f.placeholder}</p>
                 )}
                 {f.multiline ? (
                   <textarea
@@ -506,14 +508,14 @@ function QuickPromptView({
         >
           ← Journal
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Quick prompt</h1>
+        <h1 className="mt-2 text-2xl font-semibold text-text">Quick prompt</h1>
       </div>
 
       <Card className="flex flex-col gap-3">
         <Badge className="self-start bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
           {prompt.category}
         </Badge>
-        <p className="text-lg text-slate-800 dark:text-slate-100">{prompt.text}</p>
+        <p className="text-lg text-text">{prompt.text}</p>
         <button
           type="button"
           onClick={() => {
@@ -590,8 +592,8 @@ function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel
         >
           ← Journal
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Intrusive thought</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="mt-2 text-2xl font-semibold text-text">Intrusive thought</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           What theme is this? Tap one, then save — that's the whole exercise.
         </p>
       </div>
@@ -606,14 +608,14 @@ function ThoughtCaptureView({ onDone, onCancel }: { onDone: () => void; onCancel
               className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                 theme === t.key
                   ? 'border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-600 dark:bg-amber-950/40 dark:text-amber-300'
-                  : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                  : 'border-border text-text-secondary hover:bg-page'
               }`}
             >
               {t.label}
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-slate-400">Pick the closest fit. It doesn't have to be exact.</p>
+        <p className="mt-3 text-xs text-text-secondary">Pick the closest fit. It doesn't have to be exact.</p>
       </Card>
 
       <Card className="border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/40">
@@ -648,7 +650,7 @@ function UrgeRatingPicker({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">{label}</span>
       <div className="flex flex-wrap gap-1.5">
         {Array.from({ length: 11 }, (_, i) => i).map((n) => (
           <button
@@ -658,14 +660,14 @@ function UrgeRatingPicker({
             className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
               value === n
                 ? 'bg-amber-500 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                : 'bg-surface-muted text-text-secondary hover:bg-surface-muted'
             }`}
           >
             {n}
           </button>
         ))}
       </div>
-      <p className="text-[11px] text-slate-400">This number doesn't need to go down.</p>
+      <p className="text-[11px] text-text-secondary">This number doesn't need to go down.</p>
     </div>
   )
 }
@@ -749,8 +751,8 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
           <button type="button" onClick={onCancel} className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
             ← Journal
           </button>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Obsessive Thought</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="mt-2 text-2xl font-semibold text-text">Obsessive Thought</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             30-minute hard cap — stop at the timer, regardless of section. Not about deciding whether the
             obsession is true — about naming the process it's running and choosing what to do next.
           </p>
@@ -765,10 +767,10 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
         </Card>
 
         <Card className="flex flex-col gap-1.5">
-          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">What's ahead</h2>
+          <h2 className="text-sm font-semibold text-text">What's ahead</h2>
           {THOUGHT_RECORD_SECTIONS.map((s, i) => (
-            <p key={s.key} className="text-sm text-slate-500 dark:text-slate-400">
-              {i + 1}. {s.title} <span className="text-slate-400">— {s.timerLabel}</span>
+            <p key={s.key} className="text-sm text-text-secondary">
+              {i + 1}. {s.title} <span className="text-text-secondary">— {s.timerLabel}</span>
             </p>
           ))}
         </Card>
@@ -784,22 +786,22 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           Section {sectionIndex + 1} of {THOUGHT_RECORD_SECTIONS.length} · overall{' '}
           {formatElapsed(overallElapsedMs)} / {THOUGHT_RECORD_HARD_CAP_MINUTES} min cap
         </p>
-        <h1 className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{section.title}</h1>
+        <h1 className="mt-1 text-2xl font-semibold text-text">{section.title}</h1>
       </div>
 
       <Card className="flex flex-col items-center gap-1 py-5 text-center">
         <span
           className={`text-3xl font-semibold tabular-nums ${
-            sectionTimeUp ? 'text-amber-500' : 'text-slate-900 dark:text-white'
+            sectionTimeUp ? 'text-amber-500' : 'text-text'
           }`}
         >
           {formatElapsed(sectionRemainingMs)}
         </span>
-        <span className="text-xs text-slate-400">{section.timerLabel} — time left in this section</span>
+        <span className="text-xs text-text-secondary">{section.timerLabel} — time left in this section</span>
       </Card>
 
       {sectionTimeUp && (
@@ -824,7 +826,7 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
       )}
 
       <Card className="flex flex-col gap-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">{section.helper}</p>
+        <p className="text-sm text-text-secondary">{section.helper}</p>
         {section.key === 'name_obsession' ? (
           <textarea
             value={situation}
@@ -846,7 +848,7 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
               <button
                 type="button"
                 onClick={() => setFields((f) => ({ ...f, practice_uncertainty: UNCERTAINTY_STATEMENT_SUGGESTION }))}
-                className="self-start rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                className="self-start rounded-full bg-surface-muted px-2.5 py-1 text-xs text-text-secondary hover:bg-surface-muted"
               >
                 Use: "{UNCERTAINTY_STATEMENT_SUGGESTION}"
               </button>
@@ -886,8 +888,8 @@ function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood
   const selected = FEELINGS_CHART.find((f) => f.key === value)
   return (
     <Card>
-      <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">How do you feel?</h2>
-      <p className="mt-0.5 text-xs text-slate-400">Optional — tap a face to check in, tap it again to clear it.</p>
+      <h2 className="text-sm font-semibold text-text">How do you feel?</h2>
+      <p className="mt-0.5 text-xs text-text-secondary">Optional — tap a face to check in, tap it again to clear it.</p>
       <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
         {FEELINGS_CHART.map((f) => (
           <button
@@ -897,17 +899,17 @@ function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood
             className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors ${
               value === f.key
                 ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40'
-                : 'border-transparent hover:bg-slate-50 dark:hover:bg-slate-800'
+                : 'border-transparent hover:bg-page'
             }`}
           >
             <img src={MOOD_IMAGES[f.key]} alt="" className="h-11 w-11 rounded-lg" />
-            <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">{f.emotion}</span>
+            <span className="text-[11px] font-medium text-text-secondary">{f.emotion}</span>
           </button>
         ))}
       </div>
       {selected && selected.related.length > 0 && (
-        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-          <span className="font-medium text-slate-700 dark:text-slate-300">{selected.emotion}</span> can also feel
+        <p className="mt-3 text-xs text-text-secondary">
+          <span className="font-medium text-text">{selected.emotion}</span> can also feel
           like: {selected.related.join(', ')}
         </p>
       )}
@@ -919,7 +921,7 @@ function MoodBadge({ moodKey }: { moodKey: string }) {
   const entry = FEELINGS_CHART.find((f) => f.key === moodKey)
   if (!entry) return null
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 py-0.5 pl-0.5 pr-2 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+    <span className="inline-flex items-center gap-1 rounded-full bg-surface-muted py-0.5 pl-0.5 pr-2 text-xs text-text-secondary">
       <img src={MOOD_IMAGES[moodKey]} alt="" className="h-5 w-5 rounded-full" />
       {entry.emotion}
     </span>
@@ -942,18 +944,18 @@ function HistoryView({ onBack }: { onBack: () => void }) {
         <button type="button" onClick={onBack} className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
           ← Journal
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Saved entries</h1>
-        <p className="mt-1 max-w-xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="mt-2 text-2xl font-semibold text-text">Saved entries</h1>
+        <p className="mt-1 max-w-xl text-sm text-text-secondary">
           Mainly here for export or to bring to your therapist. Re-reading past entries for reassurance is a
           compulsion warning sign flagged throughout Journal — worth keeping in mind while browsing.
         </p>
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+        <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
       ) : entries.length === 0 ? (
         <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">No journal entries saved yet.</p>
+          <p className="text-sm text-text-secondary">No journal entries saved yet.</p>
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
@@ -1022,7 +1024,7 @@ function EntryCardShell({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Badge className={badgeClass}>{badge}</Badge>
-          <span className="text-sm text-slate-500 dark:text-slate-400">{date}</span>
+          <span className="text-sm text-text-secondary">{date}</span>
           {extra}
         </div>
         <div className="flex gap-3">
@@ -1043,7 +1045,7 @@ function EntryCardShell({
         </div>
       </div>
       {expanded && (
-        <div className="mt-3 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+        <div className="mt-3 flex flex-col gap-3 border-t border-border pt-3">
           {children}
         </div>
       )}
@@ -1069,13 +1071,13 @@ function StructuredEntryCard({
       badgeClass={
         entry.type === 'morning'
           ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-          : 'bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+          : 'bg-surface-muted text-text'
       }
       date={entry.date}
       extra={
         <>
           {entry.durationSeconds !== undefined && (
-            <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
+            <span className="text-xs text-text-secondary">· {formatElapsed(entry.durationSeconds * 1000)}</span>
           )}
           {entry.mood && <MoodBadge moodKey={entry.mood} />}
         </>
@@ -1089,12 +1091,12 @@ function StructuredEntryCard({
         if (values.length === 0) return null
         return (
           <div key={section.title}>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               {section.title}
             </p>
             {section.fields.map((f) =>
               entry.fields[f.key]?.trim() ? (
-                <p key={f.key} className="mt-1 text-sm text-slate-700 dark:text-slate-300">
+                <p key={f.key} className="mt-1 text-sm text-text">
                   {section.fields.length > 1 ? `${f.label}: ` : ''}
                   {entry.fields[f.key]}
                 </p>
@@ -1129,12 +1131,12 @@ function QuickEntryCard({
       onDelete={onDelete}
     >
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Prompt</p>
-        <p className="mt-1 text-sm italic text-slate-600 dark:text-slate-300">{entry.promptText}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Prompt</p>
+        <p className="mt-1 text-sm italic text-text-secondary">{entry.promptText}</p>
       </div>
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Response</p>
-        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{entry.response}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Response</p>
+        <p className="mt-1 whitespace-pre-wrap text-sm text-text">{entry.response}</p>
       </div>
     </EntryCardShell>
   )
@@ -1155,14 +1157,14 @@ function ThoughtEntryCard({
   return (
     <EntryCardShell
       badge={`Intrusive thought · ${theme?.label ?? entry.theme}`}
-      badgeClass="bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+      badgeClass="bg-surface-muted text-text"
       date={entry.date}
       extra={entry.mood ? <MoodBadge moodKey={entry.mood} /> : undefined}
       expanded={expanded}
       onToggle={onToggle}
       onDelete={onDelete}
     >
-      <p className="text-sm text-slate-600 dark:text-slate-300">
+      <p className="text-sm text-text-secondary">
         Noticed and tagged — no other detail was saved with this entry, by design.
       </p>
     </EntryCardShell>
@@ -1187,7 +1189,7 @@ function ThoughtRecordEntryCard({
       date={entry.date}
       extra={
         <>
-          <span className="text-xs text-slate-400">· {formatElapsed(entry.durationSeconds * 1000)}</span>
+          <span className="text-xs text-text-secondary">· {formatElapsed(entry.durationSeconds * 1000)}</span>
           {entry.mood && <MoodBadge moodKey={entry.mood} />}
         </>
       }
@@ -1197,18 +1199,18 @@ function ThoughtRecordEntryCard({
     >
       {entry.situation.trim() && (
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">
             {entry.version === 2 ? 'Name the obsession' : 'Situation / obsession theme'}
           </p>
-          <p className="mt-1 text-sm text-slate-700 dark:text-slate-300">{entry.situation}</p>
+          <p className="mt-1 text-sm text-text">{entry.situation}</p>
         </div>
       )}
       {entry.version === 2 ? (
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-sm text-text-secondary">
           Urge to solve/check {entry.urgeToSolveBefore} before → {entry.urgeToSolveAfter} after
         </p>
       ) : (
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <p className="text-sm text-text-secondary">
           Believability {entry.believabilityBefore}% before → {entry.believabilityAfter}% after
         </p>
       )}
@@ -1218,8 +1220,8 @@ function ThoughtRecordEntryCard({
       ).map((s) =>
         entry.fields[s.key]?.trim() ? (
           <div key={s.key}>
-            <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">{s.title}</p>
-            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-300">{entry.fields[s.key]}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">{s.title}</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm text-text">{entry.fields[s.key]}</p>
           </div>
         ) : null,
       )}

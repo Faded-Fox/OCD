@@ -24,7 +24,7 @@ export default function TherapistSummary() {
 
   const loading = sessionsLoading || journalLoading || focusPlansLoading || laddersLoading
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   if (sessions.length === 0) {
     return (
@@ -70,8 +70,8 @@ export default function TherapistSummary() {
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Therapist Summary</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Therapist Summary</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             A printable report to bring to a session — separate from the raw JSON backup in Settings.
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function TherapistSummary() {
 
       <Card className="flex flex-wrap items-end gap-3 print:hidden">
         <label className="flex w-40 min-w-0 shrink-0 flex-col gap-1">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">From</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">From</span>
           <input
             type="date"
             value={range.from}
@@ -96,7 +96,7 @@ export default function TherapistSummary() {
           />
         </label>
         <label className="flex w-40 min-w-0 shrink-0 flex-col gap-1">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">To</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">To</span>
           <input
             type="date"
             value={range.to}
@@ -124,26 +124,26 @@ export default function TherapistSummary() {
 
       {summary.hierarchyRows.length > 0 && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">By hierarchy</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">By hierarchy</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {summary.hierarchyRows.map((r) => (
               <Card key={r.hierarchy} className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <HierarchyBadge hierarchy={r.hierarchy} />
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-text-secondary">
                     {r.sessionCount} session{r.sessionCount === 1 ? '' : 's'}
                   </span>
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-xl font-semibold text-slate-900 dark:text-white">{r.rungsAttempted}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                  <span className="text-xl font-semibold text-text">{r.rungsAttempted}</span>
+                  <span className="text-xs text-text-secondary">
                     rung{r.rungsAttempted === 1 ? '' : 's'} attempted
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Avg peak {fmtSuds(r.avgPeakSuds)} SUDS</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Last attempted {r.lastSessionDate ?? '—'}</p>
+                <p className="text-xs text-text-secondary">Avg peak {fmtSuds(r.avgPeakSuds)} SUDS</p>
+                <p className="text-xs text-text-secondary">Last attempted {r.lastSessionDate ?? '—'}</p>
                 {r.avgGapDays !== null && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-text-secondary">
                     ~{Math.round(r.avgGapDays)} day avg gap
                   </p>
                 )}
@@ -160,7 +160,7 @@ export default function TherapistSummary() {
 
       {summary.sessionRows.length > 0 && (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <h2 className="mb-3 text-sm font-semibold text-text">
             Sessions in this period ({summary.sessionRows.length})
           </h2>
           <div className="flex flex-col gap-2">
@@ -168,12 +168,12 @@ export default function TherapistSummary() {
               <Card key={i} className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div className="flex items-center gap-3">
                   <HierarchyBadge hierarchy={s.hierarchy} />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                  <span className="text-sm text-text">
                     Rung {s.rung ?? '—'}
                     {s.variation ? ` (${s.variation})` : ''}
                   </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-text-secondary">
                   <span>{s.date}</span>
                   <span>
                     Peak {s.peakSuds ?? '—'} → End {s.endSuds ?? '—'}
@@ -188,28 +188,28 @@ export default function TherapistSummary() {
 
       {summary.focusPlanRows.length > 0 && (
         <Card className="flex flex-col gap-4">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Focus Plan debriefs</h2>
+          <h2 className="text-sm font-semibold text-text">Focus Plan debriefs</h2>
           {summary.focusPlanRows.map((p, i) => (
-            <div key={i} className="border-b border-slate-100 pb-4 last:border-0 last:pb-0 dark:border-slate-900">
+            <div key={i} className="border-b border-border pb-4 last:border-0 last:pb-0">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                <span className="text-sm font-medium text-text">
                   {p.taskDescription || 'Untitled task'}
                 </span>
-                <span className="text-xs text-slate-400">
+                <span className="text-xs text-text-secondary">
                   {p.date} · {p.completed === 'yes' ? 'Completed' : p.completed === 'partial' ? 'Partially completed' : 'Not completed'}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs text-text-secondary">
                 Peak {p.peakSuds ?? '—'} → End {p.endSuds ?? '—'}
               </p>
               {p.whatWorked.trim() && (
-                <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
+                <p className="mt-1.5 text-sm text-text-secondary">
                   <span className="font-medium">What worked: </span>
                   {p.whatWorked}
                 </p>
               )}
               {p.whatWouldDoDifferently.trim() && (
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                <p className="mt-1 text-sm text-text-secondary">
                   <span className="font-medium">Would do differently: </span>
                   {p.whatWouldDoDifferently}
                 </p>
@@ -221,12 +221,12 @@ export default function TherapistSummary() {
 
       {summary.ladderRows.length > 0 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Planned fear ladders</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">Planned fear ladders</h2>
           <div className="flex flex-wrap gap-2">
             {summary.ladderRows.map((l) => (
               <span
                 key={l.hierarchy}
-                className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                className="rounded-full bg-surface-muted px-3 py-1 text-xs text-text-secondary"
               >
                 {l.hierarchy} — {l.rungCount} rung{l.rungCount === 1 ? '' : 's'} planned
               </span>
@@ -235,7 +235,7 @@ export default function TherapistSummary() {
         </Card>
       )}
 
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-text-secondary">
         This is a descriptive summary of self-reported data — not a diagnosis or treatment recommendation.
       </p>
     </div>

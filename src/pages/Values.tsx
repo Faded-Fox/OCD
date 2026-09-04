@@ -13,7 +13,7 @@ export default function ValuesPage() {
   const [draft, setDraft] = useState<ValuesGuide | null>(null)
   const [saving, setSaving] = useState(false)
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   const startEdit = () => {
     setDraft(guide ?? createEmptyValuesGuide())
@@ -61,8 +61,8 @@ function ValuesView({ guide, onEdit }: { guide: ValuesGuide; onEdit: () => void 
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Values</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Values</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             ERP isn't about feeling less anxious — it's about living life. Why you're doing this, worth rereading
             before something hard.
           </p>
@@ -79,9 +79,9 @@ function ValuesView({ guide, onEdit }: { guide: ValuesGuide; onEdit: () => void 
               <img src={foxTail} alt="" className="h-6 w-6 shrink-0" />
             )}
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{v.label}</h2>
+              <h2 className="text-sm font-semibold text-text">{v.label}</h2>
               {v.note.trim() && (
-                <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{v.note}</p>
+                <p className="mt-0.5 text-sm text-text-secondary">{v.note}</p>
               )}
             </div>
           </Card>
@@ -122,20 +122,20 @@ function ValuesForm({
         >
           ← Cancel
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Values</h1>
-        <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="mt-2 text-2xl font-semibold text-text">Values</h1>
+        <p className="mt-1 max-w-2xl text-sm text-text-secondary">
           A few words each is plenty — an icon or emoji, a short label, and an optional note on why it matters.
         </p>
       </div>
 
       <Card className="flex flex-col gap-3">
         {draft.values.length === 0 && (
-          <p className="text-sm text-slate-400">No values yet — add your first one below.</p>
+          <p className="text-sm text-text-secondary">No values yet — add your first one below.</p>
         )}
         {draft.values.map((v) => (
           <div
             key={v.id}
-            className="flex flex-col gap-2 border-b border-slate-100 pb-3 last:border-0 last:pb-0 dark:border-slate-800 sm:flex-row sm:items-start"
+            className="flex flex-col gap-2 border-b border-border pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-start"
           >
             <Field label="Icon">
               <input

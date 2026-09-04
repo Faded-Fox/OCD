@@ -56,8 +56,8 @@ export default function FocusPlan() {
     <div className="flex flex-col gap-6 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Focus Plan</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Focus Plan</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             Break a task that OCD makes difficult into smaller steps, plan for the intrusions and urges likely to
             show up, and debrief afterward. Start the plan before the task, come back to fill in the debrief once
             you've attempted it.
@@ -67,7 +67,7 @@ export default function FocusPlan() {
       </div>
 
       {loading ? (
-        <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+        <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
       ) : entries.length === 0 ? (
         <EmptyState
           title="No focus plans yet"
@@ -89,9 +89,9 @@ export default function FocusPlan() {
                   >
                     {entry.completed === null ? 'Debrief pending' : 'Debriefed'}
                   </Badge>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">{entry.date}</span>
+                  <span className="text-sm text-text-secondary">{entry.date}</span>
                 </div>
-                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-slate-100">
+                <p className="mt-1 text-sm font-medium text-text">
                   {entry.taskDescription.trim() || 'Untitled task'}
                 </p>
               </button>
@@ -143,12 +143,12 @@ function FocusPlanForm({
         >
           ← Focus Plan
         </button>
-        <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Focus Plan</h1>
+        <h1 className="mt-2 text-2xl font-semibold text-text">Focus Plan</h1>
       </div>
 
       <Card className="flex flex-col gap-3">
         <StepLabel n={1} title="Describe the task" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           What do you need to get done, and why has OCD made it hard?
         </p>
         <textarea
@@ -162,7 +162,7 @@ function FocusPlanForm({
 
       <Card className="flex flex-col gap-3">
         <StepLabel n={2} title="Break it into smaller parts" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           Estimate how long each part will realistically take, and note what you'll need.
         </p>
         <RowsEditor
@@ -180,7 +180,7 @@ function FocusPlanForm({
 
       <Card className="flex flex-col gap-3">
         <StepLabel n={3} title="Schedule it" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           When will you do each part, how will you remind yourself, and how will you reward finishing? Keep rewards
           OCD-safe — avoid checking-based rewards.
         </p>
@@ -199,7 +199,7 @@ function FocusPlanForm({
 
       <Card className="flex flex-col gap-3">
         <StepLabel n={4} title="Plan your ERP response" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           What will OCD tell you, what compulsion will you feel pulled toward, and what will you do instead — decided
           now, not in the moment.
         </p>
@@ -218,7 +218,7 @@ function FocusPlanForm({
 
       <Card className="flex flex-col gap-4">
         <StepLabel n={5} title="Post-task debrief" />
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-sm text-text-secondary">
           Fill this out after completing the task (or attempting it). This is data for you and your therapist — not a
           place to judge yourself.
         </p>
@@ -246,7 +246,7 @@ function FocusPlanForm({
         </Field>
 
         <div>
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
             What did I practice instead of compulsions?
           </span>
           <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -320,10 +320,10 @@ function FocusPlanForm({
 function StepLabel({ n, title }: { n: number; title: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white dark:bg-white dark:text-slate-900">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-inverse text-xs font-semibold text-on-inverse">
         {n}
       </span>
-      <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
+      <h2 className="text-sm font-semibold text-text">{title}</h2>
     </div>
   )
 }
@@ -347,8 +347,8 @@ function SudsPicker({
             onClick={() => onChange(value === n ? null : n)}
             className={`h-8 w-8 rounded-full text-xs font-semibold transition-colors ${
               value === n
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                ? 'bg-inverse text-on-inverse'
+                : 'bg-surface-muted text-text-secondary hover:bg-surface-muted'
             }`}
           >
             {n}
@@ -372,9 +372,9 @@ function SudsRatingsDisclosure({
 }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border-t border-slate-100 pt-4 dark:border-slate-800">
+    <div className="border-t border-border pt-4">
       <button type="button" onClick={() => setOpen((o) => !o)} className="flex w-full items-center justify-between text-left">
-        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">SUDS ratings (optional)</span>
+        <span className="text-sm font-medium text-text-secondary">SUDS ratings (optional)</span>
         <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
       </button>
       {open && (
@@ -421,11 +421,11 @@ function RowsEditor<T extends Record<string, string>>({
   return (
     <div className="flex flex-col gap-3">
       {rows.map((row, i) => (
-        <div key={i} className="rounded-xl border border-slate-100 p-3 dark:border-slate-800">
+        <div key={i} className="rounded-xl border border-border p-3">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {columns.map((col) => (
               <label key={String(col.key)} className="flex flex-col gap-1">
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                   {col.label}
                 </span>
                 <input
@@ -467,39 +467,39 @@ function ErpToolkit() {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full items-center justify-between text-left"
       >
-        <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">ERP toolkit for this task</h2>
+        <h2 className="text-sm font-semibold text-text">ERP toolkit for this task</h2>
         <span className="text-sm text-emerald-700 dark:text-emerald-400">{open ? 'Hide' : 'Show'}</span>
       </button>
       {open && (
         <div className="mt-4 flex flex-col gap-5">
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
               SUDS scale
             </h3>
             <div className="mt-2 flex flex-col gap-1">
               {SUDS_SCALE.map((s) => (
                 <div key={s.range} className="flex items-baseline gap-2 text-sm">
-                  <span className="w-10 shrink-0 font-semibold text-slate-800 dark:text-slate-100">{s.range}</span>
-                  <span className="text-slate-600 dark:text-slate-300">{s.label}</span>
+                  <span className="w-10 shrink-0 font-semibold text-text">{s.range}</span>
+                  <span className="text-text-secondary">{s.label}</span>
                 </div>
               ))}
             </div>
           </div>
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
               Defusion techniques to use during the task
             </h3>
             <div className="mt-2 flex flex-col gap-2">
               {DEFUSION_TECHNIQUES.map((t) => (
                 <div key={t.name} className="text-sm">
-                  <span className="font-semibold text-slate-800 dark:text-slate-100">{t.name}: </span>
-                  <span className="text-slate-600 dark:text-slate-300">{t.description}</span>
+                  <span className="font-semibold text-text">{t.name}: </span>
+                  <span className="text-text-secondary">{t.description}</span>
                 </div>
               ))}
             </div>
           </div>
-          <p className="text-sm italic text-slate-500 dark:text-slate-400">{FOCUS_PLAN_AFFIRMATION}</p>
-          <p className="text-xs text-slate-400">
+          <p className="text-sm italic text-text-secondary">{FOCUS_PLAN_AFFIRMATION}</p>
+          <p className="text-xs text-text-secondary">
             This worksheet is an adjunct to ERP/CBT/ACT treatment with a trained OCD specialist. If it itself begins
             to feel compulsive, bring it to your next session. IOCDF therapist directory: iocdf.org/find-help
           </p>

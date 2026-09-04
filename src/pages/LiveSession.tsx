@@ -75,8 +75,8 @@ function ModeButton({ active, onClick, children }: { active: boolean; onClick: (
       onClick={onClick}
       className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
         active
-          ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+          ? 'bg-inverse text-on-inverse'
+          : 'text-text-secondary hover:bg-surface-muted'
       }`}
     >
       {children}
@@ -326,8 +326,8 @@ export default function LiveSession() {
     return (
       <div className="flex flex-col gap-6 py-4">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Start a live session</h1>
-          <p className="mt-1 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Start a live session</h1>
+          <p className="mt-1 max-w-2xl text-sm text-text-secondary">
             Set up the exposure, rate how you feel right now, then start the timer. Everything stays on this
             device the whole time.
           </p>
@@ -346,7 +346,7 @@ export default function LiveSession() {
         )}
         <Card className="flex flex-col gap-4">
           {ladders.length > 0 && (
-            <div className="inline-flex w-fit rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+            <div className="inline-flex w-fit rounded-full bg-surface p-1 shadow-sm ring-1 ring-border">
               <ModeButton active={setupMode === 'planned'} onClick={() => setSetupMode('planned')}>
                 Planned (from a Fear Ladder)
               </ModeButton>
@@ -428,7 +428,7 @@ export default function LiveSession() {
                       key={`${r[0]}-${r[1]}`}
                       type="button"
                       onClick={() => setSession((s) => ({ ...s, target_suds_range: r }))}
-                      className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                      className="rounded-full bg-surface-muted px-2.5 py-1 text-xs text-text-secondary hover:bg-surface-muted"
                     >
                       {r[0]}–{r[1]}
                     </button>
@@ -448,7 +448,7 @@ export default function LiveSession() {
 
           {rungPickerLadder && rungPickerLadder.rungs.length > 0 && (
             <div>
-              <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                 Planned rungs for {rungPickerLadder.hierarchy}
               </span>
               <div className="mt-2 flex flex-col gap-1.5">
@@ -461,8 +461,8 @@ export default function LiveSession() {
                       onClick={() => pickRung(r)}
                       className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-left text-sm transition-colors ${
                         session.rung === r.rung
-                          ? 'border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900'
-                          : 'border-slate-200 text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+                          ? 'border-inverse bg-inverse text-on-inverse'
+                          : 'border-border text-text-secondary hover:bg-page'
                       }`}
                     >
                       <span className="font-semibold">Rung {r.rung}</span>
@@ -475,14 +475,14 @@ export default function LiveSession() {
                     </button>
                   ))}
               </div>
-              <p className="mt-1.5 text-xs text-slate-400">
+              <p className="mt-1.5 text-xs text-text-secondary">
                 Tap a rung to fill in its description and expected difficulty — you can still edit anything above.
               </p>
             </div>
           )}
 
           <div>
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
               Pre-exposure rating — how distressed or uncomfortable do you feel right now?
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -494,7 +494,7 @@ export default function LiveSession() {
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
                     preSuds === n
                       ? 'text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                      : 'bg-surface-muted text-text-secondary hover:bg-surface-muted'
                   }`}
                   style={preSuds === n ? { backgroundColor: color.hex } : undefined}
                 >
@@ -508,7 +508,7 @@ export default function LiveSession() {
             Start exposure
           </PrimaryButton>
           {!canStart && (
-            <p className="text-xs text-slate-400">Hierarchy, rung, and a pre-exposure rating are needed to start.</p>
+            <p className="text-xs text-text-secondary">Hierarchy, rung, and a pre-exposure rating are needed to start.</p>
           )}
         </Card>
       </div>
@@ -526,15 +526,15 @@ export default function LiveSession() {
           </Card>
         )}
         <Card className="flex flex-col items-center gap-2 py-8 text-center">
-          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          <span className="text-sm font-medium text-text-secondary">
             {session.hierarchy} · Rung {session.rung}
             {session.variation ? ` · ${session.variation}` : ''}
             {session.exposure_type ? ` · ${EXPOSURE_TYPE_LABELS[session.exposure_type]}` : ''}
           </span>
-          <span className="text-5xl font-semibold tabular-nums text-slate-900 dark:text-white">
+          <span className="text-5xl font-semibold tabular-nums text-text">
             {formatElapsed(elapsedMs)}
           </span>
-          <span className="text-xs text-slate-400">elapsed</span>
+          <span className="text-xs text-text-secondary">elapsed</span>
           {!supportOpen && (
             <button
               type="button"
@@ -602,13 +602,13 @@ export default function LiveSession() {
             onClick={() => setSudsTrackingOpen((o) => !o)}
             className="flex w-full items-center justify-between text-left"
           >
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">SUDS tracking (optional)</span>
+            <span className="text-sm font-medium text-text-secondary">SUDS tracking (optional)</span>
             <span className="text-sm text-emerald-700 dark:text-emerald-400">{sudsTrackingOpen ? 'Hide' : 'Show'}</span>
           </button>
           {sudsTrackingOpen && (
             <div className="mt-4 flex flex-col gap-4">
               <div>
-                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                   Log a rating, if you want to
                 </span>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -646,7 +646,7 @@ export default function LiveSession() {
 
               {chartPoints.length > 0 && (
                 <div>
-                  <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS so far</h2>
+                  <h2 className="mb-3 text-sm font-semibold text-text">SUDS so far</h2>
                   <SudsChart
                     points={chartPoints}
                     isTimeBased={isTimeBased}
@@ -658,7 +658,7 @@ export default function LiveSession() {
 
               {session.readings.length > 0 && (
                 <div>
-                  <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  <span className="text-xs font-medium uppercase tracking-wide text-text-secondary">
                     Readings logged
                   </span>
                   <div className="mt-1.5 flex flex-wrap gap-2">
@@ -668,7 +668,7 @@ export default function LiveSession() {
                         type="button"
                         onClick={() => removeReading(i)}
                         title="Tap to remove"
-                        className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-600 hover:bg-rose-100 hover:text-rose-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-rose-950 dark:hover:text-rose-300"
+                        className="inline-flex items-center gap-1 rounded-full bg-surface-muted px-2.5 py-1 text-xs text-text-secondary hover:bg-rose-100 hover:text-rose-700 dark:hover:bg-rose-950 dark:hover:text-rose-300"
                       >
                         {r.label}: {r.suds} ✕
                       </button>
@@ -696,22 +696,22 @@ export default function LiveSession() {
   return (
     <div className="flex flex-col gap-6 py-4">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Wrap up the session</h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <h1 className="text-2xl font-semibold text-text">Wrap up the session</h1>
+        <p className="mt-1 text-sm text-text-secondary">
           {session.planned_duration_minutes} minute exposure logged. Fill in the rest, then save.
         </p>
       </div>
 
       {chartPoints.length > 0 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS curve</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">SUDS curve</h2>
           <SudsChart
             points={chartPoints}
             isTimeBased={isTimeBased}
             targetRange={session.target_suds_range}
             colorHex={color.hex}
           />
-          <p className="mt-2 text-xs text-slate-400">Updates live as you edit the readings below.</p>
+          <p className="mt-2 text-xs text-text-secondary">Updates live as you edit the readings below.</p>
         </Card>
       )}
 

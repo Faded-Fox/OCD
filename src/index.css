@@ -2,12 +2,50 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Semantic surface/text/border tokens — the warm paper/sepia light theme and
+ * the ability to re-color it without touching every component both come from
+ * these. Each one is a real Tailwind v4 theme color (declaring it here also
+ * generates matching bg, text, and border utilities), given its new warm
+ * light-mode value by default; the .dark block below re-declares every one of
+ * them to the exact slate value components already relied on via `dark:`
+ * classes (referenced through Tailwind's own --color-slate variables, not
+ * retyped hex, so dark mode is guaranteed pixel-identical to before this
+ * theme existed). Only ever add a new token here for a genuinely new
+ * surface/text role — don't reach for a raw slate class in a component
+ * again once it has a token equivalent.
+ */
+@theme {
+  --color-page: #f5efe3;
+  --color-surface: #fbf8f0;
+  --color-surface-muted: #ede3d0;
+  --color-input: #f7f1e5;
+  --color-border: #ded2bc;
+  --color-border-strong: #cbb999;
+  --color-text: #2a2420;
+  --color-text-secondary: #7a6b5c;
+  --color-inverse: #3a2f25;
+  --color-on-inverse: #fdf9f0;
+}
+
+.dark {
+  --color-page: var(--color-slate-950);
+  --color-surface: var(--color-slate-900);
+  --color-surface-muted: var(--color-slate-800);
+  --color-input: var(--color-slate-950);
+  --color-border: var(--color-slate-800);
+  --color-border-strong: var(--color-slate-700);
+  --color-text: var(--color-slate-100);
+  --color-text-secondary: var(--color-slate-400);
+  --color-inverse: white;
+  --color-on-inverse: var(--color-slate-900);
+}
+
 html {
   color-scheme: light dark;
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+  @apply bg-page text-text;
   margin: 0;
 }
 

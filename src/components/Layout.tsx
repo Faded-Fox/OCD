@@ -6,11 +6,11 @@ import pawLogo from '../assets/paw-logo.png'
 // The four things reached most often stay as always-visible top-level pills;
 // everything else lives behind "More" so the mobile header doesn't wrap into
 // several rows of equally-weighted tabs.
-const primaryNavItems = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/sessions', label: 'Sessions' },
-  { to: '/live', label: 'Live' },
-  { to: '/journal', label: 'Journal' },
+const primaryNavItems: { to: string; label: string; section: NavSection }[] = [
+  { to: '/', label: 'Dashboard', section: 'dashboard' },
+  { to: '/sessions', label: 'Sessions', section: 'sessions' },
+  { to: '/live', label: 'Live', section: 'live' },
+  { to: '/journal', label: 'Journal', section: 'journal' },
 ]
 
 const secondaryNavItems = [
@@ -22,6 +22,23 @@ const secondaryNavItems = [
   { to: '/import', label: 'Import' },
   { to: '/settings', label: 'Settings' },
 ]
+
+type NavSection = 'dashboard' | 'sessions' | 'live' | 'journal' | 'more'
+
+// Route-aware rather than styled per-page: a couple of real routes
+// (/session/:id, /hierarchy/:name) have no exact entry in either nav list
+// above — the first because it's a plural/singular mismatch with "Sessions",
+// the second because it's a Fear Ladders drill-down living inside "More" —
+// so left as exact-match checks, neither Sessions nor More ever highlighted
+// on those pages. Any future nested route just needs one clause here.
+function sectionForPath(pathname: string): NavSection | null {
+  if (pathname === '/') return 'dashboard'
+  if (pathname === '/sessions' || pathname.startsWith('/session/')) return 'sessions'
+  if (pathname === '/live') return 'live'
+  if (pathname === '/journal') return 'journal'
+  if (secondaryNavItems.some((item) => item.to === pathname) || pathname.startsWith('/hierarchy/')) return 'more'
+  return null
+}
 
 function SunIcon() {
   return (
@@ -50,18 +67,31 @@ function HelpIcon() {
   )
 }
 
-function navLinkClass({ isActive }: { isActive: boolean }) {
-  return `rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-    isActive
-      ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
-      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+      <circle cx="5" cy="12" r="1.75" />
+      <circle cx="12" cy="12" r="1.75" />
+      <circle cx="19" cy="12" r="1.75" />
+    </svg>
+  )
+}
+
+function pillClass(isActive: boolean) {
+  return `rounded-full px-2 py-1.5 text-sm font-medium transition-colors ${
+    isActive ? 'bg-inverse text-on-inverse shadow-sm' : 'text-text-secondary hover:bg-surface-muted'
   }`
 }
 
-function MoreMenu() {
+function iconButtonClass(isActive: boolean) {
+  return `rounded-full p-2 transition-colors ${
+    isActive ? 'bg-inverse text-on-inverse shadow-sm' : 'text-text-secondary hover:bg-surface-muted'
+  }`
+}
+
+function MoreMenu({ isActive }: { isActive: boolean }) {
   const location = useLocation()
   const [open, setOpen] = useState(false)
-  const isSecondaryActive = secondaryNavItems.some((item) => item.to === location.pathname)
 
   // Any navigation — from this menu or anywhere else — should leave it closed.
   useEffect(() => setOpen(false), [location.pathname])
@@ -72,27 +102,29 @@ function MoreMenu() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-          isSecondaryActive
-            ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
-            : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-        }`}
+        aria-label="More"
+        className={iconButtonClass(isActive)}
       >
-        More
+        <MoreIcon />
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 z-20 mt-2 flex w-52 flex-col gap-0.5 rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+          {/* Below sm (640px) this renders as a viewport-anchored sheet spanning
+              the same 1rem margins as the header's own edges, so it can never
+              overflow left or right at any of the 320–430px widths this app
+              targets — anchoring it to the button itself (as a fixed-width
+              popover) was what let it run past the left edge on narrow phones.
+              From sm up there's comfortably enough room for the original
+              compact anchored popover. */}
+          <div className="fixed inset-x-4 top-[calc(env(safe-area-inset-top)+7.75rem)] z-20 flex flex-col gap-0.5 rounded-2xl bg-surface p-1.5 shadow-lg ring-1 ring-border sm:absolute sm:inset-x-auto sm:top-full sm:right-0 sm:mt-2 sm:w-56">
             {secondaryNavItems.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
                   `rounded-xl px-3 py-2 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+                    isActive ? 'bg-inverse text-on-inverse' : 'text-text-secondary hover:bg-surface-muted'
                   }`
                 }
               >
@@ -108,52 +140,55 @@ function MoreMenu() {
 
 export default function Layout() {
   const { theme, toggle } = useTheme()
+  const location = useLocation()
+  const activeSection = sectionForPath(location.pathname)
 
   return (
     <div className="mx-auto flex min-h-svh max-w-5xl flex-col px-4 pb-16 sm:px-6">
-      <header className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 py-5 print:hidden">
-        <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <img src={pawLogo} alt="" className="h-8 w-8 rounded-xl shadow-sm" />
-          <span>
-            PocketFox<span className="hidden sm:inline"> Companion</span>
-          </span>
-        </NavLink>
+      {/* pt uses max() rather than a flat inset so non-notched devices/browsers
+          (where env() resolves to 0px) keep today's exact 1.25rem spacing —
+          only devices that actually need clearance for a notch/Dynamic Island
+          get pushed further down. */}
+      {/* Two deliberate rows rather than one that wraps organically — at 320px
+          a single flex row can't fit the logo, all 4 primary pills, and the
+          utility cluster together, and letting it wrap wherever space ran
+          out split "Journal" onto the icon cluster's row instead of staying
+          with its siblings. Logo + the compact icon cluster share a row
+          (comfortably fits at any width this app targets); primary nav gets
+          a full-width row of its own underneath, so it's never competing
+          with anything else for space. */}
+      <header className="flex flex-col gap-3 pt-[max(1.25rem,env(safe-area-inset-top))] pb-5 print:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <NavLink to="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+            <img src={pawLogo} alt="" className="h-8 w-8 rounded-xl shadow-sm" />
+            <span>
+              PocketFox<span className="hidden sm:inline"> Companion</span>
+            </span>
+          </NavLink>
+          <div className="flex items-center gap-1">
+            <MoreMenu isActive={activeSection === 'more'} />
+            <NavLink to="/help" aria-label="Help" className={() => iconButtonClass(location.pathname === '/help')}>
+              <HelpIcon />
+            </NavLink>
+            <button type="button" onClick={toggle} aria-label="Toggle dark mode" className={iconButtonClass(false)}>
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
+          </div>
+        </div>
         <nav className="flex flex-wrap items-center gap-1">
           {primaryNavItems.map((item) => (
-            <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
+            <NavLink key={item.to} to={item.to} className={() => pillClass(activeSection === item.section)}>
               {item.label}
             </NavLink>
           ))}
-          <MoreMenu />
-          <NavLink
-            to="/help"
-            aria-label="Help"
-            className={({ isActive }) =>
-              `rounded-full p-2 transition-colors ${
-                isActive
-                  ? 'bg-slate-900 text-white shadow-sm dark:bg-white dark:text-slate-900'
-                  : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
-              }`
-            }
-          >
-            <HelpIcon />
-          </NavLink>
-          <button
-            type="button"
-            onClick={toggle}
-            aria-label="Toggle dark mode"
-            className="rounded-full p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-          >
-            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          </button>
         </nav>
       </header>
       <main className="flex-1">
-        <Suspense fallback={<p className="py-10 text-center text-sm text-slate-400">Loading…</p>}>
+        <Suspense fallback={<p className="py-10 text-center text-sm text-text-secondary">Loading…</p>}>
           <Outlet />
         </Suspense>
       </main>
-      <footer className="mt-10 text-center text-xs text-slate-400 dark:text-slate-600 print:hidden">
+      <footer className="mt-10 text-center text-xs text-text-secondary print:hidden">
         All data stays on this device. No accounts, no cloud sync, no analytics.
       </footer>
     </div>

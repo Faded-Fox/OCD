@@ -11,11 +11,11 @@ export default function DashboardPeakChart({
 }) {
   return (
     <Card>
-      <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDS over time</h2>
+      <h2 className="mb-3 text-sm font-semibold text-text">Peak SUDS over time</h2>
       <div className="h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
             <XAxis dataKey="date" type="category" tick={{ fontSize: 11 }} allowDuplicatedCategory={false} />
             <YAxis dataKey="peak" domain={[0, 10]} tick={{ fontSize: 11 }} />
             <Tooltip

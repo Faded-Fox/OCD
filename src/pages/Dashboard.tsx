@@ -46,7 +46,7 @@ export default function Dashboard() {
     setShowReminder(false)
   }
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   if (sessions.length === 0) {
     return (
@@ -115,8 +115,8 @@ export default function Dashboard() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Dashboard</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-semibold text-text">Dashboard</h1>
+          <p className="mt-1 text-sm text-text-secondary">
             A descriptive summary of logged sessions — not a diagnosis or a treatment recommendation.
           </p>
         </div>
@@ -139,7 +139,7 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Elsewhere in the app</h2>
+        <h2 className="mb-3 text-sm font-semibold text-text">Elsewhere in the app</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           <LinkStatTile to="/journal" label="Journal" value={journalThisWeek} sub="entries this week" />
           <LinkStatTile
@@ -175,7 +175,7 @@ export default function Dashboard() {
       )}
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">By hierarchy</h2>
+        <h2 className="mb-3 text-sm font-semibold text-text">By hierarchy</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {hierarchies.map((h) => {
             const hierarchySessions = sessionsForHierarchy(sessions, h)
@@ -188,19 +188,19 @@ export default function Dashboard() {
                 <Card className="h-full">
                   <div className="flex items-center justify-between">
                     <HierarchyBadge hierarchy={h} />
-                    <span className="text-xs text-slate-400">{count} session{count === 1 ? '' : 's'}</span>
+                    <span className="text-xs text-text-secondary">{count} session{count === 1 ? '' : 's'}</span>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-xl font-semibold text-slate-900 dark:text-white">{rungsAttempted}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                    <span className="text-xl font-semibold text-text">{rungsAttempted}</span>
+                    <span className="text-xs text-text-secondary">
                       rung{rungsAttempted === 1 ? '' : 's'} attempted
                     </span>
                   </div>
                   {lastAttempted && (
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Last attempted {lastAttempted}</p>
+                    <p className="mt-1 text-xs text-text-secondary">Last attempted {lastAttempted}</p>
                   )}
                   {gapInfo?.avgGapDays !== null && gapInfo?.avgGapDays !== undefined && (
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-xs text-text-secondary">
                       ~{Math.round(gapInfo.avgGapDays)} day avg gap between sessions
                     </p>
                   )}
@@ -213,7 +213,7 @@ export default function Dashboard() {
 
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Recent sessions</h2>
+          <h2 className="text-sm font-semibold text-text">Recent sessions</h2>
           <Link to="/sessions" className="text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">
             Search all sessions
           </Link>
@@ -224,12 +224,12 @@ export default function Dashboard() {
               <Card className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div className="flex items-center gap-3">
                   <HierarchyBadge hierarchy={s.hierarchy} />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                  <span className="text-sm text-text">
                     {s.rung !== null ? `Rung ${s.rung}` : 'Rung —'}
                     {s.variation ? ` · ${s.variation}` : ''}
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-4 text-xs text-text-secondary">
                   <span>{s.date || 'no date'}</span>
                   <span>Peak {s.peak_suds ?? '—'} → End {s.end_suds ?? '—'}</span>
                 </div>
@@ -269,7 +269,7 @@ function CaughtFoxButton() {
       to="/journal?start=thought"
       title="Caught the fox — log an intrusive thought"
       aria-label="Log an intrusive thought"
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg hover:bg-surface-muted"
     >
       🦊
     </Link>

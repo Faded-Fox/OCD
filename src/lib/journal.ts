@@ -73,6 +73,7 @@ export const FEELINGS_CHART: FeelingChartEntry[] = [
   { key: 'bored', emotion: 'Bored', related: ['Indifferent'] },
   { key: 'lonely', emotion: 'Lonely', related: ['Isolated'] },
   { key: 'excited', emotion: 'Excited', related: ['Energetic'] },
+  { key: 'tired', emotion: 'Tired', related: ['Sleepy', 'Drained', 'Exhausted', 'Worn out', 'Fatigued'] },
 ]
 
 export interface JournalField {

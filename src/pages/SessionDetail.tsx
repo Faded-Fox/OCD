@@ -33,7 +33,7 @@ export default function SessionDetail() {
     return () => URL.revokeObjectURL(url)
   }, [session?.photo])
 
-  if (loading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   if (!session) {
     return <EmptyState title="Session not found" body="It may have been deleted." />
@@ -86,7 +86,7 @@ export default function SessionDetail() {
           >
             ← Cancel
           </button>
-          <h1 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Edit session</h1>
+          <h1 className="mt-2 text-2xl font-semibold text-text">Edit session</h1>
         </div>
         <Card>
           <SessionFields session={draft} onChange={(patch) => setDraft((d) => (d ? { ...d, ...patch } : d))} />
@@ -119,11 +119,11 @@ export default function SessionDetail() {
           <div className="flex flex-wrap items-center gap-3">
             <HierarchyBadge hierarchy={session.hierarchy} />
             {session.exposure_type && (
-              <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              <Badge className="bg-surface-muted text-text-secondary">
                 {EXPOSURE_TYPE_LABELS[session.exposure_type]}
               </Badge>
             )}
-            <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-semibold text-text">
               Rung {session.rung ?? '—'}
               {session.variation ? ` · ${session.variation}` : ''}
             </h1>
@@ -135,7 +135,7 @@ export default function SessionDetail() {
             </SecondaryButton>
           </div>
         </div>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{session.date || 'no date'}</p>
+        <p className="mt-1 text-sm text-text-secondary">{session.date || 'no date'}</p>
       </div>
 
       {session.flags.length > 0 && (
@@ -153,22 +153,22 @@ export default function SessionDetail() {
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Peak SUDS</p>
-          <p className="text-xl font-semibold text-slate-900 dark:text-white">{session.peak_suds ?? '—'}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Peak SUDS</p>
+          <p className="text-xl font-semibold text-text">{session.peak_suds ?? '—'}</p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">End SUDS</p>
-          <p className="text-xl font-semibold text-slate-900 dark:text-white">{session.end_suds ?? '—'}</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">End SUDS</p>
+          <p className="text-xl font-semibold text-text">{session.end_suds ?? '—'}</p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Expected difficulty</p>
-          <p className="text-xl font-semibold text-slate-900 dark:text-white">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Expected difficulty</p>
+          <p className="text-xl font-semibold text-text">
             {session.target_suds_range ? `${session.target_suds_range[0]}–${session.target_suds_range[1]}` : '—'}
           </p>
         </Card>
         <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Response to urges</p>
-          <p className="text-xl font-semibold text-slate-900 dark:text-white">
+          <p className="text-xs font-medium uppercase tracking-wide text-text-secondary">Response to urges</p>
+          <p className="text-xl font-semibold text-text">
             {session.compulsions_resisted === null ? '—' : urgeResponseLabel(session.compulsions_resisted)}
           </p>
         </Card>
@@ -176,7 +176,7 @@ export default function SessionDetail() {
 
       {curve.length > 1 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">SUDS curve</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">SUDS curve</h2>
           <SudsChart
             points={curve}
             isTimeBased={isTimeBased}
@@ -185,7 +185,7 @@ export default function SessionDetail() {
             heightClassName="h-72"
           />
           {!isTimeBased && (
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-text-secondary">
               Readings couldn't be matched to exact times, so they're shown in logged order rather than on a
               real timeline.
             </p>
@@ -196,7 +196,7 @@ export default function SessionDetail() {
       {photoUrl && (
         <Card>
           <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-200">Original photo</h2>
+            <h2 className="text-sm font-semibold text-text">Original photo</h2>
             <button
               type="button"
               onClick={removePhoto}
@@ -213,13 +213,13 @@ export default function SessionDetail() {
               className="max-h-[70vh] w-full rounded-xl object-contain"
             />
           </button>
-          <p className="mt-2 text-xs text-slate-400">Tap the photo to view full size</p>
+          <p className="mt-2 text-xs text-text-secondary">Tap the photo to view full size</p>
         </Card>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Compulsions targeted</h2>
+          <h2 className="mb-2 text-sm font-semibold text-text">Compulsions targeted</h2>
           {session.compulsions_targeted.length ? (
             <div className="flex flex-wrap gap-1.5">
               {session.compulsions_targeted.map((c, i) => (
@@ -236,11 +236,11 @@ export default function SessionDetail() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-400">None logged</p>
+            <p className="text-sm text-text-secondary">None logged</p>
           )}
         </Card>
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Techniques used</h2>
+          <h2 className="mb-2 text-sm font-semibold text-text">Techniques used</h2>
           {session.techniques_used.length ? (
             <div className="flex flex-wrap gap-1.5">
               {session.techniques_used.map((t, i) => (
@@ -250,20 +250,20 @@ export default function SessionDetail() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-400">None logged</p>
+            <p className="text-sm text-text-secondary">None logged</p>
           )}
         </Card>
       </div>
 
       <Card>
-        <h2 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Notes</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{session.notes || 'No notes.'}</p>
+        <h2 className="mb-2 text-sm font-semibold text-text">Notes</h2>
+        <p className="text-sm text-text-secondary">{session.notes || 'No notes.'}</p>
       </Card>
 
       {session.rung_description && (
         <Card>
-          <h2 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Scenario</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300">{session.rung_description}</p>
+          <h2 className="mb-2 text-sm font-semibold text-text">Scenario</h2>
+          <p className="text-sm text-text-secondary">{session.rung_description}</p>
         </Card>
       )}
     </div>

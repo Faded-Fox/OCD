@@ -22,7 +22,7 @@ export default function HierarchyView() {
   const { sessions, loading } = useSessions()
   const { ladders, loading: laddersLoading } = useFearLadders()
 
-  if (loading || laddersLoading) return <p className="py-10 text-center text-sm text-slate-400">Loading…</p>
+  if (loading || laddersLoading) return <p className="py-10 text-center text-sm text-text-secondary">Loading…</p>
 
   const hierarchySessions = sessionsForHierarchy(sessions, hierarchy)
   const ladder = ladders.find((l) => hierarchyKey(l.hierarchy) === hierarchyKey(hierarchy))
@@ -59,11 +59,11 @@ export default function HierarchyView() {
         <Link to="/" className="text-sm text-emerald-700 hover:underline dark:text-emerald-400">
           ← Dashboard
         </Link>
-        <h1 className="mt-2 flex items-center gap-3 text-2xl font-semibold text-slate-900 dark:text-white">
+        <h1 className="mt-2 flex items-center gap-3 text-2xl font-semibold text-text">
           <span className="h-3 w-3 rounded-full" style={{ backgroundColor: color.hex }} />
           {hierarchy}
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-sm text-text-secondary">
           {hierarchySessions.length} session{hierarchySessions.length === 1 ? '' : 's'} logged
           {ladder && (
             <>
@@ -85,7 +85,7 @@ export default function HierarchyView() {
       </div>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Rung ladder</h2>
+        <h2 className="mb-3 text-sm font-semibold text-text">Rung ladder</h2>
         <div className="flex flex-col gap-2">
           {mergedRungs.map(({ rung, description, plannedTarget, progress }) => {
             const targetRange = progress?.target_suds_range ?? plannedTarget
@@ -97,9 +97,9 @@ export default function HierarchyView() {
                   </span>
                   <div>
                     {description && (
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-100">{description}</p>
+                      <p className="text-sm font-medium text-text">{description}</p>
                     )}
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-text-secondary">
                       {progress
                         ? `${progress.attempts} attempt${progress.attempts === 1 ? '' : 's'} · last ${progress.lastAttemptDate}`
                         : 'Not attempted yet'}
@@ -109,7 +109,7 @@ export default function HierarchyView() {
                 </div>
                 <div className="flex items-center gap-2">
                   {progress && progress.fullResistanceStreak > 0 && (
-                    <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <Badge className="bg-surface-muted text-text-secondary">
                       {progress.fullResistanceStreak}-session resistance streak
                     </Badge>
                   )}
@@ -127,11 +127,11 @@ export default function HierarchyView() {
 
       {peakTrend.length > 1 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Peak SUDS trend</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">Peak SUDS trend</h2>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={peakTrend} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis domain={[0, 10]} tick={{ fontSize: 11 }} />
                 <Tooltip
@@ -147,13 +147,13 @@ export default function HierarchyView() {
 
       {habTrend.length > 1 && (
         <Card>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <h2 className="mb-3 text-sm font-semibold text-text">
             Habituation speed (minutes from peak to back-in-range)
           </h2>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={habTrend} margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-800" />
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip
@@ -169,16 +169,16 @@ export default function HierarchyView() {
 
       {hierarchySessions.length > 0 ? (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-slate-700 dark:text-slate-200">Sessions</h2>
+          <h2 className="mb-3 text-sm font-semibold text-text">Sessions</h2>
           <div className="flex flex-col gap-2">
             {sorted.map((s) => (
               <Link key={s.id} to={`/session/${s.id}`}>
                 <Card className="flex flex-wrap items-center justify-between gap-2 py-3">
-                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                  <span className="text-sm text-text">
                     Rung {s.rung ?? '—'}
                     {s.variation ? ` · ${s.variation}` : ''}
                   </span>
-                  <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-4 text-xs text-text-secondary">
                     <span>{s.date || 'no date'}</span>
                     <span>Peak {s.peak_suds ?? '—'} → End {s.end_suds ?? '—'}</span>
                     <span>{urgeResponseLabel(s.compulsions_resisted)}</span>
@@ -190,7 +190,7 @@ export default function HierarchyView() {
         </div>
       ) : (
         <Card>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-text-secondary">
             No sessions logged for this hierarchy yet — this is just the plan so far. Start a{' '}
             <Link to="/live" className="text-emerald-700 hover:underline dark:text-emerald-400">
               live session
