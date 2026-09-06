@@ -30,8 +30,8 @@ export default defineConfig({
         short_name: 'PocketFox',
         description:
           'Private, local-only tracker for ERP exposure session patterns and trends, for you and your specialist.',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#18130f',
+        background_color: '#18130f',
         display: 'standalone',
         start_url: base,
         scope: base,

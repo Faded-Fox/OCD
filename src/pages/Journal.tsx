@@ -59,8 +59,11 @@ const MOOD_IMAGES: Record<string, string> = {
 
 type Phase = 'landing' | 'form' | 'saved' | 'history' | 'quick' | 'thought' | 'thought-record'
 
+// text-base, not text-sm — see the identical comment on SessionFields.tsx's
+// inputBaseClass: below 16px, iOS auto-zooms on focus and the zoomed state
+// can get stuck, leaving the page wider than the viewport.
 const inputClass =
-  'w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
+  'w-full rounded-lg border border-border bg-surface px-2.5 py-1.5 text-base text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
 
 function formatElapsed(ms: number): string {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -890,13 +893,20 @@ function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood
     <Card>
       <h2 className="text-sm font-semibold text-text">How do you feel?</h2>
       <p className="mt-0.5 text-xs text-text-secondary">Optional — tap a face to check in, tap it again to clear it.</p>
-      <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+      {/* Flex-wrap + justify-center rather than grid: grid has no way to center
+          a trailing incomplete row (it just left-aligns whatever's left), and
+          with 13 feelings that last tile ends up stuck on the left instead of
+          centered. Each tile's explicit width reproduces the same 4-per-row
+          (mobile) / 6-per-row (sm+) layout grid-cols-4/6 gave, so full rows
+          look identical — only the incomplete trailing row's centering
+          actually changes. */}
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
         {FEELINGS_CHART.map((f) => (
           <button
             key={f.key}
             type="button"
             onClick={() => onChange(value === f.key ? null : f.key)}
-            className={`flex flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors ${
+            className={`flex w-[calc((100%-1.5rem)/4)] flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors sm:w-[calc((100%-2.5rem)/6)] ${
               value === f.key
                 ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40'
                 : 'border-transparent hover:bg-page'

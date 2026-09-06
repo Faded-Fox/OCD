@@ -140,7 +140,7 @@ export default function Settings() {
           onChange={(e) => setRestoreRaw(e.target.value)}
           placeholder="Paste a backup file exported from this screen…"
           rows={6}
-          className="mt-2 w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-xs text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
+          className="mt-2 w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-base text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
         />
         {isBackup && backupCounts && (
           <Card className="mt-3 border-emerald-300 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/40">
@@ -192,7 +192,7 @@ export default function Settings() {
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder='Type "delete" to confirm'
-            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:focus:ring-rose-900"
+            className="rounded-lg border border-border bg-surface px-2.5 py-1.5 text-base text-text outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200 dark:focus:ring-rose-900"
           />
           <SecondaryButton
             onClick={handleDeleteAll}

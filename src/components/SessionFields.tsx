@@ -631,8 +631,12 @@ export function TargetRangeInput({
 // No width baked in, so callers that need a non-full width (e.g. the fixed-width
 // columns in the readings row below) can set one without fighting `w-full` for
 // specificity — two width utilities on the same element is a Tailwind footgun.
+// text-base (16px), not text-sm — iOS Safari/WKWebView auto-zooms on focus
+// for any input rendering below 16px, and that zoomed layout state doesn't
+// reliably revert on blur inside a Capacitor WKWebView, leaving the page
+// wider than the viewport (horizontal scroll) until reload.
 export const inputBaseClass =
-  'rounded-lg border border-border bg-surface px-2.5 py-1.5 text-sm text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
+  'rounded-lg border border-border bg-surface px-2.5 py-1.5 text-base text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900'
 
 export const inputClass = `w-full ${inputBaseClass}`
 

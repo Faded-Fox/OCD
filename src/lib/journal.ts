@@ -409,21 +409,21 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
     sections: [
       {
         title: "Section 1 — Offload: Tomorrow's Tasks",
-        evidence: 'Scullin et al., 2018 — polysomnographic RCT (NIH-funded)',
+        evidence: 'Writing down tomorrow\'s tasks before bed can help you fall asleep faster.',
         helper:
           'Write 3–5 specific tasks for tomorrow. Be brief and concrete. This is not planning — it is permission to stop thinking about them tonight.',
         fields: [1, 2, 3, 4, 5].map((n) => ({ key: `offload_${n}`, label: `Task ${n}` })),
       },
       {
         title: 'Section 2 — Anchor: Three Things I Noticed Today',
-        evidence: 'Digdon & Koble RCT (2011) — gratitude reduces pre-sleep arousal',
+        evidence: 'Naming something you noticed today can ease pre-sleep anxiety.',
         helper:
           'Name three things from today — specific, sensory, concrete. Not "I\'m grateful for my family." Something you actually noticed.',
         fields: [1, 2, 3].map((n) => ({ key: `anchor_${n}`, label: `Thing ${n}` })),
       },
       {
         title: "Section 3 — Observe, Don't Analyze: Thoughts as Weather",
-        evidence: 'ACT defusion framework — Twohig et al. (2015); anti-rumination design',
+        evidence: 'Uses defusion — noticing a thought without getting pulled into it.',
         helper:
           'If any intrusive thoughts, obsessions, or compulsive urges showed up today, note them like a scientist logging data — not problems to solve.',
         warning: 'Do NOT write about what the thought means. Do NOT write about whether it is true or false.',
@@ -438,20 +438,20 @@ export const JOURNAL_TEMPLATES: Record<JournalType, JournalTemplate> = {
       },
       {
         title: 'Section 4 — Values Compass',
-        evidence: 'ACT values + committed action — Twohig et al. (2015)',
+        evidence: 'Grounded in values-based action, not just managing symptoms.',
         helper:
           'One sentence: did my actions today move toward something that matters to me, or away from it? No judgment. Just a compass reading.',
         fields: [{ key: 'values_compass', label: 'Compass reading', multiline: true }],
       },
       {
         title: 'Section 5 — Close',
-        evidence: 'Worry postponement / cognitive containment — Borkovec framework',
+        evidence: 'Based on worry postponement — setting a worry aside for later instead of pushing it away.',
         helper: 'Write these words, then close the journal:',
         fields: [
           {
             key: 'close',
             label: 'Closing line',
-            placeholder: 'Do not re-open this journal tonight.',
+            placeholder: 'The rest can wait until tomorrow.',
           },
         ],
       },

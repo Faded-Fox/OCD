@@ -192,7 +192,7 @@ export default function Import() {
             onChange={(e) => setRaw(e.target.value)}
             placeholder="Paste conversation text or JSON here…"
             rows={14}
-            className="w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-xs text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
+            className="w-full resize-y rounded-xl border border-border bg-page p-3 font-mono text-base text-text outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:focus:ring-amber-900"
           />
 
           {isBackup && (

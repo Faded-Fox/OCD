@@ -2,17 +2,16 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Semantic surface/text/border tokens — the warm paper/sepia light theme and
- * the ability to re-color it without touching every component both come from
- * these. Each one is a real Tailwind v4 theme color (declaring it here also
- * generates matching bg, text, and border utilities), given its new warm
- * light-mode value by default; the .dark block below re-declares every one of
- * them to the exact slate value components already relied on via `dark:`
- * classes (referenced through Tailwind's own --color-slate variables, not
- * retyped hex, so dark mode is guaranteed pixel-identical to before this
- * theme existed). Only ever add a new token here for a genuinely new
- * surface/text role — don't reach for a raw slate class in a component
- * again once it has a token equivalent.
+/* Semantic surface/text/border tokens — both the warm paper/sepia light
+ * theme and the warm espresso dark theme, and the ability to re-color either
+ * without touching every component, come from these. Each one is a real
+ * Tailwind v4 theme color (declaring it here also generates matching bg,
+ * text, and border utilities). @theme below holds the light (default)
+ * values; the .dark block re-declares every one of them to the espresso
+ * palette. Only ever add a new token here for a genuinely new surface/text
+ * role — don't reach for a raw color class in a component again once it has
+ * a token equivalent, since that's how blue/navy or stark-white styling
+ * creeps back in one component at a time.
  */
 @theme {
   --color-page: #f5efe3;
@@ -28,16 +27,16 @@
 }
 
 .dark {
-  --color-page: var(--color-slate-950);
-  --color-surface: var(--color-slate-900);
-  --color-surface-muted: var(--color-slate-800);
-  --color-input: var(--color-slate-950);
-  --color-border: var(--color-slate-800);
-  --color-border-strong: var(--color-slate-700);
-  --color-text: var(--color-slate-100);
-  --color-text-secondary: var(--color-slate-400);
-  --color-inverse: white;
-  --color-on-inverse: var(--color-slate-900);
+  --color-page: #18130f;
+  --color-surface: #241c16;
+  --color-surface-muted: #30251d;
+  --color-input: #30251d;
+  --color-border: #493a2d;
+  --color-border-strong: #5c4a3a;
+  --color-text: #f1e8da;
+  --color-text-secondary: #b9aa98;
+  --color-inverse: #f1e8da;
+  --color-on-inverse: #18130f;
 }
 
 html {

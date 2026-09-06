@@ -260,18 +260,14 @@ function LinkStatTile({
   )
 }
 
-// Jumps straight into the Journal tab's "Intrusive thought" capture screen —
-// deliberately just the emoji, no label, since what it does is already
-// explained there (the "Caught the fox!" moment on save).
+// Jumps straight into the Journal tab's "Intrusive thought" capture screen.
+// A labeled secondary action alongside "Start live session"/"Import" rather
+// than a bare emoji, so it reads as an interactive quick action instead of
+// decoration.
 function CaughtFoxButton() {
   return (
-    <Link
-      to="/journal?start=thought"
-      title="Caught the fox — log an intrusive thought"
-      aria-label="Log an intrusive thought"
-      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg hover:bg-surface-muted"
-    >
-      🦊
+    <Link to="/journal?start=thought">
+      <SecondaryButton>🦊 Intrusive thought</SecondaryButton>
     </Link>
   )
 }
