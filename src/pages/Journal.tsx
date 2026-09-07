@@ -887,34 +887,52 @@ function ThoughtRecordView({ onDone, onCancel }: { onDone: () => void; onCancel:
   )
 }
 
+// Fixed row grouping rather than a fluid wrap: the picker is meant to read
+// as 3-4-4-2 regardless of viewport width, not reflow into different column
+// counts at different breakpoints. Keys only — FEELINGS_CHART itself stays
+// in its existing order since MoodBadge and storage both look entries up by
+// key, not position.
+const MOOD_ROWS: string[][] = [
+  ['calm', 'happy', 'excited'],
+  ['angry', 'frustrated', 'nervous', 'scared'],
+  ['sad', 'lonely', 'shy', 'surprised'],
+  ['bored', 'tired'],
+]
+
 function MoodPicker({ value, onChange }: { value: string | null; onChange: (mood: string | null) => void }) {
   const selected = FEELINGS_CHART.find((f) => f.key === value)
   return (
     <Card>
       <h2 className="text-sm font-semibold text-text">How do you feel?</h2>
       <p className="mt-0.5 text-xs text-text-secondary">Optional — tap a face to check in, tap it again to clear it.</p>
-      {/* Flex-wrap + justify-center rather than grid: grid has no way to center
-          a trailing incomplete row (it just left-aligns whatever's left), and
-          with 13 feelings that last tile ends up stuck on the left instead of
-          centered. Each tile's explicit width reproduces the same 4-per-row
-          (mobile) / 6-per-row (sm+) layout grid-cols-4/6 gave, so full rows
-          look identical — only the incomplete trailing row's centering
-          actually changes. */}
-      <div className="mt-3 flex flex-wrap justify-center gap-2">
-        {FEELINGS_CHART.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => onChange(value === f.key ? null : f.key)}
-            className={`flex w-[calc((100%-1.5rem)/4)] flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors sm:w-[calc((100%-2.5rem)/6)] ${
-              value === f.key
-                ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40'
-                : 'border-transparent hover:bg-page'
-            }`}
-          >
-            <img src={MOOD_IMAGES[f.key]} alt="" className="h-11 w-11 rounded-lg" />
-            <span className="text-[11px] font-medium text-text-secondary">{f.emotion}</span>
-          </button>
+      {/* Each row is its own justify-center flex container so the 3-item and
+          2-item rows center instead of left-aligning. Every tile shares one
+          width formula (4-column math) at every breakpoint, so a full
+          4-item row fills edge-to-edge and shorter rows just show fewer,
+          identically-sized tiles centered in the row. */}
+      <div className="mt-3 flex flex-col gap-2">
+        {MOOD_ROWS.map((row, i) => (
+          <div key={i} className="flex flex-wrap justify-center gap-2">
+            {row.map((key) => {
+              const f = FEELINGS_CHART.find((entry) => entry.key === key)
+              if (!f) return null
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => onChange(value === f.key ? null : f.key)}
+                  className={`flex w-[calc((100%-1.5rem)/4)] flex-col items-center gap-1 rounded-xl border p-1.5 transition-colors ${
+                    value === f.key
+                      ? 'border-amber-400 bg-amber-50 dark:border-amber-600 dark:bg-amber-950/40'
+                      : 'border-transparent hover:bg-page'
+                  }`}
+                >
+                  <img src={MOOD_IMAGES[f.key]} alt="" className="h-11 w-11 rounded-lg" />
+                  <span className="text-[11px] font-medium text-text-secondary">{f.emotion}</span>
+                </button>
+              )
+            })}
+          </div>
         ))}
       </div>
       {selected && selected.related.length > 0 && (

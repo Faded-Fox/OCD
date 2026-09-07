@@ -52,6 +52,25 @@ body {
   min-height: 100svh;
 }
 
+/* Disables iOS's native double-tap-to-zoom gesture on tappable controls only
+ * — user-scalable pinch-zoom stays available everywhere else in the app, so
+ * this doesn't reopen the accessibility trade-off already settled around the
+ * viewport meta tag. Without this, a fast double-tap on any button (most
+ * likely on the same-size, rapidly-retappable buttons in Journal's theme/
+ * mood pickers) can register as a zoom gesture; WKWebView doesn't reliably
+ * revert that zoomed/scrolled state afterward, which can leave later taps
+ * elsewhere on the page — like the header's nav pills — landing on the wrong
+ * on-screen position until the app is restarted.
+ */
+button,
+a,
+[role='button'],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 ::selection {
   @apply bg-violet-300/60 dark:bg-violet-700/60;
 }
